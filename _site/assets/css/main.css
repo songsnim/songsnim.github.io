@@ -313,7 +313,7 @@
 /* Document
    ========================================================================== */
 html {
-  font-family: "Gmarket Sans TTF", sans-serif; /* 1 */
+  font-family: "NanumSquareTTF-bRg"; /* 1 */
   box-sizing: border-box;
   -ms-text-size-adjust: 100%; /* 2 */
   -webkit-text-size-adjust: 100%; /* 2 */
@@ -587,7 +587,7 @@ optgroup,
 select,
 textarea {
   margin: 0; /* 2 */
-  font-family: "Gmarket Sans TTF", sans-serif; /* 1 */
+  font-family: "NanumSquareTTF-bRg"; /* 1 */
   font-size: 100%; /* 1 */
   line-height: 1.15; /* 1 */
 }
@@ -829,7 +829,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Gmarket Sans TTF", sans-serif;
+  font-family: "NanumSquareNeoTTF-dEb", serif;
   text-rendering: optimizeLegibility; /* enable common ligatures and kerning */
 }
 
@@ -1096,7 +1096,7 @@ th {
 
 .site-description {
   margin-bottom: 1em;
-  font-family: "Gmarket Sans TTF", serif;
+  font-family: "NanumSquareTTF-bRg";
   font-weight: 400;
   font-style: normal;
 }
@@ -1202,7 +1202,7 @@ th {
 
 .taxonomy-title {
   margin-bottom: 0.5em;
-  font-family: "Gmarket Sans TTF", sans-serif;
+  font-family: "NanumSquareTTF-bRg";
 }
 .taxonomy-title {
   font-size: 28px;
@@ -1224,7 +1224,7 @@ th {
   grid-template-columns: repeat(2, 1fr);
   margin: 0;
   padding: 0;
-  font-family: "Gmarket Sans TTF", sans-serif;
+  font-family: "NanumSquareTTF-bRg";
   font-size: 0.9rem;
   list-style: none;
 }
@@ -1322,7 +1322,7 @@ th {
   align-items: center;
   margin: 0;
   padding: 0.75rem 1rem;
-  font-family: "Gmarket Sans TTF", sans-serif;
+  font-family: "NanumSquareTTF-bRg";
   font-size: 0.75rem;
   text-transform: uppercase;
   cursor: pointer;
@@ -1355,7 +1355,7 @@ th {
 }
 .toc-wrapper li {
   padding: 0.3em 0;
-  font-family: "Gmarket Sans TTF", sans-serif;
+  font-family: "NanumSquareTTF-bRg";
 }
 .toc-wrapper li a {
   display: inline-block;
@@ -1382,7 +1382,7 @@ th {
 
 .page-title {
   margin-bottom: 0.5em;
-  font-family: "Gmarket Sans TTF", serif;
+  font-family: "NanumSquareNeoTTF-dEb", serif;
   font-weight: bold;
   font-style: normal;
   letter-spacing: -2px;
@@ -1445,7 +1445,7 @@ th {
 }
 
 .page-sidebar {
-  font-size: 0.75rem;
+  font-size: 1rem;
 }
 @media (min-width: 64em) {
   .page-sidebar {
@@ -1454,9 +1454,10 @@ th {
 }
 .page-sidebar .page-date,
 .page-sidebar .read-time {
-  font-family: "Gmarket Sans TTF", serif;
+  font-family: Menlo, Consolas, Monaco, "Jetbrains Mono", Courier, monospace;
   font-style: normal;
   white-space: nowrap;
+  font-size: 0.75rem;
 }
 @media (min-width: 64em) {
   .page-sidebar .read-time {
@@ -1483,6 +1484,8 @@ th {
   -ms-flex-align: center;
   align-items: center;
   margin-bottom: 1em;
+  font-family: Menlo, Consolas, Monaco, "Jetbrains Mono", Courier, monospace;
+  font-size: 1rem;
 }
 .page-author::after {
   clear: both;
@@ -1507,7 +1510,7 @@ th {
     display: inline-block;
     margin: 1.5em 0 0.5em;
     padding: 0;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-weight: normal;
     text-transform: uppercase;
   }
@@ -1518,6 +1521,8 @@ th {
   margin-right: 1em;
   padding: 0;
   list-style: none;
+  font-family: Menlo, Consolas, Monaco, "Jetbrains Mono", Courier, monospace;
+  font-size: 0.75rem;
 }
 @media (min-width: 64em) {
   .page-taxonomies {
@@ -1582,7 +1587,7 @@ th {
 .page-pagination-title {
   margin: 0;
   padding: 0;
-  font-family: "Gmarket Sans TTF", serif;
+  font-family: Menlo, Consolas, Monaco, "Jetbrains Mono", Courier, monospace;
   font-size: 0.9rem;
   font-style: normal;
 }
@@ -1747,7 +1752,7 @@ th {
 
 .entry-title {
   margin-bottom: 0.5rem;
-  font-family: "Gmarket Sans TTF", serif;
+  font-family: "BMDoHyeon-Regular";
   font-weight: bold;
   font-style: normal;
   letter-spacing: -1px;
@@ -1775,7 +1780,7 @@ th {
 
 .entry-meta .entry-date,
 .entry-meta .read-time {
-  font-family: "Gmarket Sans TTF", serif;
+  font-family: Menlo, Consolas, Monaco, "Jetbrains Mono", Courier, monospace;
   font-style: normal;
   white-space: nowrap;
 }
@@ -1930,7 +1935,7 @@ th {
   display: inline-block;
   margin-bottom: 0.25em;
   padding: 0.5em 1em;
-  font-family: "Gmarket Sans TTF", sans-serif;
+  font-family: "NanumSquareTTF-bRg";
   font-size: 1rem;
   font-weight: bold;
   text-align: center;

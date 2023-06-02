@@ -6,14 +6,16 @@ sitemap: false
 @charset "utf-8";
 
 
-$serif-font-family: "Gmarket Sans TTF", serif;
-$sans-serif-font-family: "Gmarket Sans TTF", sans-serif;
+$serif-font-family: "NanumSquareNeoTTF-dEb", serif;
+// $sans-serif-font-family: "Gmarket Sans TTF", sans-serif;
+$sans-serif-font-family: "NanumSquareTTF-bRg";
+$all-title-font-family: "BMDoHyeon-Regular";
 $monospace-font-family: Menlo, Consolas, Monaco, "Jetbrains Mono", Courier,
   monospace;
 
 $base-font-family: $sans-serif-font-family;
-$headline-font-family: $sans-serif-font-family;
+$headline-font-family: $serif-font-family;
 $title-font-family: $serif-font-family;
-$description-font-family: $serif-font-family;
-$meta-font-family: $serif-font-family;
+$description-font-family: $sans-serif-font-family;
+$meta-font-family: $monospace-font-family;
 @import "so-simple";
