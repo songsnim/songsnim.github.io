@@ -17,7 +17,7 @@
 #remote_theme: mmistakes/so-simple-theme
 remote_theme: "mmistakes/so-simple-theme@3.2.0"
 skin: "/assets/css/skins/default.css"
-locale: en-US
+locale: kr-KR
 title: "Songsnim"
 description: "이것저것 기록하기"
 baseurl: "/" # the subpath of your site, e.g. "/blog"
@@ -31,10 +31,11 @@ mathjax:
   combo: "tex-svg"
   tags: "ams"
 google_fonts:
-  - name: "Noto Sans Korean"
-    weights: "400,700"
-  - name: "Noto Sans Korean"
-    weights: "400,700"
+  - name: "Lora"
+    weights: "400,400i,700,700i"
+  - name: "Hahmlet"
+    weights: "400"
+
 google_analytics: # Google Analytics id, e.g. "UA-NNNNNNNN-N"
 disqus:
   shortname: # Disqus shortname, e.g. "my_disqus_shortname"
