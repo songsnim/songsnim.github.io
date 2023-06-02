@@ -6,3 +6,14 @@ sitemap: false
 @charset "utf-8";
 
 @import "so-simple";
+
+$serif-font-family: Jetbrains Mono, "Hahmlet", serif;
+$sans-serif-font-family: Jetbrains Mono, "Noto Sans Korean", sans-serif;
+$monospace-font-family: Menlo, Consolas, Monaco, "Courier New", Courier,
+  monospace;
+
+$base-font-family: $sans-serif-font-family;
+$headline-font-family: $sans-serif-font-family;
+$title-font-family: $serif-font-family;
+$description-font-family: $serif-font-family;
+$meta-font-family: $serif-font-family;

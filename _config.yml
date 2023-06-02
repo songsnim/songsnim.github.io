@@ -18,28 +18,26 @@
 remote_theme: "mmistakes/so-simple-theme@3.2.0"
 skin: "/assets/css/skins/default.css"
 locale: en-US
-title: "So Simple Development Site"
-description: "A simple Jekyll theme for words and pictures."
+title: "Songsnim"
+description: "이것저것 기록하기"
 baseurl: "/" # the subpath of your site, e.g. "/blog"
 url: "https://songsnim.github.io"
-logo: "/images/so-simple-site-logo.png" # path of site logo, e.g. "/assets/images/logo.png"
-date_format: "%Y-%M-%-d"
+logo: "/images/coding wallpaper.png" # path of site logo, e.g. "/assets/images/logo.png"
+date_format: "%Y-%m-%d"
 read_time: true
 words_per_minute: 200
 mathjax:
   enable: true
-#  combo: "tex-mml-chtml"
-#  tags: "none"
+  combo: "tex-svg"
+  tags: "ams"
 google_fonts:
-  - name: "Source Sans Pro"
+  - name: "Noto Sans Korean"
     weights: "400,400i,700,700i"
-  - name: "Lora"
+  - name: "Noto Sans Korean"
     weights: "400,400i,700,700i"
 google_analytics: # Google Analytics id, e.g. "UA-NNNNNNNN-N"
 disqus:
   shortname: # Disqus shortname, e.g. "my_disqus_shortname"
-twitter:
-  username: mmistakes # site's Twitter username
 
 # Liquid
 liquid:
@@ -106,32 +104,17 @@ defaults:
 
 # Site Author
 author:
-  name: Michael Rose
-  picture: /images/michael-rose-photo.jpg
-  email:
-  twitter: mmistakes
+  name: Youngjae Song
+  picture: /images/프사.png
+  email: thddudwo1313@gmail.com
   links:
-    - title: Twitter
-      url: https://twitter.com/mmistakes
-      icon: fab fa-twitter-square
-    - title: Instagram
-      url: https://instagram.com/mmistakes
-      icon: fab fa-instagram
-    - title: GitHub
-      url: https://github.com/mmistakes
+    - title: Github
+      url: https://github.com/songsnim
       icon: fab fa-github-square
 
 # Footer Links
 footer_links:
-  - title: Twitter
-    url: https://twitter.com/mmistakes
-    icon: fab fa-twitter-square
-  - title: Instagram
-    url: https://instagram.com/mmistakes
-    icon: fab fa-instagram
   - title: GitHub
-    url: https://github.com/mmistakes
+    url: https://github.com/songsnim
     icon: fab fa-github-square
-  - title: Feed
-    url: atom.xml
-    icon: fas fa-rss-square
+

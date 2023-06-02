@@ -140,7 +140,7 @@ var store = [{
         "url": "http://localhost:4000/2018/02/25/hidden-post.html"
       },{
         "title": "Test pages",
-        "excerpt":"test $x+y$ latex!! ","categories": ["Test"],
+        "excerpt":"test $x+y$ latex!! 한글 테스트 입니다. ","categories": ["Test"],
         "tags": ["test"],
         "url": "http://localhost:4000/test/2023/06/02/test-page.html"
       },{
