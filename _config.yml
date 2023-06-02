@@ -30,11 +30,11 @@ mathjax:
   enable: true
   combo: "tex-svg"
   tags: "ams"
-google_fonts:
-  - name: "Lora"
-    weights: "400,400i,700,700i"
-  - name: "Hahmlet"
-    weights: "400"
+# google_fonts:
+#   - name: "Lora"
+#     weights: "400,400i,700,700i"
+#   - name: "Hahmlet"
+#     weights: "400"
 
 google_analytics: # Google Analytics id, e.g. "UA-NNNNNNNN-N"
 disqus:
