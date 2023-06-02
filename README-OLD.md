@@ -4,29 +4,31 @@ General notes and suggestions for customizing **So Simple Theme**.
 
 ## Table of Contents
 
-1. [Installation](#installation)
-2. [Running Jekyll](#running-jekyll)
-3. [Scaffolding](#scaffolding)
-4. [Site Setup](#site-setup)
-    1. [Site Wide Configuration](#site-wide-configuration)
-        1. [title](#title)
-        2. [logo](#logo)
-        3. [url](#url)
-        4. [Google Analytics and Webmaster Tools](#google-analytics-and-webmaster-tools)
-    2. [Navigation Links](#navigation-links)
-5. [Adding New Content](#adding-new-content)
-6. [Layouts and Content](#layouts-and-content)
-    1. [Post and Page](#post-and-page)
-    2. [Categories](#categories)
-    3. [Feature Images](#feature-images)
-    4. [Videos](#videos)
-    5. [Link Post Type](#link-post-type)
-    6. [Author Override](#author-override)
-7. [Social Share Links](#social-share-links)
-8. [Disqus Comments](#disqus-comments)
-9. [Twitter Cards](#twitter-cards)
-10. [Jekyll search](#jekyll-search)
-11. [Further Customization](#further-customization)
+- [So Simple Theme v2 \[Deprecated\]](#so-simple-theme-v2-deprecated)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Running Jekyll](#running-jekyll)
+  - [Scaffolding](#scaffolding)
+  - [Site Setup](#site-setup)
+    - [Site Wide Configuration](#site-wide-configuration)
+      - [title](#title)
+      - [logo](#logo)
+      - [url](#url)
+      - [Google Analytics and Webmaster Tools](#google-analytics-and-webmaster-tools)
+    - [Navigation Links](#navigation-links)
+  - [Adding New Content](#adding-new-content)
+  - [Layouts and Content](#layouts-and-content)
+    - [Post and Page](#post-and-page)
+    - [Categories](#categories)
+    - [Feature Images](#feature-images)
+    - [Videos](#videos)
+    - [Link Post Type](#link-post-type)
+    - [Author Override](#author-override)
+  - [Social Share Links](#social-share-links)
+  - [Disqus Comments](#disqus-comments)
+  - [Twitter Cards](#twitter-cards)
+  - [Jekyll search](#jekyll-search)
+  - [Further Customization](#further-customization)
 
 ## Installation
 
@@ -220,7 +222,7 @@ Not sure if this only effects Kramdown or if it's an issue with Markdown in gene
 
 ### Link Post Type
 
-So Simple Theme supports **link posts**, made famous by John Gruber. To activate just add `link: http://url-you-want-linked` to the post's YAML front matter and you're done. Here's an [example of a link post]({{ site.url }}/articles/sample-link-post) if you need a visual.
+So Simple Theme supports **link posts**, made famous by John Gruber. To activate just add `link: http://url-you-want-linked` to the post's YAML front matter and you're done. Here's an [example of a link post]({% raw %}{{ site.url }}{% endraw %}/articles/sample-link-post) if you need a visual.
 
 ### Author Override
 
@@ -297,7 +299,7 @@ Feature and thumbnail images are used by [Open Graph](https://developers.faceboo
 
 Here's an example of a tweet with Twitter Cards enabled.
 
-![Twitter Card summary large image screenshot]({{ site.url }}/images/twitter-card-summary-large-image.jpg)
+![Twitter Card summary large image screenshot]({% raw %}{{ site.url }}{% endraw %}/images/twitter-card-summary-large-image.jpg)
 
 ---
 
