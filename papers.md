@@ -1,5 +1,5 @@
 ---
-title: Papers
+title: AI Papers
 layout: collection
 permalink: /papers/
 collection: papers
