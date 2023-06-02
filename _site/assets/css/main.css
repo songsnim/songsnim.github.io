@@ -313,7 +313,7 @@
 /* Document
    ========================================================================== */
 html {
-  font-family: "Source Sans Pro", sans-serif; /* 1 */
+  font-family: "Gmarket Sans TTF", sans-serif; /* 1 */
   box-sizing: border-box;
   -ms-text-size-adjust: 100%; /* 2 */
   -webkit-text-size-adjust: 100%; /* 2 */
@@ -587,7 +587,7 @@ optgroup,
 select,
 textarea {
   margin: 0; /* 2 */
-  font-family: "Source Sans Pro", sans-serif; /* 1 */
+  font-family: "Gmarket Sans TTF", sans-serif; /* 1 */
   font-size: 100%; /* 1 */
   line-height: 1.15; /* 1 */
 }
@@ -806,7 +806,7 @@ code,
 kbd,
 samp,
 pre {
-  font-family: Menlo, Consolas, Monaco, "Courier New", Courier, monospace;
+  font-family: Menlo, Consolas, Monaco, "Jetbrains Mono", Courier, monospace;
 }
 
 kbd {
@@ -829,7 +829,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Gmarket Sans TTF", sans-serif;
   text-rendering: optimizeLegibility; /* enable common ligatures and kerning */
 }
 
@@ -1096,9 +1096,9 @@ th {
 
 .site-description {
   margin-bottom: 1em;
-  font-family: "Lora", serif;
+  font-family: "Gmarket Sans TTF", serif;
   font-weight: 400;
-  font-style: italic;
+  font-style: normal;
 }
 .site-description {
   font-size: 16px;
@@ -1202,7 +1202,7 @@ th {
 
 .taxonomy-title {
   margin-bottom: 0.5em;
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Gmarket Sans TTF", sans-serif;
 }
 .taxonomy-title {
   font-size: 28px;
@@ -1224,7 +1224,7 @@ th {
   grid-template-columns: repeat(2, 1fr);
   margin: 0;
   padding: 0;
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Gmarket Sans TTF", sans-serif;
   font-size: 0.9rem;
   list-style: none;
 }
@@ -1322,7 +1322,7 @@ th {
   align-items: center;
   margin: 0;
   padding: 0.75rem 1rem;
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Gmarket Sans TTF", sans-serif;
   font-size: 0.75rem;
   text-transform: uppercase;
   cursor: pointer;
@@ -1355,7 +1355,7 @@ th {
 }
 .toc-wrapper li {
   padding: 0.3em 0;
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Gmarket Sans TTF", sans-serif;
 }
 .toc-wrapper li a {
   display: inline-block;
@@ -1382,9 +1382,9 @@ th {
 
 .page-title {
   margin-bottom: 0.5em;
-  font-family: "Lora", serif;
+  font-family: "Gmarket Sans TTF", serif;
   font-weight: bold;
-  font-style: italic;
+  font-style: normal;
   letter-spacing: -2px;
 }
 .page-title {
@@ -1454,8 +1454,8 @@ th {
 }
 .page-sidebar .page-date,
 .page-sidebar .read-time {
-  font-family: "Lora", serif;
-  font-style: italic;
+  font-family: "Gmarket Sans TTF", serif;
+  font-style: normal;
   white-space: nowrap;
 }
 @media (min-width: 64em) {
@@ -1582,9 +1582,9 @@ th {
 .page-pagination-title {
   margin: 0;
   padding: 0;
-  font-family: "Lora", serif;
+  font-family: "Gmarket Sans TTF", serif;
   font-size: 0.9rem;
-  font-style: italic;
+  font-style: normal;
 }
 
 /*
@@ -1747,9 +1747,9 @@ th {
 
 .entry-title {
   margin-bottom: 0.5rem;
-  font-family: "Lora", serif;
+  font-family: "Gmarket Sans TTF", serif;
   font-weight: bold;
-  font-style: italic;
+  font-style: normal;
   letter-spacing: -1px;
   word-wrap: break-word; /* break long words that could overflow */
 }
@@ -1775,8 +1775,8 @@ th {
 
 .entry-meta .entry-date,
 .entry-meta .read-time {
-  font-family: "Lora", serif;
-  font-style: italic;
+  font-family: "Gmarket Sans TTF", serif;
+  font-style: normal;
   white-space: nowrap;
 }
 .entry-meta .read-time + .entry-date::before {
@@ -1930,7 +1930,7 @@ th {
   display: inline-block;
   margin-bottom: 0.25em;
   padding: 0.5em 1em;
-  font-family: "Source Sans Pro", sans-serif;
+  font-family: "Gmarket Sans TTF", sans-serif;
   font-size: 1rem;
   font-weight: bold;
   text-align: center;
@@ -2074,7 +2074,7 @@ div.highlighter-rouge,
 figure.highlight {
   position: relative;
   margin-bottom: 1em;
-  font-family: Menlo, Consolas, Monaco, "Courier New", Courier, monospace;
+  font-family: Menlo, Consolas, Monaco, "Jetbrains Mono", Courier, monospace;
   line-height: 1.8;
 }
 div.highlighter-rouge > pre,
