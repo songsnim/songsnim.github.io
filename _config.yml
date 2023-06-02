@@ -80,7 +80,10 @@ plugins:
 
 # Collections
 collections:
-  recipes:
+  papers:
+    output: true
+    permalink: /:collection/:path/
+  programming:
     output: true
     permalink: /:collection/:path/
 
@@ -94,10 +97,17 @@ defaults:
       layout: post
       comments: true
       share: true
-  # Recipe defaults
+  # Papers defaults
   - scope:
-      path: "_recipes"
-      type: recipes
+      path: "_papers"
+      type: papers
+    values:
+      layout: post
+      comments: true
+      share: true
+  - scope:
+      path: "_programming"
+      type: programming
     values:
       layout: post
       comments: true
