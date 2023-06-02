@@ -20,7 +20,7 @@ skin: "/assets/css/skins/default.css"
 locale: en-US
 title: "So Simple Development Site"
 description: "A simple Jekyll theme for words and pictures."
-baseurl: "/" # the subpath of your site, e.g. "/blog"
+baseurl: "/blog" # the subpath of your site, e.g. "/blog"
 url: "https://songsnim.github.io"
 logo: "/images/so-simple-site-logo.png" # path of site logo, e.g. "/assets/images/logo.png"
 date_format: "%Y-%M-%-d"
