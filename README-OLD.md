@@ -181,9 +181,9 @@ In the sample posts folder you may have noticed `categories: articles` in the YA
 
 For example. Say you want to group all your posts under blog/ instead of articles/. In your post add `categories: blog` to the YAML front matter, rename or duplicate articles/index.md to blog/index.md and update the *for loop* to limit posts to just the blog category.
 
-```liquid
+<!-- ```liquid
 {% for post in site.categories.blog %}
-```
+``` -->
 
 If done correctly /blog/ should be a page index of only posts with a category of `blog`.
 
