@@ -1,3 +1,5 @@
+<!-- 작성된 글 최상단에 이미지가 뜨게 할 것인지 아닌지 -->
+
 {% if page.image %}
   {% assign page_image = page.image.path | default: page.image %}
   {% unless page_image contains '://' %}
@@ -5,10 +7,10 @@
   {% endunless %}
   {% assign page_image = page_image | escape %}
 
-  <div class="page-image">
+  <!-- <div class="page-image">
     <img src="{{ page_image }}" class="entry-feature-image u-photo" alt="{{ page.title }}" {% unless site.logo %}style="margin-top: 0;"{% endunless %}>
     {% if page.image.caption %}
       <div class="page-image-caption">{{ page.image.caption | markdownify }}</div>
     {% endif %}
-  </div>
+  </div> -->
 {% endif %}

@@ -1,7 +1,5 @@
 ---
 title: "programming test, 테스트 페이지"
-categories:
-  - program
 tags:
   - coding
 image: 
