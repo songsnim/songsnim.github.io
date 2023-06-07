@@ -8,7 +8,7 @@ image:
 
 ## Abstract
 
-![](/images/2023-06-07-15-39-47.png)
+
 
 $x+y$
 
