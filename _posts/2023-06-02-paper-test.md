@@ -1,7 +1,5 @@
 ---
 title: "paper test page논문 테스트 페이지"
-categories:
-  - AI
 tags:
   - XAI
 last_modified_at: 2023-08-02T08:08:50-04:00
