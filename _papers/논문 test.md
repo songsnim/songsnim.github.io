@@ -8,10 +8,6 @@ image:
 
 ## Abstract
 
-
-
-$x+y$
-
 $\mathcal{X}=\mathbb{R}^d$ : input space 
 
 $\mathcal{Y}= y \in \{0,1\}^M$ : output space(y is one-hot) M is number of classes, 
