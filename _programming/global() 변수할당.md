@@ -1,5 +1,5 @@
 ---
-title: "global() 변수할당"
+title: "Python global() 동적 변수 할당"
 tags:
   - python
 image:
