@@ -2,8 +2,8 @@
 title: "논문 test"
 
 image: 
-  path: /images/oatmeal-cookies-400x200.jpg
-  thumbnail: /images/oatmeal-cookies-400x200.jpg
+  path: /images/프로그래머스로고.jpeg
+  thumbnail: /images/프로그래머스로고.jpeg
 ---
 
 ## Abstract
