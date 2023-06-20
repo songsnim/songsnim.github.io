@@ -25,6 +25,7 @@ url: "https://songsnim.github.io"
 logo: "/images/coding wallpaper.png" # path of site logo, e.g. "/assets/images/logo.png"
 date_format: "%Y-%m-%d"
 read_time: true
+future: true
 words_per_minute: 200
 
 
