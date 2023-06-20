@@ -1,5 +1,5 @@
 ---
-title: All posts
+title: Posts
 layout: posts
 permalink: /posts/
 show_excerpts: false
