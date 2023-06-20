@@ -37,5 +37,7 @@
     "watch:js": "onchange \"assets/js/**/*.js\" -e \"assets/js/main.min.js\" -- npm run build:js",
     "build:js": "npm run uglify && npm run add-banner"
   },
-  "dependencies": {}
+  "dependencies": {
+    "monokai.scss": "^1.0.0"
+  }
 }
