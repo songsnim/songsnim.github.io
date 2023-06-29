@@ -111,9 +111,7 @@ print([full_name for name in visitors
 ```
 방문자 중 풀네임이 초대명단에 있으면 풀네임이 담긴 배열로 반환하는 코드다. 단 한줄로 표현이 가능하다.
 
-
-상황에 따라 코드를 더 간결하고 직관적으로 작성할 수 있는 walrus operator를 알아 보았다.
-개인적으로 3가지 예시 중에서는 특히 while loop에 유용하게 사용할 수 있다고 생각한다.
+혹시라도 코딩할 때 추가 변수 할당이 필수적이어서 코드의 흐름이 끊어지는 경우가 있다고 느낀다면 walrus operator를 사용해보자.
 
 ## Refernece
 https://docs.python.org/3/whatsnew/3.8.html
