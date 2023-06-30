@@ -71,5 +71,7 @@ Localized style이 학습되도록 저자는 mixing regularization을 도입한�
 
 ## Reference
 [StyeGAN 논문 링크](https://arxiv.org/pdf/1812.04948.pdf)
+
 [StyleGAN 코드 링크](https://github.com/NVlabs/stylegan/)
+
 [StyleGAN 코드 링크 2](https://github.com/rosinality/style-based-gan-pytorch/)
