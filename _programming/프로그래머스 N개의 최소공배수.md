@@ -1,5 +1,6 @@
 ---
 title: "프로그래머스 N개의 최소공배수"
+date: 2023-06-17
 tags:
   - 프로그래머스, python, math
 image:

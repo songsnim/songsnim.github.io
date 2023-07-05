@@ -1,5 +1,6 @@
 ---
 title: "프로그래머스 A로 B 만들기"
+date: 2023-06-17
 tags:
   - 프로그래머스, python
 image:
