@@ -7,7 +7,7 @@ image:
   thumbnail: "images/파이썬로고.png"
 ---
 
-![](/images/walrus.png){: width="50%"}
+![](../images/walrus.png){: width="50%"}
 
 Walrus operator는 python 3.8 버전에 새로 추가된 문법이다. `:=`로 표현하며, 바다코끼리(walrus)를 닮아서 `walrus operator`라고 부른다. 표현식(expression) 내에서 변수에 값을 할당할 수 있는 역할을 한다. 코드 간소화와 가독성 향상에 도움을 주고 그 외 특정한 경우에 유용하게 사용할 수 있다.
 

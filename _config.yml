@@ -21,7 +21,7 @@ locale: kr-KR
 title: "Songsnim"
 description: "이것저것 기록하기"
 baseurl: "/" # the subpath of your site, e.g. "/blog"
-url: "https://songsnim.github.io"
+# url: "https://songsnim.github.io"
 logo: "/images/coding wallpaper.png" # path of site logo, e.g. "/assets/images/logo.png"
 date_format: "%Y-%m-%d"
 read_time: true
@@ -124,16 +124,16 @@ author:
   name: Songsnim
   picture: /images/프사.png
   email: thddudwo1313@gmail.com
-  links:
-    - title: Github
-      url: https://github.com/songsnim
-      icon: fab fa-github-square
+  # links:
+  #   - title: Github
+  #     url: https://github.com/songsnim
+  #     icon: fab fa-github-square
 
 # Footer Links
-footer_links:
-  - title: GitHub
-    url: https://github.com/songsnim
-    icon: fab fa-github-square
+# footer_links:
+  # - title: GitHub
+  #   url: https://github.com/songsnim
+  #   icon: fab fa-github-square
 
 # Analytics
 analytics:
