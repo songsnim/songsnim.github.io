@@ -1,14 +1,14 @@
 ---
-title: "COCO dataset annotation 둘러보기"
+title: "XHR failed"
 tags:
-  - Computer Vision
+  - debug
 image:
-  path: "images/COCO로고.png"
-  thumbnail: "images/COCO로고.png"
+  path: "images/vscode logo.png"
+  thumbnail: "images/vscode logo.png"
 ---
 
 
-### 데이터 내려받기
+### 
 
 https://cocodataset.org/#download 이 링크에서 COCO dataset을 다운받을 수 있다.
 
