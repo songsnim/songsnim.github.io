@@ -89,7 +89,7 @@ collections:
   papers:
     output: true
     permalink: /:collection/:path/
-  coding_test:
+  programming:
     output: true
     permalink: /:collection/:path/
 
@@ -112,8 +112,8 @@ defaults:
       comments: true
       share: true
   - scope:
-      path: "_coding_test"
-      type: coding_test
+      path: "_programming"
+      type: programming
     values:
       layout: post
       comments: true
