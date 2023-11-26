@@ -112,8 +112,8 @@ defaults:
       comments: true
       share: true
   - scope:
-      path: "_programming"
-      type: programming
+      path: "_coding_test"
+      type: coding_test
     values:
       layout: post
       comments: true
