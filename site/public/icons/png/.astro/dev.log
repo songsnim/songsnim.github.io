@@ -1,0 +1,18 @@
+{"message":"Missing pages directory: src/pages","label":null,"level":"warn"}
+{"message":"connected.","label":"vite","level":"info"}
+{"message":"Generated 0ms","label":"types","level":"info"}
+{"message":"connected.","label":"vite","level":"info"}
+{"message":"Port 4321 is in use, trying another one...","label":"vite","level":"info"}
+{"message":"Port 4322 is in use, trying another one...","label":"vite","level":"info"}
+{"message":"Port 4323 is in use, trying another one...","label":"vite","level":"info"}
+{"message":"Port 4324 is in use, trying another one...","label":"vite","level":"info"}
+{"message":"Port 4325 is in use, trying another one...","label":"vite","level":"info"}
+{"message":"Port 4326 is in use, trying another one...","label":"vite","level":"info"}
+{"message":"Port 4327 is in use, trying another one...","label":"vite","level":"info"}
+{"message":"Port 4328 is in use, trying another one...","label":"vite","level":"info"}
+{"message":"Port 4329 is in use, trying another one...","label":"vite","level":"info"}
+{"message":"Port 4330 is in use, trying another one...","label":"vite","level":"info"}
+{"message":"Port 4331 is in use, trying another one...","label":"vite","level":"info"}
+{"message":"Port 4332 is in use, trying another one...","label":"vite","level":"info"}
+{"message":" astro  v7.2.0 ready in 1332 ms\n┃ Local    http://localhost:4333/\n┃ Network  use --host to expose","label":"SKIP_FORMAT","level":"info"}
+{"message":"watching for file changes...","label":null,"level":"info"}

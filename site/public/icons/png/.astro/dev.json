@@ -1,0 +1,14 @@
+{
+	"pid": 92074,
+	"port": 4333,
+	"url": "http://localhost:4333",
+	"urls": {
+		"local": [
+			"http://localhost:4333/"
+		],
+		"network": [],
+		"networkInterfaceNames": []
+	},
+	"background": true,
+	"startedAt": "2026-08-09T10:49:48.190Z"
+}

@@ -17,55 +17,97 @@
   src: url('/fonts/NanumSquareNeo-cBd.woff2') format('woff2');
 }
 
-/* ── tokens ─────────────────────────────────────────────────────────── */
+/* ── tokens ─────────────────────────────────────────────────────────────
+   Colour is Ayu: the light theme is Ayu Light, the dark theme Ayu Dark, both
+   with the orange/gold accent the palette is known for. Everything structural
+   — the 8px spacing rhythm, the two-tier radius, hairline rules, no shadows,
+   and the full-bleed band closing the page — still follows DESIGN.md, as does
+   the type, which stays NanumSquare Neo because this blog is Korean. */
 :root {
-  --bg: #faf9f6;
-  --surface: #ffffff;
-  --ink: #141519;
-  --muted: #5f6470;
-  --faint: #8a8f9a;
-  --rule: #e3e2db;
-  --accent: #a32e3c;
-  --accent-soft: #a32e3c1a;
-  --code-bg: #f4f3ef;
+  /* One ground for the whole page: ayu ui.panel.bg. The hero, the list, the
+     code blocks and the footer all sit on it, so nothing is separated by a
+     change of background — only by space and hairlines. */
+  --bg: #faf8f4;
+  --surface: #faf8f4;
+  --surface-warm: #eee9df;
+  --ink: #2f2d29;
+  --ink-soft: #4a4741;
+  --muted: #77726a;
+  --faint: #a49e94;
+  --rule: #e6e1d8;
+  --accent: #3f6b25; /* deep green — hover and focus share it */
+  --accent-soft: #3f6b2521;
+  --code-bg: #faf8f4;
+  --band: #faf8f4;
+  --band-ink: #77726a;
+  --select: #3f6b254d; /* the focus green, at a strength text survives */
+
+  --focus: #3f6b25;
 
   --display: 'NanumSquare Neo', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
   --body: 'NanumSquare Neo', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
     'Malgun Gothic', system-ui, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+
+  /* 8px rhythm: 4 8 12 16 24 32 48 96 */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-base: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 96px;
+
+  --r-none: 0px;
+  --r-sm: 8px;
+  --r-md: 16px;
 
   --measure: 68ch;
-  --shell: 46rem;
+  --shell: 736px; /* fixed, so growing the type does not widen the page */
   --gutter: clamp(1.25rem, 5vw, 3rem);
 
   color-scheme: light;
 }
 
+/* Ayu Dark: #0b0e14 ground, #bfbdb6 text, #e6b450 gold accent. */
 :root:not([data-theme='light']) {
   @media (prefers-color-scheme: dark) {
-    --bg: #101114;
-    --surface: #16181c;
-    --ink: #e9e9e4;
-    --muted: #9096a0;
-    --faint: #6d727c;
-    --rule: #272930;
-    --accent: #e4737e;
-    --accent-soft: #e4737e1f;
-    --code-bg: #1a1d22;
+    --bg: #131820;
+    --surface: #131820;
+    --surface-warm: #1d2433;
+    --ink: #cecbc4;
+    --ink-soft: #acb6bf;
+    --muted: #a0a7b1;
+    --faint: #6d7380;
+    --rule: #262e3d;
+    --accent: #e6b450; /* ayu accent — the one gold the theme spends */
+    --accent-soft: #e6b45021;
+    --code-bg: #131820;
+    --band: #131820;
+    --band-ink: #9198a3;
+    --focus: #e6b450;
+    --select: #e6b4504d;
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --bg: #101114;
-  --surface: #16181c;
-  --ink: #e9e9e4;
-  --muted: #9096a0;
-  --faint: #6d727c;
-  --rule: #272930;
-  --accent: #e4737e;
-  --accent-soft: #e4737e1f;
-  --code-bg: #1a1d22;
+  --bg: #131820;
+  --surface: #131820;
+  --surface-warm: #1d2433;
+  --ink: #cecbc4;
+  --ink-soft: #acb6bf;
+  --muted: #a0a7b1;
+  --faint: #6d7380;
+  --rule: #262e3d;
+  --accent: #e6b450; /* ayu accent — the one gold the theme spends */
+  --accent-soft: #e6b45021;
+  --code-bg: #131820;
+  --band: #131820;
+  --band-ink: #9198a3;
+  --focus: #e6b450;
+  --select: #e6b4504d;
   color-scheme: dark;
 }
 
@@ -78,14 +120,21 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Everything below is sized in rem, so one step here moves the whole scale. */
+  font-size: 110%;
 }
 
 body {
   margin: 0;
+  /* The band has to close the page, so it is pinned to the bottom on short
+     pages instead of leaving a strip of canvas below it. */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--body);
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.75;
   letter-spacing: -0.003em;
   -webkit-font-smoothing: antialiased;
@@ -98,13 +147,17 @@ a {
 }
 
 a:hover {
-  text-decoration-color: var(--accent);
+  text-decoration-color: var(--ink);
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--focus);
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: var(--r-none);
+}
+
+::selection {
+  background: var(--select);
 }
 
 img {
@@ -120,9 +173,11 @@ hr {
 
 /* ── shell ──────────────────────────────────────────────────────────── */
 .shell {
+  width: 100%;
   max-width: var(--shell);
   margin: 0 auto;
-  padding: 0 var(--gutter) 6rem;
+  padding: 0 var(--gutter);
+  flex: 1;
 }
 
 /* running head — the paper conceit */
@@ -131,9 +186,9 @@ hr {
   align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.5rem 0 0.75rem;
+  padding: var(--space-lg) 0 var(--space-base);
   border-bottom: 1px solid var(--rule);
-  margin-bottom: 3rem;
+  margin-bottom: var(--space-2xl);
   font-size: 0.8125rem;
 }
 
@@ -173,6 +228,16 @@ hr {
   color: var(--accent);
 }
 
+/* Four nav items plus the toggle no longer fit a phone at the desktop gap. */
+@media (max-width: 34rem) {
+  .runninghead {
+    gap: 0.75rem;
+  }
+  .runninghead__nav {
+    gap: 0.75rem;
+  }
+}
+
 /* ── index ──────────────────────────────────────────────────────────── */
 .lede {
   font-family: var(--display);
@@ -184,13 +249,168 @@ hr {
 
 .lede em {
   font-style: italic;
-  color: var(--accent);
 }
 
 .sub {
   color: var(--muted);
   margin: 0 0 2.5rem;
   max-width: 34rem;
+}
+
+/* ── masthead ───────────────────────────────────────────────────────────
+   The page runs on a single background, so the hero is set apart by space
+   alone: air above the type and a wide gap down to the list. */
+.masthead {
+  padding-block: clamp(1rem, 3vw, 2rem) 0;
+  margin-bottom: var(--space-3xl);
+}
+
+.masthead__head {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 2.5vw, 1.5rem);
+}
+
+.masthead__avatar {
+  flex: none;
+  width: clamp(3.375rem, 10.8vw, 5.85rem);
+  height: auto;
+  /* The memoji reads low because of the laptop mass at its foot; nudging it up
+     puts the face on the name's optical centre. */
+  transform: translateY(-5px);
+}
+
+.masthead__name {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 8vw, 4.4rem);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  margin: 0;
+}
+
+.masthead__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md) var(--space-lg);
+  margin-top: var(--space-base);
+}
+
+.masthead__role {
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* The three destinations read as one set, so they share a hairline frame
+   rather than three separate chips. */
+.masthead__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.masthead__link {
+  display: block;
+  color: var(--muted);
+  padding: var(--space-xs);
+  transition: color 120ms ease;
+}
+
+.masthead__link svg {
+  display: block;
+  width: 1.3125rem;
+  height: 1.3125rem;
+}
+
+.masthead__link:hover {
+  color: var(--accent);
+}
+
+.masthead__line {
+  font-family: var(--mono);
+  font-size: 0.9375rem;
+  line-height: 1.9;
+  margin: var(--space-lg) 0 0;
+  color: var(--faint);
+}
+
+.masthead__slash {
+  color: var(--rule);
+  margin: 0 0.4em;
+}
+
+
+.masthead__tail {
+  font-family: var(--body);
+  color: var(--muted);
+  margin-left: 0.65em;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The head animates as a unit so the character arrives with the name. */
+  .masthead__head,
+  .masthead__row,
+  .masthead__line {
+    animation: masthead-in 620ms cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+  }
+  .masthead__row {
+    animation-delay: 90ms;
+  }
+  .masthead__line {
+    animation-delay: 180ms;
+  }
+  @keyframes masthead-in {
+    from {
+      opacity: 0;
+      transform: translateY(0.35em);
+    }
+  }
+}
+
+@media (max-width: 34rem) {
+  .masthead__line {
+    line-height: 2.1;
+  }
+  .masthead__tail {
+    display: block;
+    margin-left: 0;
+  }
+}
+
+/* ── section header ─────────────────────────────────────────────────── */
+.section {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-base);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.section__title {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+}
+
+.section__more {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.section__more:hover {
+  color: var(--accent);
 }
 
 /* ── post list ──────────────────────────────────────────────────────── */
@@ -268,6 +488,7 @@ hr {
 
 .row__title {
   font-family: var(--display);
+  font-weight: 700;
   font-size: 1.0625rem;
   line-height: 1.45;
   letter-spacing: 0.005em;
@@ -316,7 +537,7 @@ hr {
   font-size: 0.75rem;
   padding: 0.2rem 0.55rem;
   border: 1px solid var(--rule);
-  border-radius: 3px;
+  border-radius: var(--r-sm);
   text-decoration: none;
   color: var(--muted);
   white-space: nowrap;
@@ -420,7 +641,7 @@ hr {
 .prose blockquote {
   margin-left: 0;
   padding: 0.1rem 0 0.1rem 1rem;
-  border-left: 2px solid var(--accent);
+  border-left: 2px solid var(--ink);
   color: var(--muted);
 }
 
@@ -432,7 +653,7 @@ hr {
   display: block;
   margin: 1.75rem auto;
   border: 1px solid var(--rule);
-  border-radius: 3px;
+  border-radius: var(--r-none);
   background: var(--surface);
 }
 
@@ -441,14 +662,14 @@ hr {
   font-size: 0.855em;
   background: var(--code-bg);
   padding: 0.12em 0.36em;
-  border-radius: 3px;
+  border-radius: var(--r-sm);
   word-break: break-word;
 }
 
 .prose pre {
   background: var(--code-bg) !important;
   border: 1px solid var(--rule);
-  border-radius: 4px;
+  border-radius: var(--r-sm);
   padding: 0.9rem 1rem;
   overflow-x: auto;
   font-size: 0.8125rem;
@@ -565,14 +786,30 @@ hr {
   color: var(--accent);
 }
 
-.foot {
-  margin-top: 5rem;
-  padding-top: 1.25rem;
+/* Band alternation is DESIGN.md's structural device. A one-column blog has
+   only one place to spend it honestly: the footer, as a full-bleed inverse
+   band closing the page. */
+.footband {
+  background: var(--band);
+  color: var(--band-ink);
   border-top: 1px solid var(--rule);
-  color: var(--faint);
-  font-size: 0.8125rem;
+  margin-top: var(--space-3xl);
+  padding: var(--space-2xl) 0;
+}
+
+/* Same box as .shell so the band's text lines up with the column above it. */
+.footband__inner {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
   display: flex;
   justify-content: space-between;
-  gap: 1rem;
+  gap: var(--space-base);
   flex-wrap: wrap;
+  font-size: 0.8125rem;
+}
+
+.footband__year {
+  font-family: var(--mono);
+  letter-spacing: 0.08em;
 }

@@ -40,6 +40,7 @@ const year = new Date().getFullYear();
         <a class="runninghead__name" href="/">Songsnim</a>
         <nav class="runninghead__nav">
           <a href="/">Home</a>
+          <a href="/posts">Blog</a>
           <a href="/topics">Topics</a>
           <a href="https://github.com/songsnim">GitHub</a>
           <button class="themetoggle" id="theme" type="button" aria-label="테마 전환">◐</button>
@@ -50,11 +51,14 @@ const year = new Date().getFullYear();
         <slot />
       </main>
 
-      <footer class="foot">
-        <span>Machine Learning Engineer</span>
-        <span>© {year} Songsnim</span>
-      </footer>
     </div>
+
+    <footer class="footband">
+      <div class="footband__inner">
+        <span>Songsnim Tech Blog</span>
+        <span class="footband__year">© {year} Songsnim</span>
+      </div>
+    </footer>
 
     <script is:inline>
       document.getElementById('theme')?.addEventListener('click', () => {

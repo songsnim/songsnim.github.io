@@ -2,21 +2,56 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import PostList from '../components/PostList.astro';
+// Inlined rather than <img>-linked so the icons inherit currentColor and follow
+// the theme — and the hover — without a second file per palette.
+import githubIcon from '../../public/icons/github.svg?raw';
+import linkedinIcon from '../../public/icons/linkedin.svg?raw';
+import emailIcon from '../../public/icons/email.svg?raw';
 
 const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime()
 );
+const recent = posts.slice(0, 10);
+
+const links = [
+  { label: 'GitHub', href: 'https://github.com/songsnim', icon: githubIcon },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/youngjaesong/', icon: linkedinIcon },
+  { label: 'Email', href: 'mailto:thddudwo1313@gmail.com', icon: emailIcon },
+];
 ---
 
 <Base
   title="Songsnim"
-  description="ML 엔지니어링과 시스템 운영을 다루는 기술 블로그. 수식 유도와 실무 판단 근거를 남긴다."
+  description="Machine Learning Engineer. ML/AI/Data/Engineering 관련 주제로 글을 씁니다."
 >
-  <h1 class="lede">모델이 <em>왜</em> 그렇게 동작하는지<br />수식까지 내려가서 확인한다.</h1>
-  <p class="sub">
-    Machine Learning Engineer. ML 이론을 수식으로 유도하고, 운영 중에 부딪힌 문제와 그때의 판단
-    근거를 기록한다.
-  </p>
+  <header class="masthead">
+    <div class="masthead__head">
+      <h1 class="masthead__name">Songsnim</h1>
+      <img class="masthead__avatar" src="/character.png" alt="" width="420" height="420" />
+    </div>
+    <div class="masthead__row">
+      <p class="masthead__role">Machine Learning Engineer</p>
+      <nav class="masthead__links">
+        {
+          links.map(({ label, href, icon }) => (
+            <a class="masthead__link" href={href} aria-label={label} title={label}>
+              <Fragment set:html={icon} />
+            </a>
+          ))
+        }
+      </nav>
+    </div>
+    <p class="masthead__line">
+      ML <span class="masthead__slash">/</span> AI <span class="masthead__slash">/</span> Data
+      <span class="masthead__slash">/</span> Engineering
+      <span class="masthead__tail">관련 주제로 글을 씁니다.</span>
+    </p>
+  </header>
 
-  <PostList posts={posts} />
+  <div class="section">
+    <h2 class="section__title">Recent</h2>
+    <a class="section__more" href="/posts">전체 {posts.length}편 보기</a>
+  </div>
+
+  <PostList posts={recent} groupByYear={false} />
 </Base>

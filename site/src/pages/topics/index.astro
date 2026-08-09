@@ -11,7 +11,7 @@ const real = topics.filter(({ topic }) => topic !== NO_TOPIC).length;
 
 <Base title="Topics" description={`${real}개 주제로 분류된 ${posts.length}편의 글.`}>
   <h1 class="lede">Topics</h1>
-  <p class="sub">{posts.length}편의 글이 {real}개 주제에 걸쳐 있다.</p>
+  <p class="sub">{real}개 주제, {posts.length}편의 글</p>
 
   <ul class="topics">
     {
