@@ -1,0 +1,71 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  ogType?: string;
+}
+
+const { title, description, ogType = 'website' } = Astro.props;
+const site = 'Songsnim';
+const full = title === site ? title : `${title} · ${site}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const year = new Date().getFullYear();
+---
+
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{full}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" type="application/rss+xml" title={site} href="/rss.xml" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={full} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <script is:inline>
+      (() => {
+        const t = localStorage.getItem('theme');
+        if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="runninghead">
+        <a class="runninghead__name" href="/">Songsnim</a>
+        <nav class="runninghead__nav">
+          <a href="/tags">태그</a>
+          <a href="/rss.xml">RSS</a>
+          <a href="https://github.com/songsnim">GitHub</a>
+          <button class="themetoggle" id="theme" type="button" aria-label="테마 전환">◐</button>
+        </nav>
+      </header>
+
+      <main>
+        <slot />
+      </main>
+
+      <footer class="foot">
+        <span>Machine Learning Engineer</span>
+        <span>© {year} Songsnim</span>
+      </footer>
+    </div>
+
+    <script is:inline>
+      document.getElementById('theme')?.addEventListener('click', () => {
+        const root = document.documentElement;
+        const dark = root.dataset.theme
+          ? root.dataset.theme === 'dark'
+          : matchMedia('(prefers-color-scheme: dark)').matches;
+        const next = dark ? 'light' : 'dark';
+        root.dataset.theme = next;
+        localStorage.setItem('theme', next);
+      });
+    </script>
+  </body>
+</html>

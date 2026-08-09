@@ -1,0 +1,38 @@
+---
+title: "[프로그래머스] 행렬의 곱셈"
+date: 2023-06-17
+tags:
+  - "math"
+  - "python"
+  - "코테"
+  - "프로그래머스"
+description: "프로그래머스 '행렬의 곱셈' 문제 풀이."
+cover: "./explanation-1.png"
+draft: false
+---
+url : [프로그래머스 행렬의 곱셈](https://school.programmers.co.kr/learn/courses/30/lessons/12949)
+
+## 문제 설명
+2차원 행렬 arr1과 arr2를 입력받아, arr1에 arr2를 곱한 결과를 반환하는 함수, solution을 완성해주세요.
+
+**제한 조건**
+행렬 arr1, arr2의 행과 열의 길이는 2 이상 100 이하입니다.
+행렬 arr1, arr2의 원소는 -10 이상 20 이하인 자연수입니다.
+곱할 수 있는 배열만 주어집니다.
+
+![](./explanation-1.png)
+
+## Code
+```python
+def solution(arr1, arr2):
+    rows = arr1 # row만 담은 list
+    cols = [x for x in zip(*arr2)] # column만 담은 list
+    answer = [[0]*len(cols) for _ in range(len(rows))] # 빈 행렬 만들기
+    
+    for n, row in enumerate(rows):
+        for m, col in enumerate(cols):
+            answer[n][m] = sum([r*c for r,c in zip(row,col)])
+            # row와 column을 element-wise 곱한 것의 합이 행렬 곱셈의 결과
+    return answer
+
+```

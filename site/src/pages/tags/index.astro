@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { getTags } from '../../lib/tags';
+
+const posts = await getCollection('posts', ({ data }) => !data.draft);
+const tags = await getTags();
+---
+
+<Base title="태그" description={`${tags.length}개 태그로 분류된 ${posts.length}편의 글.`}>
+  <h1 class="lede">태그</h1>
+  <p class="sub">{posts.length}편의 글이 {tags.length}개 태그에 걸쳐 있다.</p>
+
+  <ul class="tags">
+    {
+      tags.map(({ tag, slug, count }) => (
+        <li>
+          <a class="tag" href={`/tags/${slug}`}>
+            {tag}
+            <span class="tag__n">{count}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</Base>

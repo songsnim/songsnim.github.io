@@ -1,0 +1,32 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import PostList from '../../components/PostList.astro';
+import { getTags } from '../../lib/tags';
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('posts', ({ data }) => !data.draft);
+  const tags = await getTags();
+  return tags.map(({ tag, slug }) => ({
+    params: { tag: slug },
+    props: {
+      tag,
+      posts: posts
+        .filter((p) => p.data.tags.includes(tag))
+        .sort((a, b) => b.data.date.getTime() - a.data.date.getTime()),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { tag, posts } = Astro.props;
+---
+
+<Base title={`${tag} 태그`} description={`${tag} 태그가 붙은 글 ${posts.length}편.`}>
+  <h1 class="lede">{tag}</h1>
+  <p class="sub">
+    이 태그가 붙은 글 {posts.length}편. <a href="/tags">전체 태그 보기</a>
+  </p>
+
+  <PostList posts={posts} />
+</Base>

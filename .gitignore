@@ -1,21 +1,8 @@
-_asset_bundler_cache
-_site
-.bundle
+# build tooling — kept out of the Obsidian vault's sync and search
+site/node_modules/
+site/dist/
+site/.astro/
+
+# macOS / editor cruft
 .DS_Store
-.jekyll-cache
-.jekyll-metadata
-*.gem
-*.sublime-project
-*.sublime-workspace
-codekit-config.json
-Gemfile.lock
-node_modules
-npm-debug.log*
-cheatsheet.md
-
-playground.ipynb
-cheatsheet.md
-
-# 미완성, publish되지 않은 글
-_posts/2023-10-15-객체지향 튜토리얼.md
-_posts/2023-11-03-Pascal VOC dataset annotation.md
+*.sync-conflict-*
