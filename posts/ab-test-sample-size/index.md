@@ -3,7 +3,7 @@ title: "A/B테스트에서 유의미한 표본 크기를 정하는 공식"
 date: 2025-10-15
 tags:
   - "ML"
-  - "통계"
+  - "Statistics"
 description: "통계적 유의성을 만족하는 최소 표본 크기를 공식으로 유도한다."
 cover: "./critical-value-and-sample-size.png"
 draft: false

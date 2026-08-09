@@ -2,9 +2,7 @@
 title: "Pandas .iloc과 .loc"
 date: 2023-06-22
 tags:
-  - "pandas"
-  - "python"
-  - "개발"
+  - "Python"
 description: "label 기준 .loc과 integer position 기준 .iloc의 차이와 사용법."
 draft: false
 ---

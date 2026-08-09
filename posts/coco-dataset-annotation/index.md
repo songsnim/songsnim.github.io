@@ -2,8 +2,7 @@
 title: "COCO dataset annotation 둘러보기"
 date: 2023-11-03
 tags:
-  - "Computer Vision"
-  - "컴퓨터비전"
+  - "Vision"
 description: "COCO dataset annotation JSON의 구조를 직접 뜯어본다."
 cover: "./coco-download-page.png"
 draft: false

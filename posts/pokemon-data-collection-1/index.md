@@ -1,9 +1,7 @@
 ---
 title: "[포켓몬] 1. 데이터 구축 (1)"
 date: 2023-06-20
-tags:
-  - "data"
-  - "포켓몬"
+tags: []
 description: "포켓몬 골드 텍스트 RPG를 위해 도감 데이터를 HTML에서 추출한다."
 cover: "./pokedex-reference-page.png"
 draft: false

@@ -2,8 +2,7 @@
 title: "Python 스택/큐 구현"
 date: 2023-06-16
 tags:
-  - "python"
-  - "스택/큐"
+  - "Python"
 description: "파이썬 리스트와 deque로 스택과 큐를 구현한다."
 draft: false
 ---

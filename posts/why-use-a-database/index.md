@@ -2,7 +2,7 @@
 title: "[DB] 왜 DB를 써야하는가?: 무결성, 동시성, 속도"
 date: 2025-08-14
 tags:
-  - "개발"
+  - "Dev"
 description: "CSV 대신 DB를 써야 하는 이유를 무결성·동시성·속도 관점에서 정리한다."
 draft: false
 ---

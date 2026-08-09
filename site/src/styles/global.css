@@ -381,6 +381,12 @@ hr {
   font-variant-numeric: tabular-nums;
 }
 
+/* The untagged bucket is not a tag — a dashed edge says so without a legend. */
+.tag--none {
+  border-style: dashed;
+  color: var(--faint);
+}
+
 .tag[aria-current='page'] {
   border-color: var(--accent);
   color: var(--accent);

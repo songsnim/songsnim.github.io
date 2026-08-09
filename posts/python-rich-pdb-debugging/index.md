@@ -2,7 +2,7 @@
 title: "python rich로 pdb 디버깅 효율 올리기"
 date: 2025-08-03
 tags:
-  - "개발"
+  - "Dev"
 description: "breakpoint()로 진입한 pdb의 밋밋한 출력을 rich로 바꿔 디버깅 가독성을 올린다."
 cover: "./plain-pdb-output.png"
 draft: false

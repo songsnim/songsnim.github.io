@@ -2,7 +2,7 @@
 title: "Path.resolve()를 써야하는 이유"
 date: 2025-07-16
 tags:
-  - "개발"
+  - "Dev"
 description: "상대 경로의 모호함이 만드는 FileNotFoundError와 Path.resolve()의 역할."
 cover: "./cover.jpg"
 draft: false

@@ -2,7 +2,7 @@
 title: "그래서 추상화 해 말아?"
 date: 2026-08-08
 tags:
-  - "개발"
+  - "Dev"
 description: "반복 코드를 추출할 시점을 Rule of Three와 비용 모델로 계산해본다."
 cover: "./cover.png"
 draft: false

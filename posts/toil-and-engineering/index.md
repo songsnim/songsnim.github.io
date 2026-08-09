@@ -2,8 +2,7 @@
 title: "Toil과 엔지니어링"
 date: 2026-07-25
 tags:
-  - "OPS"
-  - "SRE"
+  - "Ops"
 description: "SRE가 말하는 Toil이 무엇이고 왜, 어떻게 줄여야 하는지 살펴본다."
 draft: false
 ---

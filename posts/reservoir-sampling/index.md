@@ -3,7 +3,7 @@ title: "저수지 샘플링"
 date: 2025-10-30
 tags:
   - "ML"
-  - "통계"
+  - "Statistics"
 description: "전체 크기를 모르는 스트리밍 데이터에서 균등 확률로 k개를 뽑는 저수지 샘플링."
 draft: false
 ---

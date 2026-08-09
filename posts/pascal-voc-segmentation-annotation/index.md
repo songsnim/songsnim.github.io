@@ -2,7 +2,7 @@
 title: "Pascal VOC segmentation annotation 둘러보기"
 date: 2023-11-04
 tags:
-  - "컴퓨터비전"
+  - "Vision"
 description: "Pascal VOC 2012의 segmentation annotation 구조를 직접 뜯어본다."
 cover: "./pascal-voc-download-page.png"
 draft: false

@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
 import PostList from '../../components/PostList.astro';
-import { getTags } from '../../lib/tags';
+import { getTags, UNTAGGED } from '../../lib/tags';
 
 export const getStaticPaths = (async () => {
   const posts = await getCollection('posts', ({ data }) => !data.draft);
@@ -13,19 +13,25 @@ export const getStaticPaths = (async () => {
     props: {
       tag,
       posts: posts
-        .filter((p) => p.data.tags.includes(tag))
+        .filter((p) => (tag === UNTAGGED ? p.data.tags.length === 0 : p.data.tags.includes(tag)))
         .sort((a, b) => b.data.date.getTime() - a.data.date.getTime()),
     },
   }));
 }) satisfies GetStaticPaths;
 
 const { tag, posts } = Astro.props;
+const untagged = tag === UNTAGGED;
 ---
 
-<Base title={`${tag} 태그`} description={`${tag} 태그가 붙은 글 ${posts.length}편.`}>
+<Base
+  title={untagged ? '태그 없는 글' : `${tag} 태그`}
+  description={untagged ? `아직 태그가 붙지 않은 글 ${posts.length}편.` : `${tag} 태그가 붙은 글 ${posts.length}편.`}
+>
   <h1 class="lede">{tag}</h1>
   <p class="sub">
-    이 태그가 붙은 글 {posts.length}편. <a href="/tags">전체 태그 보기</a>
+    {untagged ? '아직 태그가 붙지 않은 글' : '이 태그가 붙은 글'} {posts.length}편. <a href="/tags"
+      >전체 태그 보기</a
+    >
   </p>
 
   <PostList posts={posts} />
