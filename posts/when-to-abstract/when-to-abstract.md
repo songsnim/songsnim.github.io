@@ -13,22 +13,22 @@ draft: false
 이 글에서 **추상화**는 "반복되는 것들은 한 번만 정의하고 나머지를 참조하는 것으로 대체" 라는 의미로 사용합니다.
 
 > "반복되는 코드는 추상화를 통해 기술부채를 줄여야 한다."
-"불필요하거나 섣부른 추상화는 피해라."
-... 작업 중인 프로젝트에 같은 코드가 반복된다. 추출할까, 그냥 둘까?
+> "불필요하거나 섣부른 추상화는 피해라."
+>  ... 작업 중인 프로젝트에 같은 코드가 반복된다. 추출할까, 그냥 둘까?
 
 코드베이스 규모가 커지면 추상화를 통해 재사용성과 가독성을 높여 기술부채를 완화할 수 있다는 주장이 있다. 다른 한 쪽에서는 추상화하는 비용과 증가하는 코드베이스 복잡성 때문에 섣부른 추상화를 피하라고도 한다. 어느 쪽 말을 들어야할까? 중간 지점이 존재할까?
 
 ## 1. Rule of Three
 
 > “The first time you do something, you just do it. The second time you do something similar, you wince at the duplication, but you do the duplicate thing anyway. The third time you do something similar, you refactor.”
-"처음으로 뭔가 할 땐 그냥 해라. 그 다음에 비슷한 걸 한다면 중복이 눈에 밟히겠지만 허용해라. 세번째 비슷한 일을 또 하게 된다면 리팩토링할 시간이다.", 
--[ Don Roberts](https://www.manojphadnis.net/refactoring/refactoring-strategies)
+> "처음으로 뭔가 할 땐 그냥 해라. 그 다음에 비슷한 걸 한다면 중복이 눈에 밟히겠지만 허용해라. 세번째 비슷한 일을 또 하게 된다면 리팩토링할 시간이다.", 
+> -[ Don Roberts](https://www.manojphadnis.net/refactoring/refactoring-strategies)
 
 Martin Fowler의 **리팩토링** 책에서는 **Rule of Three**라는 격언을 들며, 2번 반복까지는 허용하고, 세번째 반복부터 조치를 취하라(리팩토링, 추상화, 반복 제거)는 전략을 제시한다. 
 유명한 격언이므로 그냥 받아들여도 되지만 조금 독특한 것은 특정 **_숫자_** 가 격언에 포함되어 있다. 여기서 의문이 생긴다.
 
 >- 추상화하는 것이 이득이 되는 지점을 계산할 수 있을까? 
-- 그렇게 계산해보면 Rule of Three에서 말하는 숫자 '3'이 나올까?
+>- 그렇게 계산해보면 Rule of Three에서 말하는 숫자 '3'이 나올까?
 
 ## 2. 식을 세워보자
 
@@ -87,8 +87,8 @@ RCWR는 1.0~2.2 범위, RCR은 0.03~0.4 범위이므로 범위의 양 끝 값에
 
 따라서,
 >- RCWR과 RCR의 목적함수와 종속 변수를 찾고 실제 변숫값을 측정하는 것은 어려운 작업이다.
-- 하지만, [Poulin의 연구](https://jeffreypoulin.info/Papers/IJAST97/ijast97.html)에서 RCWR과 RCR의 범위 값이 보고됐다.
-- 범위 값의 상한으로 보수적으로 계산했을 때 **Rule of Three**와 동일한 결론에 이르렀다!
+>- 하지만, [Poulin의 연구](https://jeffreypoulin.info/Papers/IJAST97/ijast97.html)에서 RCWR과 RCR의 범위 값이 보고됐다.
+>- 범위 값의 상한으로 보수적으로 계산했을 때 **Rule of Three**와 동일한 결론에 이르렀다!
 
 ## 4. 마치며
 처음 Rule of Three를 생각해낸 사람이 이 식으로 계산하진 않았을 것 같고 경험으로 체득했다고 생각한다. 그럼에도 불구하고 `3회 반복부터는 재사용을 고려하여 코드를 짜는 것이 이득이다`라는 결론이 계산과 동일하게 나오는 것을 확인했다.
