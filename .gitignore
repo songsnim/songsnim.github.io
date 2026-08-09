@@ -1,0 +1,8 @@
+# build tooling — kept out of the Obsidian vault's sync and search
+site/node_modules/
+site/dist/
+site/.astro/
+
+# macOS / editor cruft
+.DS_Store
+*.sync-conflict-*

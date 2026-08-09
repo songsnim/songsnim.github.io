@@ -1,0 +1,52 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  posts: CollectionEntry<'posts'>[];
+  groupByYear?: boolean;
+}
+
+const { posts, groupByYear = true } = Astro.props;
+
+const fmt = (d: Date) =>
+  `${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+const fmtFull = (d: Date) =>
+  `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+
+const groups = groupByYear
+  ? [
+      ...posts.reduce((m, p) => {
+        const y = p.data.date.getFullYear();
+        if (!m.has(y)) m.set(y, []);
+        m.get(y)!.push(p);
+        return m;
+      }, new Map<number, CollectionEntry<'posts'>[]>()),
+    ]
+  : [[null, posts] as const];
+---
+
+{
+  groups.map(([year, items]) => (
+    <section>
+      {year !== null && (
+        <div class="year">
+          <span class="year__n">{year}</span>
+          <span class="year__count">{items.length}편</span>
+        </div>
+      )}
+      <ul class="list">
+        {items.map((p) => (
+          <li class="row">
+            <a class="row__link" href={`/posts/${p.id}`}>
+              <time class="row__date" datetime={p.data.date.toISOString().slice(0, 10)}>
+                {year === null ? fmtFull(p.data.date) : fmt(p.data.date)}
+              </time>
+              <span class="row__title">{p.data.title}</span>
+              <span class="row__desc">{p.data.description}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))
+}

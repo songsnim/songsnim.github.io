@@ -1,0 +1,77 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  posts: CollectionEntry<'posts'>[];
+}
+
+const { posts } = Astro.props;
+
+// One bar per month across the full span of the archive. The empty stretches
+// are the point: they show when the writing stopped and when it resumed.
+const key = (d: Date) => d.getFullYear() * 12 + d.getMonth();
+const months = posts.map((p) => key(p.data.date));
+const first = Math.min(...months);
+const last = Math.max(...months);
+
+const counts: number[] = Array.from({ length: last - first + 1 }, () => 0);
+for (const m of months) counts[m - first]++;
+const peak = Math.max(...counts);
+const peakMonth = first + counts.indexOf(peak);
+
+// Square-root scale: one month holds half the archive, so a linear axis would
+// flatten every other month into an invisible sliver.
+const scale = (c: number) => Math.sqrt(c) / Math.sqrt(peak);
+
+const W = 320;
+const H = 26;
+const gap = 0.6;
+const bw = W / counts.length - gap;
+
+const yearTicks: { x: number; year: number }[] = [];
+for (let i = 0; i < counts.length; i++) {
+  const m = first + i;
+  if (m % 12 === 0 || i === 0) yearTicks.push({ x: i * (bw + gap), year: Math.floor(m / 12) });
+}
+---
+
+<figure class="dist">
+  <p class="eyebrow">
+    Archive · {posts.length}편 · {Math.floor(first / 12)}–{Math.floor(last / 12)}
+  </p>
+  <svg
+    class="dist__chart"
+    viewBox={`0 0 ${W} ${H + 5}`}
+    role="img"
+    aria-label={`${posts.length}편의 글이 ${counts.length}개월에 걸쳐 분포한 히스토그램. 최다 월은 ${peak}편.`}
+  >
+    <line class="dist__rule" x1="0" y1={H} x2={W} y2={H} />
+    {
+      counts.map((c, i) => {
+        if (c === 0) return null;
+        const h = Math.max(0.8, scale(c) * (H - 2));
+        return (
+          <rect
+            class="dist__bar"
+            x={i * (bw + gap)}
+            y={H - h}
+            width={bw}
+            height={h}
+            style={`animation-delay:${i * 6}ms`}
+          >
+            <title>{`${Math.floor((first + i) / 12)}.${String(((first + i) % 12) + 1).padStart(2, '0')} — ${c}편`}</title>
+          </rect>
+        );
+      })
+    }
+    <text
+      class="dist__peak"
+      x={(peakMonth - first) * (bw + gap) + bw + 1.5}
+      y={H - (H - 2) + 3}>{peak}</text
+    >
+    {yearTicks.map((t) => <text class="dist__axis" x={t.x} y={H + 4}>{t.year}</text>)}
+  </svg>
+  <figcaption class="dist__caption">
+    월별 글 수, 제곱근 축. 2023년의 뭉치는 알고리즘 문제 풀이, 그 이후는 ML과 시스템 엔지니어링.
+  </figcaption>
+</figure>
