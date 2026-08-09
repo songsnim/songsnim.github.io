@@ -331,12 +331,13 @@ hr {
   color: var(--accent);
 }
 
+/* One sentence, one voice — it sits at the same level as the role line above. */
 .masthead__line {
   font-family: var(--mono);
   font-size: 0.9375rem;
   line-height: 1.9;
   margin: var(--space-lg) 0 0;
-  color: var(--faint);
+  color: var(--muted);
 }
 
 .masthead__slash {
@@ -347,7 +348,6 @@ hr {
 
 .masthead__tail {
   font-family: var(--body);
-  color: var(--muted);
   margin-left: 0.65em;
 }
 
