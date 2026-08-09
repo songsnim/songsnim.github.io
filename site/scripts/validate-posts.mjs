@@ -36,13 +36,22 @@ let images = 0;
 
 for (const slug of slugs) {
   const dir = join(ROOT, slug);
-  const file = join(dir, 'index.md');
+  const file = join(dir, `${slug}.md`);
+  const entries = readdirSync(dir);
 
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) {
     fail(slug, 'folder name is not a lowercase kebab-case slug');
   }
+
+  // The loader takes every .md in the folder and derives the URL from the
+  // folder name, so a second markdown file becomes a second post at the same
+  // URL, and a renamed one silently detaches from its folder.
+  const markdown = entries.filter((f) => f.endsWith('.md'));
+  if (markdown.length > 1) {
+    fail(slug, `folder holds ${markdown.length} markdown files, expected one: ${markdown.join(', ')}`);
+  }
   if (!existsSync(file)) {
-    fail(slug, 'index.md is missing');
+    fail(slug, `${slug}.md is missing — the post file must be named after its folder`);
     continue;
   }
 
@@ -80,8 +89,8 @@ for (const slug of slugs) {
       fail(slug, `image path must start with ./ — got ${url}`);
     }
   }
-  for (const f of readdirSync(dir)) {
-    if (f !== 'index.md' && !used.has(f)) warn(slug, `file is not referenced by the post: ${f}`);
+  for (const f of entries) {
+    if (!f.endsWith('.md') && !used.has(f)) warn(slug, `file is not referenced by the post: ${f}`);
   }
 
   // Internal links must point at a post that exists.

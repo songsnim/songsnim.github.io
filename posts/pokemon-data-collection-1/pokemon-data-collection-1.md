@@ -2,9 +2,9 @@
 title: "[포켓몬] 1. 데이터 구축 (1)"
 date: 2023-06-20
 tags: []
-description: "포켓몬 골드 텍스트 RPG를 위해 도감 데이터를 HTML에서 추출한다."
-cover: "./pokedex-reference-page.png"
-draft: false
+description: 포켓몬 골드 텍스트 RPG를 위해 도감 데이터를 HTML에서 추출한다.
+cover: ./pokedex-reference-page.png
+draft: true
 ---
 포켓몬 골드를 Text rpg로 구현하는 프로젝트다. 가장 먼저 포켓몬 도감을 데이터로 구축한다. 
 

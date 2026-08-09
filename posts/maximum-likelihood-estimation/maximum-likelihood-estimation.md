@@ -1,8 +1,9 @@
 ---
 title: "[ML] Maximum Likelihood Estimation"
 date: 2025-10-14
-tags: []
-description: "probability와 likelihood의 차이에서 출발해 MLE를 수식으로 파헤친다."
+tags:
+  - ML
+description: probability와 likelihood의 차이에서 출발해 MLE를 수식으로 파헤친다.
 draft: false
 ---
 MLE(Maximum Likelihood Estimation, 최대우도추정법, 최대가능도추정법)는 모델의 파라미터를 추정하는 기법입니다. 이 글에서는 수식과 함께 MLE를 파헤쳐보겠습니다.

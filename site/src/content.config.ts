@@ -4,8 +4,12 @@ import { glob } from 'astro/loaders';
 const posts = defineCollection({
   loader: glob({
     base: '../posts',
-    pattern: '**/index.md',
-    generateId: ({ entry }) => entry.replace(/\/index\.md$/, ''),
+    // A post is `<slug>/<slug>.md`. Naming the file after its folder keeps
+    // Obsidian's `[[wikilinks]]` and quick-open usable — 98 files all called
+    // `index.md` were indistinguishable there. validate-posts.mjs enforces the
+    // one-markdown-file-per-folder rule this pattern now relies on.
+    pattern: '**/*.md',
+    generateId: ({ entry }) => entry.replace(/\/[^/]+\.md$/, ''),
   }),
   schema: z.object({
     title: z.string(),

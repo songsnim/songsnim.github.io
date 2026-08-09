@@ -6,8 +6,8 @@ this repository; the published site is built from it.
 ## Layout
 
 ```
-posts/<english-slug>/index.md    the article
-posts/<english-slug>/*.png       its images, stored beside it
+posts/<english-slug>/<english-slug>.md    the article
+posts/<english-slug>/*.png               its images, stored beside it
 site/                            the Astro site that renders posts/
 .github/workflows/deploy.yml     validate → build → deploy to GitHub Pages
 ```
@@ -15,9 +15,13 @@ site/                            the Astro site that renders posts/
 One article, one folder. Images and any other artefact an article needs go in that
 folder, and the article links to them with a relative path (`./diagram.png`).
 
+The markdown file is named after its folder, not `index.md`, so Obsidian's quick-open
+and `[[wikilinks]]` can tell posts apart. A folder holds exactly one markdown file —
+put drafts and scratch notes elsewhere in the vault, or mark them `draft: true`.
+
 ## Writing a post
 
-1. Create `posts/<english-slug>/index.md`. The folder name is the URL:
+1. Create `posts/<english-slug>/<english-slug>.md`. The folder name is the URL:
    `songsnim.github.io/posts/<english-slug>`.
 2. Fill in the frontmatter:
 
