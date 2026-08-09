@@ -1,7 +1,11 @@
 ---
 title: "[StyleGAN 리뷰1] Style-based generator"
 date: 2023-06-30
+<<<<<<< HEAD
 topics: []
+=======
+tags: ["ML"]
+>>>>>>> origin/main
 description: "StyleGAN 논문의 style-based generator 구조를 큰 틀에서 정리한다."
 cover: "./input-architecture-comparison.png"
 draft: false
