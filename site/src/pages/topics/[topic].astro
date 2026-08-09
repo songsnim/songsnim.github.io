@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import PostList from '../../components/PostList.astro';
+import { getTopics, NO_TOPIC } from '../../lib/topics';
+
+export const getStaticPaths = (async () => {
+  const posts = await getCollection('posts', ({ data }) => !data.draft);
+  const topics = await getTopics();
+  return topics.map(({ topic, slug }) => ({
+    params: { topic: slug },
+    props: {
+      topic,
+      posts: posts
+        .filter((p) =>
+          topic === NO_TOPIC ? p.data.topics.length === 0 : p.data.topics.includes(topic)
+        )
+        .sort((a, b) => b.data.date.getTime() - a.data.date.getTime()),
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { topic, posts } = Astro.props;
+const none = topic === NO_TOPIC;
+---
+
+<Base
+  title={none ? '주제 없는 글' : `${topic}`}
+  description={none
+    ? `아직 주제가 붙지 않은 글 ${posts.length}편.`
+    : `${topic} 주제의 글 ${posts.length}편.`}
+>
+  <h1 class="lede">{topic}</h1>
+  <p class="sub">
+    {none ? '아직 주제가 붙지 않은 글' : '이 주제의 글'} {posts.length}편. <a href="/topics"
+      >전체 주제 보기</a
+    >
+  </p>
+
+  <PostList posts={posts} />
+</Base>

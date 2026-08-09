@@ -1,5 +1,22 @@
 @import 'katex/dist/katex.min.css';
 
+/* NanumSquare Neo, self-hosted from public/fonts so the site owns its type and
+   does not depend on a third-party CDN staying up. Two weights only — regular
+   for body, bold for headings — because each Korean weight is ~380KB. */
+@font-face {
+  font-family: 'NanumSquare Neo';
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/NanumSquareNeo-bRg.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'NanumSquare Neo';
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/NanumSquareNeo-cBd.woff2') format('woff2');
+}
+
 /* ── tokens ─────────────────────────────────────────────────────────── */
 :root {
   --bg: #faf9f6;
@@ -12,9 +29,9 @@
   --accent-soft: #a32e3c1a;
   --code-bg: #f4f3ef;
 
-  --display: 'KaTeX_Main', 'Iowan Old Style', Georgia, serif;
-  --body: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Pretendard',
-    'Noto Sans KR', 'Malgun Gothic', system-ui, sans-serif;
+  --display: 'NanumSquare Neo', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  --body: 'NanumSquare Neo', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+    'Malgun Gothic', system-ui, sans-serif;
   --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
 
   --measure: 68ch;
@@ -280,8 +297,8 @@ hr {
   }
 }
 
-/* ── tags ───────────────────────────────────────────────────────────── */
-.tags {
+/* ── topics ─────────────────────────────────────────────────────────── */
+.topics {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
@@ -290,7 +307,7 @@ hr {
   padding: 0;
 }
 
-.tag {
+.topic {
   display: inline-flex;
   align-items: baseline;
   gap: 0.35rem;
@@ -304,24 +321,24 @@ hr {
   white-space: nowrap;
 }
 
-.tag:hover {
+.topic:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
 
-.tag__n {
+.topic__n {
   color: var(--faint);
   font-size: 0.6875rem;
   font-variant-numeric: tabular-nums;
 }
 
-/* The untagged bucket is not a tag — a dashed edge says so without a legend. */
-.tag--none {
+/* The None bucket is not a topic — a dashed edge says so without a legend. */
+.topic--none {
   border-style: dashed;
   color: var(--faint);
 }
 
-.tag[aria-current='page'] {
+.topic[aria-current='page'] {
   border-color: var(--accent);
   color: var(--accent);
   background: var(--accent-soft);

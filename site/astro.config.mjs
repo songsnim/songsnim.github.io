@@ -7,6 +7,8 @@ import rehypeKatex from 'rehype-katex';
 export default defineConfig({
   site: 'https://songsnim.github.io',
   integrations: [mdx(), sitemap()],
+  // The topic index used to live at /tags. Anything already pointing there keeps working.
+  redirects: { '/tags': '/topics' },
   markdown: {
     remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeKatex],

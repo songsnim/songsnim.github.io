@@ -37,9 +37,9 @@ put drafts and scratch notes elsewhere in the vault, or mark them `draft: true`.
    ---
    ```
 
-   Blog tags live under `topics`, not `tags`. Obsidian reads `tags` into the vault's own
-   tag pane, so keeping the keys apart stops vault tags from reaching the site and site
-   tags from cluttering the vault.
+   The site calls them topics, and they live under `topics`. Obsidian reads the `tags` key
+   into the vault's own tag pane, so the two names are kept apart on purpose: vault tags
+   never reach the site, and site topics never clutter the vault.
 
 3. Write. `$...$` and `$$...$$` render as math; leave a blank line around every `$$` block.
 4. Publish with Obsidian Git: **Commit and push**. GitHub Actions validates the posts,

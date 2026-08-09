@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { getTopics, NO_TOPIC } from '../../lib/topics';
+
+const posts = await getCollection('posts', ({ data }) => !data.draft);
+const topics = await getTopics();
+// `None` is a bucket for posts with no topic, not a topic anyone wrote — don't count it as one.
+const real = topics.filter(({ topic }) => topic !== NO_TOPIC).length;
+---
+
+<Base title="Topics" description={`${real}개 주제로 분류된 ${posts.length}편의 글.`}>
+  <h1 class="lede">Topics</h1>
+  <p class="sub">{posts.length}편의 글이 {real}개 주제에 걸쳐 있다.</p>
+
+  <ul class="topics">
+    {
+      topics.map(({ topic, slug, count }) => (
+        <li>
+          <a class:list={['topic', topic === NO_TOPIC && 'topic--none']} href={`/topics/${slug}`}>
+            {topic}
+            <span class="topic__n">{count}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</Base>

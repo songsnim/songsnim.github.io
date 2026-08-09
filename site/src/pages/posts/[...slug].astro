@@ -2,7 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
-import { tagSlug } from '../../lib/tags';
+import { topicSlug } from '../../lib/topics';
 
 export const getStaticPaths = (async () => {
   const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
@@ -31,10 +31,10 @@ const fmt = (d: Date) =>
       </div>
       {
         post.data.topics.length > 0 && (
-          <ul class="tags">
+          <ul class="topics">
             {post.data.topics.map((t) => (
               <li>
-                <a class="tag" href={`/tags/${tagSlug(t)}`}>
+                <a class="topic" href={`/topics/${topicSlug(t)}`}>
                   {t}
                 </a>
               </li>
