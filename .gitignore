@@ -3,6 +3,9 @@ site/node_modules/
 site/dist/
 site/.astro/
 
+# Notes for the assistant that edits this repository — local to this machine.
+CLAUDE.md
+
 # macOS / editor cruft
 .DS_Store
 # Obsidian's Space plugin leaves one of these in every folder it has opened.
