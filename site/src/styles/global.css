@@ -38,6 +38,9 @@
   --accent: #3f6b25; /* deep green — hover and focus share it */
   --accent-soft: #3f6b2521;
   --code-bg: #faf8f4;
+  /* Inline code is the one thing that must NOT sit flush with the page — a word
+     mid-sentence needs an edge to read as a token. Blocks stay flush. */
+  --code-inline: #ebe6dc;
   --band: #faf8f4;
   --band-ink: #77726a;
   --select: #3f6b254d; /* the focus green, at a strength text survives */
@@ -65,6 +68,9 @@
 
   --measure: 68ch;
   --shell: 736px; /* fixed, so growing the type does not widen the page */
+  /* 736 + 2 × (180 + 52) = 1200, which is why the rails wait for 76rem. */
+  --rail: 180px;
+  --rail-gap: 52px;
   --gutter: clamp(1.25rem, 5vw, 3rem);
 
   color-scheme: light;
@@ -84,6 +90,7 @@
     --accent: #e6b450; /* ayu accent — the one gold the theme spends */
     --accent-soft: #e6b45021;
     --code-bg: #131820;
+    --code-inline: #1e2635;
     --band: #131820;
     --band-ink: #9198a3;
     --focus: #e6b450;
@@ -104,6 +111,7 @@
   --accent: #e6b450; /* ayu accent — the one gold the theme spends */
   --accent-soft: #e6b45021;
   --code-bg: #131820;
+  --code-inline: #1e2635;
   --band: #131820;
   --band-ink: #9198a3;
   --focus: #e6b450;
@@ -566,6 +574,165 @@ hr {
   background: var(--accent-soft);
 }
 
+/* ── side rails ─────────────────────────────────────────────────────────
+   Both rails live in the page margin rather than inside the shell, so the
+   text column keeps the width and the left edge it has on every other page.
+   They appear only when the viewport can hold shell + two rails; below that
+   the topic rail falls back to a chip row and the outline steps aside. */
+.withrail__main,
+.withoutline > article {
+  min-width: 0;
+}
+
+.rail__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  list-style: none;
+  margin: var(--space-md) 0 var(--space-2xl);
+  padding: 0;
+}
+
+.rail__item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  text-decoration: none;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.rail__item:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.rail__n {
+  color: var(--faint);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.rail__item--none {
+  border-style: dashed;
+  color: var(--faint);
+}
+
+.outline {
+  display: none;
+}
+
+@media (min-width: 76rem) {
+  .withrail {
+    display: grid;
+    grid-template-columns: var(--rail) 1fr;
+    gap: var(--rail-gap);
+    margin-left: calc(-1 * (var(--rail) + var(--rail-gap)));
+  }
+
+  /* The rail's own section header shares the row top with Recent's, so the two
+     headings sit on one line. */
+  .rail {
+    position: sticky;
+    top: var(--space-lg);
+    align-self: start;
+  }
+
+  .withrail__main > section:first-child .year {
+    margin-top: 0;
+  }
+
+  .rail__list {
+    display: block;
+    margin: var(--space-sm) 0 0;
+  }
+
+  .rail__item {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    white-space: normal;
+    border: 0;
+    border-radius: 0;
+    padding: 0.3rem 0;
+    font-size: 0.8125rem;
+  }
+
+  .rail__item:hover {
+    color: var(--accent);
+  }
+
+  .rail__item[aria-current='page'] {
+    color: var(--accent);
+  }
+
+  .withoutline {
+    display: grid;
+    grid-template-columns: 1fr var(--rail);
+    gap: var(--rail-gap);
+    margin-right: calc(-1 * (var(--rail) + var(--rail-gap)));
+  }
+
+  .outline {
+    display: block;
+  }
+
+  .outline__inner {
+    position: sticky;
+    top: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid var(--rule);
+    padding-left: var(--space-base);
+    max-height: calc(100vh - 2 * var(--space-lg));
+    overflow-y: auto;
+  }
+
+  .outline__title {
+    margin: 0 0 var(--space-sm);
+  }
+
+  .outline__item {
+    position: relative;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    padding: 0.25rem 0;
+    color: var(--faint);
+    text-decoration: none;
+    transition: color 120ms ease;
+  }
+
+  .outline__item--sub {
+    padding-left: var(--space-md);
+    font-size: 0.75rem;
+  }
+
+  .outline__item:hover {
+    color: var(--accent);
+  }
+
+  .outline__item[aria-current] {
+    color: var(--ink);
+  }
+
+  /* The bar replaces the rule for the length of the current entry, so the reader
+     finds their place without a second colour in the rail. */
+  .outline__item[aria-current]::before {
+    content: '';
+    position: absolute;
+    left: calc(-1 * var(--space-base) - 1px);
+    top: 0.3rem;
+    bottom: 0.3rem;
+    width: 2px;
+    background: var(--accent);
+  }
+}
+
 /* ── article ────────────────────────────────────────────────────────── */
 .article__head {
   margin: 0 0 2.5rem;
@@ -660,7 +827,7 @@ hr {
 .prose :not(pre) > code {
   font-family: var(--mono);
   font-size: 0.855em;
-  background: var(--code-bg);
+  background: var(--code-inline);
   padding: 0.12em 0.36em;
   border-radius: var(--r-sm);
   word-break: break-word;

@@ -1,0 +1,32 @@
+---
+import { getTopics, NO_TOPIC } from '../lib/topics';
+
+/**
+ * The topic index, restated as a rail beside the post list. It sits in the page
+ * margin rather than inside the text column, so the list keeps the same width
+ * and the same left edge as the running head above it.
+ */
+const topics = await getTopics();
+---
+
+<aside class="rail">
+  <div class="section">
+    <h2 class="section__title">Topics</h2>
+    <a class="section__more" href="/topics">전체</a>
+  </div>
+  <ul class="rail__list">
+    {
+      topics.map(({ topic, slug, count }) => (
+        <li>
+          <a
+            class:list={['rail__item', topic === NO_TOPIC && 'rail__item--none']}
+            href={`/topics/${slug}`}
+          >
+            <span class="rail__name">{topic}</span>
+            <span class="rail__n">{count}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</aside>

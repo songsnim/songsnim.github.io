@@ -1,0 +1,72 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+/**
+ * h2 and h3 only. h1 is the article title, which the reader is never lost from,
+ * and h4 and deeper turn the rail into a second copy of the article.
+ */
+const items = Astro.props.headings.filter((h) => h.depth === 2 || h.depth === 3);
+// A single entry is not an outline — it is a heading the reader can already see.
+const show = items.length > 1;
+---
+
+{
+  show && (
+    <aside class="outline">
+      <nav class="outline__inner" aria-label="목차">
+        <p class="section__title outline__title">Outline</p>
+        {items.map((h) => (
+          <a
+            class:list={['outline__item', h.depth === 3 && 'outline__item--sub']}
+            href={`#${h.slug}`}
+          >
+            {h.text}
+          </a>
+        ))}
+      </nav>
+    </aside>
+  )
+}
+
+{
+  show && (
+    <script is:inline>
+      (() => {
+        const links = [...document.querySelectorAll('.outline__item')];
+        if (!links.length) return;
+        const byId = new Map(links.map((a) => [decodeURIComponent(a.hash.slice(1)), a]));
+        const heads = [...byId.keys()].map((id) => document.getElementById(id)).filter(Boolean);
+        if (!heads.length) return;
+
+        let current = null;
+        const mark = (el) => {
+          if (el === current) return;
+          current?.removeAttribute('aria-current');
+          el?.setAttribute('aria-current', 'true');
+          current = el;
+        };
+
+        // Track the last heading whose top has passed the reading line, rather than
+        // whichever heading happens to be visible — a long section with no heading
+        // on screen should still keep its own entry lit.
+        const sync = () => {
+          const line = window.innerHeight * 0.25;
+          let active = heads[0];
+          for (const h of heads) {
+            if (h.getBoundingClientRect().top <= line) active = h;
+            else break;
+          }
+          mark(byId.get(active.id));
+        };
+
+        addEventListener('scroll', sync, { passive: true });
+        addEventListener('resize', sync, { passive: true });
+        sync();
+      })();
+    </script>
+  )
+}

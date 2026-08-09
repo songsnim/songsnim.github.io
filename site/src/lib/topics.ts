@@ -20,6 +20,14 @@ export type TopicInfo = { topic: string; slug: string; count: number };
  */
 export const NO_TOPIC = 'None';
 
+/**
+ * 코테 outnumbers every other topic by roughly five to one, so sorting purely by
+ * count would put it first and make the list look like a coding-test blog. It is
+ * pinned to the bottom instead — still findable, no longer the headline.
+ */
+const SINK = ['코테'];
+const sinkRank = (topic: string) => (SINK.includes(topic) ? 1 : 0);
+
 export async function getTopics(): Promise<TopicInfo[]> {
   const posts = await getCollection('posts', ({ data }) => !data.draft);
   const counts = new Map<string, number>();
@@ -39,7 +47,12 @@ export async function getTopics(): Promise<TopicInfo[]> {
     seen.set(slug, topic);
     topics.push({ topic, slug, count });
   }
-  topics.sort((a, b) => b.count - a.count || a.topic.localeCompare(b.topic));
+  topics.sort(
+    (a, b) =>
+      sinkRank(a.topic) - sinkRank(b.topic) ||
+      b.count - a.count ||
+      a.topic.localeCompare(b.topic)
+  );
 
   const none = posts.filter((p) => p.data.topics.length === 0).length;
   if (none) topics.push({ topic: NO_TOPIC, slug: topicSlug(NO_TOPIC), count: none });

@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
+import Outline from '../../components/Outline.astro';
 import { topicSlug } from '../../lib/topics';
 
 export const getStaticPaths = (async () => {
@@ -15,39 +16,43 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { post, newer, older } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 
 const fmt = (d: Date) =>
   `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
 ---
 
 <Base title={post.data.title} description={post.data.description} ogType="article">
-  <article>
-    <header class="article__head">
-      <h1 class="article__title">{post.data.title}</h1>
-      <div class="article__meta">
-        <time datetime={post.data.date.toISOString().slice(0, 10)}>{fmt(post.data.date)}</time>
-        {post.data.updated && <span>수정 {fmt(post.data.updated)}</span>}
-      </div>
-      {
-        post.data.topics.length > 0 && (
-          <ul class="topics">
-            {post.data.topics.map((t) => (
-              <li>
-                <a class="topic" href={`/topics/${topicSlug(t)}`}>
-                  {t}
-                </a>
-              </li>
-            ))}
-          </ul>
-        )
-      }
-    </header>
+  <div class="withoutline">
+    <article>
+      <header class="article__head">
+        <h1 class="article__title">{post.data.title}</h1>
+        <div class="article__meta">
+          <time datetime={post.data.date.toISOString().slice(0, 10)}>{fmt(post.data.date)}</time>
+          {post.data.updated && <span>수정 {fmt(post.data.updated)}</span>}
+        </div>
+        {
+          post.data.topics.length > 0 && (
+            <ul class="topics">
+              {post.data.topics.map((t) => (
+                <li>
+                  <a class="topic" href={`/topics/${topicSlug(t)}`}>
+                    {t}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </header>
 
-    <div class="prose">
-      <Content />
-    </div>
-  </article>
+      <div class="prose">
+        <Content />
+      </div>
+    </article>
+
+    <Outline headings={headings} />
+  </div>
 
   <nav class="pager">
     {

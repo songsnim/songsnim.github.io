@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import PostList from '../components/PostList.astro';
+import TopicRail from '../components/TopicRail.astro';
 // Inlined rather than <img>-linked so the icons inherit currentColor and follow
 // the theme — and the hover — without a second file per palette.
 import githubIcon from '../../public/icons/github.svg?raw';
@@ -48,10 +49,14 @@ const links = [
     </p>
   </header>
 
-  <div class="section">
-    <h2 class="section__title">Recent</h2>
-    <a class="section__more" href="/posts">전체 {posts.length}편 보기</a>
+  <div class="withrail">
+    <TopicRail />
+    <div class="withrail__main">
+      <div class="section">
+        <h2 class="section__title">Recent</h2>
+        <a class="section__more" href="/posts">전체 {posts.length}편 보기</a>
+      </div>
+      <PostList posts={recent} groupByYear={false} />
+    </div>
   </div>
-
-  <PostList posts={recent} groupByYear={false} />
 </Base>
