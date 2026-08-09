@@ -2,8 +2,9 @@
 title: "[ML] Neural Net Optimizer 파헤치기"
 date: 2025-10-10
 topics:
-  - "ML"
-description: "SGD의 문제점에서 출발해 Momentum, RMSProp, Adam으로 이어지는 optimizer의 발전."
+  - ML
+  - Math
+description: SGD의 문제점에서 출발해 Momentum, RMSProp, Adam으로 이어지는 optimizer의 발전.
 draft: false
 ---
 이 글에서는 gradient descent가 어떤 문제점들을 갖고 있는지 파헤치고, 해당 문제점들을 해결하기 위해 어떻게 optimzer가 발전했는지를 살펴보겠습니다.

@@ -102,7 +102,25 @@ const fmt = (d: Date) =>
       url.searchParams.delete('obsidian');
       history.replaceState(null, '', url);
     }
-    if (localStorage.getItem('obsidian') !== '1') return;
-    for (const el of document.querySelectorAll('[data-obsidian]')) el.hidden = false;
+    // A page served from this machine is already the vault's machine, so the
+    // link is always useful there and never needs turning on.
+    const local = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
+    if (!local && localStorage.getItem('obsidian') !== '1') return;
+
+    for (const el of document.querySelectorAll('[data-obsidian]')) {
+      el.hidden = false;
+      if (!local) continue;
+      // On this machine the dev server opens the note instead of the browser.
+      // Embedded browsers drop `obsidian://` links silently, and even the ones
+      // that work put a permission prompt in the way. If the route is missing —
+      // `astro preview`, say — the plain link still gets its chance.
+      el.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const done = await fetch(`/__obsidian?uri=${encodeURIComponent(el.href)}`)
+          .then((r) => r.ok)
+          .catch(() => false);
+        if (!done) location.href = el.href;
+      });
+    }
   })();
 </script>

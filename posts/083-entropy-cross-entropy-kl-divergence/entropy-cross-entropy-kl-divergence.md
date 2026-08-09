@@ -2,9 +2,10 @@
 title: "[ML] 정보량, Entropy, CrossEntropy, 그리고 KL-divergence"
 date: 2025-09-21
 topics:
-  - "ML"
-description: "정보량에서 출발해 Entropy, CrossEntropy, KL-divergence가 어떻게 이어지는지 정리한다."
-cover: "./entropy-uniform-vs-skewed-values.png"
+  - ML
+  - Math
+description: 정보량에서 출발해 Entropy, CrossEntropy, KL-divergence가 어떻게 이어지는지 정리한다.
+cover: ./entropy-uniform-vs-skewed-values.png
 draft: false
 ---
 ## 1. 정보량: '놀라움' 관점

@@ -2,9 +2,10 @@
 title: "[ML] MSE를 Logistic Regression의 Loss로 사용하지 않는 이유"
 date: 2025-10-09
 topics:
-  - "ML"
-description: "Logistic Regression에서 MSE가 아닌 BCE를 쓰는 이유를 볼록성과 gradient로 설명한다."
-cover: "./loss-derivative-y0.png"
+  - ML
+  - Math
+description: Logistic Regression에서 MSE가 아닌 BCE를 쓰는 이유를 볼록성과 gradient로 설명한다.
+cover: ./loss-derivative-y0.png
 draft: false
 ---
 ML 기술 면접에서 "Logistic Regression의 Loss Function은 무엇인가요?"라는 질문을 받는다면, 대부분 "Binary Cross-Entropy (BCE)"라고 답변합니다. 꼬리 질문으로 "왜 Mean Squared Error(MSE)는 사용하지 않나요? MSE도 결국 예측값과 실제값의 차이를 줄이는 것 아닌가요?"라는 질문이 들어오면 어떨까요?

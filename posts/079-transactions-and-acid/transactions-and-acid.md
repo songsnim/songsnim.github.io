@@ -2,8 +2,9 @@
 title: "[DB] 트랜잭션과 ACID"
 date: 2025-08-15
 topics:
-  - "Dev"
-description: "동시성 문제를 해결하는 트랜잭션 개념과 ACID 네 가지 속성."
+  - Dev
+  - Data
+description: 동시성 문제를 해결하는 트랜잭션 개념과 ACID 네 가지 속성.
 draft: false
 ---
 ## 트랜잭션

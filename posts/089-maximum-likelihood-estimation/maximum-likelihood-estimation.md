@@ -3,6 +3,7 @@ title: "[ML] Maximum Likelihood Estimation"
 date: 2025-10-14
 topics:
   - ML
+  - Math
 description: probability와 likelihood의 차이에서 출발해 MLE를 수식으로 파헤친다.
 draft: false
 ---

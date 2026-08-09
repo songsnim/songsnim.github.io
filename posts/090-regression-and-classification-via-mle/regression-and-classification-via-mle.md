@@ -2,8 +2,9 @@
 title: "[ML] MLE 관점에서 회귀와 분류 바라보기"
 date: 2025-10-14
 topics:
-  - "ML"
-description: "MSE와 CrossEntropy가 왜 각각 회귀·분류의 loss인지 MLE로 설명한다."
+  - ML
+  - Math
+description: MSE와 CrossEntropy가 왜 각각 회귀·분류의 loss인지 MLE로 설명한다.
 draft: false
 ---
 이 글은 <a href='/posts/maximum-likelihood-estimation'>MLE</a>를 알고 있다고 가정하고 작성된 글입니다. 

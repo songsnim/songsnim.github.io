@@ -2,8 +2,9 @@
 title: "[ML] MAP관점에서 regularization 바라보기"
 date: 2025-11-02
 topics:
-  - "ML"
-description: "L1·L2 규제를 MAP 추정의 사전분포로 해석한다."
+  - ML
+  - Math
+description: L1·L2 규제를 MAP 추정의 사전분포로 해석한다.
 draft: false
 ---
 선형 회귀 모델에서 사용되는 대표적인 규제(regularization) 기법인 L1과 L2 규제가 MAP관점에서 어어떻게 해석되는지 살펴보겠습니다. 기본적인 L1과 L2를 알고 있다고 가정하고 작성된 글입니다.
