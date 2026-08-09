@@ -35,6 +35,7 @@
   --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
 
   --measure: 68ch;
+  --shell: 46rem;
   --gutter: clamp(1.25rem, 5vw, 3rem);
 
   color-scheme: light;
@@ -119,7 +120,7 @@ hr {
 
 /* ── shell ──────────────────────────────────────────────────────────── */
 .shell {
-  max-width: 46rem;
+  max-width: var(--shell);
   margin: 0 auto;
   padding: 0 var(--gutter) 6rem;
 }
@@ -504,8 +505,13 @@ hr {
   }
 }
 
-/* katex overflow guard */
+/* Display math cannot wrap — KaTeX has no line breaking — so a wide equation
+   would otherwise sit behind a horizontal scrollbar. Two steps make it fit:
+   the block breaks out of the prose measure to the full shell width, and
+   fit-math.js shrinks whatever is still too wide. The scroll stays as a last
+   resort for equations too wide even at the minimum size. */
 .prose .katex-display {
+  width: min(var(--shell), 100vw - 2 * var(--gutter));
   overflow-x: auto;
   overflow-y: hidden;
   padding: 0.35rem 0;

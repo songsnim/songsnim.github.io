@@ -49,7 +49,8 @@ log-likelihood를 최대화하는 $\theta$를 찾기 위해서는 편미분값�
 
 $$
 \mathcal{L}(\mu|X)=\sum_{i=1}^n \mathrm{log}(\frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x_i-\mu)^2}{2\sigma^2}}) \\
-=\sum_{i=1}^n  [\mathrm{log}(\frac{1}{\sqrt{2\pi\sigma^2}}) - {\frac{(x_i-\mu)^2}{2\sigma^2}})]\\
+=\sum_{i=1}^n  [\mathrm{log}(\frac{1}{\sqrt{2\pi\sigma^2}})\\
+- {\frac{(x_i-\mu)^2}{2\sigma^2}}]\\
 =C-\frac{1}{2\sigma^2}\sum_{i=1}^n(x_i-\mu)^2
 $$
 

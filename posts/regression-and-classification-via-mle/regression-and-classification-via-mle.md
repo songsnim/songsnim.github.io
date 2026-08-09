@@ -28,7 +28,8 @@ MLE를 위해 log-likelihood 함수를 세워보면,
 
 $$
 \mathcal{L}(y_i|x_i;W)=\sum_{i=1}^n \mathrm{log}(\frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(y_i-\hat{y}_i)^2}{2\sigma^2}})\\
-\mathcal{L}(y_i|x_i;W)=\mathrm{log}(\frac{1}{\sqrt{2\pi\sigma^2}})-\sum_{i=1}^n{\frac{(y_i-\hat{y}_i)^2}{2\sigma^2}}\\=C-\frac{1}{2\sigma^2}\sum_{i=1}^n{(y_i-\hat{y}_i)^2}
+\mathcal{L}(y_i|x_i;W)=\mathrm{log}(\frac{1}{\sqrt{2\pi\sigma^2}})\\
+-\sum_{i=1}^n{\frac{(y_i-\hat{y}_i)^2}{2\sigma^2}}\\=C-\frac{1}{2\sigma^2}\sum_{i=1}^n{(y_i-\hat{y}_i)^2}
 $$
 
 $\hat{y_i}$는 $x_i$에 대한 변수이므로 상수가 아님.

@@ -53,7 +53,8 @@ MAP를 위해 log-posterior 식을 세워보면,
 $$
 \mathcal{L}(\theta|D)=\mathrm{log}P(D|\theta)+\mathrm{log}P(\theta)\\
 =\mathrm{log}P(D|\theta)+\mathrm{log}(\frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{\theta^2}{2\sigma^2}})\\
-=\mathrm{log}P(D|\theta)+\mathrm{log}(\frac{1}{\sqrt{2\pi\sigma^2}})-{\frac{\theta^2}{2\sigma^2}}\\=\text{MSE loss} + C-\lambda\theta^2
+=\mathrm{log}P(D|\theta)+\mathrm{log}(\frac{1}{\sqrt{2\pi\sigma^2}})\\
+-{\frac{\theta^2}{2\sigma^2}}\\=\text{MSE loss} + C-\lambda\theta^2
 $$
 
 따라서, 
