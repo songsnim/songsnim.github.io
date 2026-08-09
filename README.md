@@ -6,8 +6,8 @@ this repository; the published site is built from it.
 ## Layout
 
 ```
-posts/<english-slug>/<english-slug>.md    the article
-posts/<english-slug>/*.png               its images, stored beside it
+posts/NNN-<english-slug>/<english-slug>.md   the article
+posts/NNN-<english-slug>/*.png              its images, stored beside it
 site/                            the Astro site that renders posts/
 .github/workflows/deploy.yml     validate → build → deploy to GitHub Pages
 ```
@@ -15,13 +15,20 @@ site/                            the Astro site that renders posts/
 One article, one folder. Images and any other artefact an article needs go in that
 folder, and the article links to them with a relative path (`./diagram.png`).
 
-The markdown file is named after its folder, not `index.md`, so Obsidian's quick-open
-and `[[wikilinks]]` can tell posts apart. A folder holds exactly one markdown file —
+`NNN` is a three-digit index in publication order — oldest is `001` — so the folder
+list reads chronologically instead of alphabetically. It is a filing device only: the
+site strips it, and the URL is the slug alone. Never renumber an existing folder; a new
+post takes the next free number, and a gap left by a deleted post stays a gap.
+
+The markdown file is named after the slug, not `index.md`, so Obsidian's quick-open and
+`[[wikilinks]]` can tell posts apart. It drops the index: Obsidian will not let a note
+take the exact name of the folder holding it. A folder holds exactly one markdown file —
 put drafts and scratch notes elsewhere in the vault, or mark them `draft: true`.
 
 ## Writing a post
 
-1. Create `posts/<english-slug>/<english-slug>.md`. The folder name is the URL:
+1. Create `posts/NNN-<english-slug>/<english-slug>.md`, where `NNN` is one past the
+   highest number already in `posts/`. The slug is the URL:
    `songsnim.github.io/posts/<english-slug>`.
 2. Fill in the frontmatter:
 

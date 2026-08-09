@@ -4,6 +4,7 @@ import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
 import Outline from '../../components/Outline.astro';
 import { topicSlug } from '../../lib/topics';
+import { obsidianUri } from '../../lib/obsidian';
 
 export const getStaticPaths = (async () => {
   const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
@@ -17,6 +18,7 @@ export const getStaticPaths = (async () => {
 
 const { post, newer, older } = Astro.props;
 const { Content, headings } = await render(post);
+const source = obsidianUri(post.filePath);
 
 const fmt = (d: Date) =>
   `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
@@ -30,6 +32,15 @@ const fmt = (d: Date) =>
         <div class="article__meta">
           <time datetime={post.data.date.toISOString().slice(0, 10)}>{fmt(post.data.date)}</time>
           {post.data.updated && <span>수정 {fmt(post.data.updated)}</span>}
+          {
+            source && (
+              /* Hidden until the reader turns it on with `?obsidian=1` — the link
+                 only does anything on a machine holding the vault. */
+              <a class="article__source" href={source} data-obsidian hidden>
+                Obsidian에서 열기
+              </a>
+            )
+          }
         </div>
         {
           post.data.topics.length > 0 && (
@@ -76,5 +87,22 @@ const fmt = (d: Date) =>
       )
     }
   </nav>
-
 </Base>
+
+<script is:inline>
+  (() => {
+    // The source link is for one person on one machine. `?obsidian=1` remembers
+    // that this browser is theirs; `?obsidian=0` forgets it again. Everyone else
+    // never sees the link at all.
+    const url = new URL(location.href);
+    const flag = url.searchParams.get('obsidian');
+    if (flag !== null) {
+      if (flag === '0') localStorage.removeItem('obsidian');
+      else localStorage.setItem('obsidian', '1');
+      url.searchParams.delete('obsidian');
+      history.replaceState(null, '', url);
+    }
+    if (localStorage.getItem('obsidian') !== '1') return;
+    for (const el of document.querySelectorAll('[data-obsidian]')) el.hidden = false;
+  })();
+</script>

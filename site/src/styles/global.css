@@ -886,6 +886,20 @@ hr {
   margin-bottom: 1rem;
 }
 
+/* Sits in the date row rather than beside the title: it is a note about where
+   this page came from, not an action the article is offering. */
+.article__source {
+  color: var(--faint);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+}
+
+.article__source:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  text-shadow: var(--emph);
+}
+
 .prose {
   max-width: var(--measure);
 }

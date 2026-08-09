@@ -29,16 +29,38 @@ if (!existsSync(ROOT)) {
   process.exit(1);
 }
 
-const slugs = readdirSync(ROOT).filter((d) => statSync(join(ROOT, d)).isDirectory());
-const known = new Set(slugs);
+// Dotted entries are the vault's, not the blog's — Obsidian plugins drop
+// `.space` folders wherever the user has been looking, and they must not be
+// mistaken for posts.
+const hidden = (f) => f.startsWith('.');
+const slugs = readdirSync(ROOT).filter(
+  (d) => !hidden(d) && statSync(join(ROOT, d)).isDirectory()
+);
+// A folder is `NNN-<slug>`, where the number is chronological filing and the
+// slug alone is the URL. Internal links are written against the URL, so that is
+// what the known-post set holds.
+const PREFIX = /^(\d{3})-/;
+const urlSlug = (dir) => dir.replace(PREFIX, '');
+const known = new Set(slugs.map(urlSlug));
+if (known.size !== slugs.length) {
+  fail('posts', 'two folders share a slug once the index prefix is removed');
+}
 
 let images = 0;
+const order = [];
 
 for (const slug of slugs) {
   const dir = join(ROOT, slug);
-  const file = join(dir, `${slug}.md`);
+  // The markdown file carries the slug without the index. Obsidian will not let
+  // you name a note exactly after the folder it sits in, and the number is a
+  // property of the folder's place in the list, not of the article.
+  const name = urlSlug(slug);
+  const file = join(dir, `${name}.md`);
   const entries = readdirSync(dir);
 
+  if (!PREFIX.test(slug)) {
+    fail(slug, 'folder name must start with a three-digit index, e.g. 099-my-post');
+  }
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) {
     fail(slug, 'folder name is not a lowercase kebab-case slug');
   }
@@ -51,7 +73,7 @@ for (const slug of slugs) {
     fail(slug, `folder holds ${markdown.length} markdown files, expected one: ${markdown.join(', ')}`);
   }
   if (!existsSync(file)) {
-    fail(slug, `${slug}.md is missing — the post file must be named after its folder`);
+    fail(slug, `${name}.md is missing — the post file takes the folder name without its index`);
     continue;
   }
 
@@ -66,9 +88,21 @@ for (const slug of slugs) {
   for (const key of REQUIRED) {
     if (!new RegExp(`^${key}:`, 'm').test(frontmatter)) fail(slug, `frontmatter is missing "${key}"`);
   }
-  if (!/^date: \d{4}-\d{2}-\d{2}$/m.test(frontmatter)) {
-    fail(slug, 'date must be YYYY-MM-DD');
+  // A key present but blank passes the schema and then breaks something further
+  // downstream — an empty topic builds a `/topics/` URL with no segment and
+  // takes the whole build down with it.
+  for (const key of ['title', 'description']) {
+    const value = frontmatter.match(new RegExp(`^${key}: *(.*)$`, 'm'))?.[1] ?? '';
+    if (!value.replace(/["']/g, '').trim()) fail(slug, `"${key}" is empty`);
   }
+  const topics = frontmatter.match(/^topics:\n((?:[ \t]*-.*\n?)*)/m)?.[1] ?? '';
+  for (const [, topic] of topics.matchAll(/^[ \t]*- *(.*)$/gm)) {
+    if (!topic.replace(/["']/g, '').trim()) fail(slug, 'topics holds an empty entry');
+  }
+
+  const date = frontmatter.match(/^date: (\d{4}-\d{2}-\d{2})$/m);
+  if (!date) fail(slug, 'date must be YYYY-MM-DD');
+  else order.push({ slug, n: Number(slug.match(PREFIX)?.[1] ?? 0), date: date[1] });
 
   const cover = frontmatter.match(/^cover: "\.\/(.+)"$/m);
   if (cover && !existsSync(join(dir, cover[1]))) {
@@ -90,7 +124,9 @@ for (const slug of slugs) {
     }
   }
   for (const f of entries) {
-    if (!f.endsWith('.md') && !used.has(f)) warn(slug, `file is not referenced by the post: ${f}`);
+    if (!hidden(f) && !f.endsWith('.md') && !used.has(f)) {
+      warn(slug, `file is not referenced by the post: ${f}`);
+    }
   }
 
   // Internal links must point at a post that exists.
@@ -113,6 +149,18 @@ for (const slug of slugs) {
   }
   if (body.includes('songsnim.github.io/20') || body.includes('velog.io/@thddudwo1313')) {
     warn(slug, 'links to the old blog instead of the local post');
+  }
+}
+
+// The index only means something if it agrees with the dates. A new post gets
+// the next free number, so this catches a backdated one that should have been
+// filed earlier — or a number reused after a folder was deleted.
+order.sort((a, b) => a.n - b.n);
+for (let i = 1; i < order.length; i++) {
+  const [prev, cur] = [order[i - 1], order[i]];
+  if (cur.n === prev.n) fail(cur.slug, `index ${cur.n} is already taken by ${prev.slug}`);
+  else if (cur.date < prev.date) {
+    warn(cur.slug, `dated ${cur.date}, but filed after ${prev.slug} (${prev.date})`);
   }
 }
 

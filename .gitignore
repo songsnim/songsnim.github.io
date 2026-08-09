@@ -5,4 +5,6 @@ site/.astro/
 
 # macOS / editor cruft
 .DS_Store
+# Obsidian's Space plugin leaves one of these in every folder it has opened.
+.space/
 *.sync-conflict-*

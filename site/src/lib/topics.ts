@@ -21,11 +21,12 @@ export type TopicInfo = { topic: string; slug: string; count: number };
 export const NO_TOPIC = 'None';
 
 /**
- * 코테 outnumbers every other topic by roughly five to one, so sorting purely by
- * count would put it first and make the list look like a coding-test blog. It is
- * pinned to the bottom instead — still findable, no longer the headline.
+ * 코딩테스트 outnumbers every other topic by roughly three to one, so sorting
+ * purely by count would put it first and make the list look like a coding-test
+ * blog. It is pinned to the bottom instead — still findable, no longer the
+ * headline.
  */
-const SINK = ['코테'];
+const SINK = ['코딩테스트'];
 const sinkRank = (topic: string) => (SINK.includes(topic) ? 1 : 0);
 
 export async function getTopics(): Promise<TopicInfo[]> {
