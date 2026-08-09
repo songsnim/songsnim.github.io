@@ -3,20 +3,96 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PostList from '../../components/PostList.astro';
 import TopicRail from '../../components/TopicRail.astro';
+// Inlined so the glass takes the theme — and the focus colour — from currentColor.
+import searchIcon from '../../../public/icons/search.svg?raw';
 
 const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime()
 );
 ---
 
-<Base title="Blog" description={`Songsnim이 쓴 글 ${posts.length}편 전체 목록.`}>
+<Base title="Blog" description={`Songsnim이 쓴 글 ${posts.length}편을 모아뒀어요.`}>
   <h1 class="lede">Blog</h1>
-  <p class="sub">{posts.length}편. 최신순.</p>
+
+  <search class="find">
+    <div class="find__field">
+      <Fragment set:html={searchIcon} />
+      <input
+        class="find__input"
+        id="find"
+        type="search"
+        autocomplete="off"
+        placeholder={`${posts.length}편에서 검색`}
+        aria-label="글 검색"
+      />
+    </div>
+    <p class="find__status" id="find-status" role="status" aria-live="polite"></p>
+  </search>
 
   <div class="withrail">
     <TopicRail />
     <div class="withrail__main">
-      <PostList posts={posts} />
+      <PostList posts={posts} searchable />
     </div>
   </div>
 </Base>
+
+<script is:inline>
+  (() => {
+    const input = document.getElementById('find');
+    const status = document.getElementById('find-status');
+    const rows = [...document.querySelectorAll('.row[data-q]')];
+    const groups = [...document.querySelectorAll('.group')];
+    if (!input || !rows.length) return;
+
+    const norm = (s) => s.toLowerCase().replace(/\s+/g, '');
+
+    const run = (raw) => {
+      // Every word must match, in any order — two words are a narrowing, not a phrase.
+      const terms = raw.trim().split(/\s+/).filter(Boolean).map(norm);
+      let hits = 0;
+
+      for (const row of rows) {
+        const hit = terms.every((t) => row.dataset.q.includes(t));
+        row.hidden = !hit;
+        if (hit) hits++;
+      }
+
+      // A year heading with nothing under it is a lie, and so is its count.
+      for (const g of groups) {
+        const shown = g.querySelectorAll('.row:not([hidden])').length;
+        g.hidden = shown === 0;
+        const count = g.querySelector('.year__count');
+        if (count) count.textContent = `${terms.length ? shown : count.dataset.count}편`;
+      }
+
+      status.textContent = !terms.length ? '' : hits ? `${hits}편` : '찾은 글이 없어요.';
+    };
+
+    let timer;
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        run(input.value);
+        const url = new URL(location.href);
+        if (input.value.trim()) url.searchParams.set('q', input.value.trim());
+        else url.searchParams.delete('q');
+        history.replaceState(null, '', url);
+      }, 90);
+    });
+
+    // Escape clears without reaching for the mouse.
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && input.value) {
+        input.value = '';
+        run('');
+      }
+    });
+
+    const q = new URL(location.href).searchParams.get('q');
+    if (q) {
+      input.value = q;
+      run(q);
+    }
+  })();
+</script>

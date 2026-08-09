@@ -9,7 +9,7 @@ const topics = await getTopics();
 const real = topics.filter(({ topic }) => topic !== NO_TOPIC).length;
 ---
 
-<Base title="Topics" description={`${real}개 주제로 분류된 ${posts.length}편의 글.`}>
+<Base title="Topics" description={`${real}개 주제로 ${posts.length}편의 글을 나눠뒀어요.`}>
   <h1 class="lede">Topics</h1>
   <p class="sub">{real}개 주제, {posts.length}편의 글</p>
 

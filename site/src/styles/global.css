@@ -47,6 +47,16 @@
 
   --focus: #3f6b25;
 
+  /* Dark ink on a bright ground reads thinner than the reverse, so light mode
+     reinforces its accents: real weight where that costs no reflow, half a
+     pixel of the accent's own colour where it would. Dark mode zeroes all of
+     it — there the accent is already the brightest thing on screen. */
+  --emph: 0 0 0.012em currentColor;
+  --emph-glow: drop-shadow(0 0 0.35px currentColor);
+  --accent-bar: 3px;
+  --accent-edge: 1px;
+  --smoothing: auto;
+
   --display: 'NanumSquare Neo', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
   --body: 'NanumSquare Neo', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
     'Malgun Gothic', system-ui, sans-serif;
@@ -68,9 +78,11 @@
 
   --measure: 68ch;
   --shell: 736px; /* fixed, so growing the type does not widen the page */
-  /* 736 + 2 × (180 + 52) = 1200, which is why the rails wait for 76rem. */
-  --rail: 180px;
-  --rail-gap: 52px;
+  /* The rails sit in the margin left over after the shell, which is
+     (100vw - --shell) / 2 + --gutter on each side. These are the compact values
+     that fit a 1056px window; 76rem and up gets the roomier pair below. */
+  --rail: 150px;
+  --rail-gap: 40px;
   --gutter: clamp(1.25rem, 5vw, 3rem);
 
   color-scheme: light;
@@ -95,6 +107,11 @@
     --band-ink: #9198a3;
     --focus: #e6b450;
     --select: #e6b4504d;
+    --emph: none;
+    --emph-glow: none;
+    --accent-bar: 2px;
+    --accent-edge: 0px;
+    --smoothing: antialiased;
     color-scheme: dark;
   }
 }
@@ -116,6 +133,11 @@
   --band-ink: #9198a3;
   --focus: #e6b450;
   --select: #e6b4504d;
+  --emph: none;
+  --emph-glow: none;
+  --accent-bar: 2px;
+  --accent-edge: 0px;
+  --smoothing: antialiased;
   color-scheme: dark;
 }
 
@@ -145,7 +167,7 @@ body {
   font-size: 1rem;
   line-height: 1.75;
   letter-spacing: -0.003em;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: var(--smoothing);
 }
 
 a {
@@ -220,6 +242,7 @@ hr {
 
 .runninghead__nav a:hover {
   color: var(--accent);
+  text-shadow: var(--emph);
 }
 
 .themetoggle {
@@ -234,6 +257,7 @@ hr {
 
 .themetoggle:hover {
   color: var(--accent);
+  text-shadow: var(--emph);
 }
 
 /* Four nav items plus the toggle no longer fit a phone at the desktop gap. */
@@ -337,6 +361,7 @@ hr {
 
 .masthead__link:hover {
   color: var(--accent);
+  filter: var(--emph-glow);
 }
 
 /* One sentence, one voice — it sits at the same level as the role line above. */
@@ -419,6 +444,7 @@ hr {
 
 .section__more:hover {
   color: var(--accent);
+  text-shadow: var(--emph);
 }
 
 /* ── post list ──────────────────────────────────────────────────────── */
@@ -474,7 +500,7 @@ hr {
   left: -0.75rem;
   top: 0.875rem;
   bottom: 0.875rem;
-  width: 2px;
+  width: var(--accent-bar);
   background: var(--accent);
   opacity: 0;
   transition: opacity 140ms ease;
@@ -504,6 +530,7 @@ hr {
 
 .row__link:hover .row__title {
   color: var(--accent);
+  text-shadow: var(--emph);
 }
 
 .row__desc {
@@ -554,6 +581,8 @@ hr {
 .topic:hover {
   border-color: var(--accent);
   color: var(--accent);
+  text-shadow: var(--emph);
+  box-shadow: inset 0 0 0 var(--accent-edge) var(--accent);
 }
 
 .topic__n {
@@ -571,7 +600,91 @@ hr {
 .topic[aria-current='page'] {
   border-color: var(--accent);
   color: var(--accent);
+  text-shadow: var(--emph);
+  box-shadow: inset 0 0 0 var(--accent-edge) var(--accent);
   background: var(--accent-soft);
+}
+
+/* ── search ─────────────────────────────────────────────────────────────
+   A glass and a rule. No box, because a box would be the loudest object on a
+   page whose whole argument is that the titles come first. */
+.find {
+  display: block;
+  margin: var(--space-lg) 0 var(--space-2xl);
+}
+
+.find__field {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.55rem;
+  transition: border-color 140ms ease;
+}
+
+.find__field:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 var(--accent-edge) 0 var(--accent);
+}
+
+.find__field svg {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+  color: var(--faint);
+  transition: color 140ms ease;
+}
+
+.find__field:focus-within svg {
+  color: var(--accent);
+  filter: var(--emph-glow);
+}
+
+.find__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.find__input::placeholder {
+  color: var(--faint);
+}
+
+/* The rule and the glass turning accent is the focus indicator — a ring on top
+   of them would draw a box back onto the field. */
+.find__input:focus {
+  outline: none;
+}
+
+.find__input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 0.8rem;
+  height: 0.8rem;
+  cursor: pointer;
+  background: currentColor;
+  color: var(--faint);
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round'%3E%3Cline x1='5' y1='5' x2='19' y2='19'/%3E%3Cline x1='19' y1='5' x2='5' y2='19'/%3E%3C/svg%3E")
+    center / contain no-repeat;
+}
+
+.find__input::-webkit-search-cancel-button:hover {
+  color: var(--accent);
+}
+
+/* Reserves its own line, so results do not jump when the count appears. */
+.find__status {
+  min-height: 1.1em;
+  margin: var(--space-sm) 0 0;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--faint);
 }
 
 /* ── side rails ─────────────────────────────────────────────────────────
@@ -610,6 +723,8 @@ hr {
 .rail__item:hover {
   border-color: var(--accent);
   color: var(--accent);
+  text-shadow: var(--emph);
+  box-shadow: inset 0 0 0 var(--accent-edge) var(--accent);
 }
 
 .rail__n {
@@ -627,7 +742,16 @@ hr {
   display: none;
 }
 
+/* Below this the margin cannot hold a rail: the topic list falls back to a chip
+   row above the posts, and the outline steps aside. */
 @media (min-width: 76rem) {
+  :root {
+    --rail: 180px;
+    --rail-gap: 52px;
+  }
+}
+
+@media (min-width: 66rem) {
   .withrail {
     display: grid;
     grid-template-columns: var(--rail) 1fr;
@@ -663,12 +787,13 @@ hr {
     font-size: 0.8125rem;
   }
 
-  .rail__item:hover {
-    color: var(--accent);
-  }
-
+  /* In rail form the name is pinned left and the count right, so real weight
+     costs nothing — no sibling has anywhere to be pushed. */
+  .rail__item:hover,
   .rail__item[aria-current='page'] {
     color: var(--accent);
+    font-weight: 700;
+    box-shadow: none;
   }
 
   .withoutline {
@@ -712,12 +837,16 @@ hr {
     font-size: 0.75rem;
   }
 
+  /* Real weight here would re-wrap a two-line entry and jump the rail, so the
+     emphasis is optical only. */
   .outline__item:hover {
     color: var(--accent);
+    text-shadow: var(--emph);
   }
 
   .outline__item[aria-current] {
     color: var(--ink);
+    text-shadow: var(--emph);
   }
 
   /* The bar replaces the rule for the length of the current entry, so the reader
@@ -728,7 +857,7 @@ hr {
     left: calc(-1 * var(--space-base) - 1px);
     top: 0.3rem;
     bottom: 0.3rem;
-    width: 2px;
+    width: var(--accent-bar);
     background: var(--accent);
   }
 }
@@ -951,6 +1080,7 @@ hr {
 
 .pager__item:hover .pager__title {
   color: var(--accent);
+  text-shadow: var(--emph);
 }
 
 /* Band alternation is DESIGN.md's structural device. A one-column blog has

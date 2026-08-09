@@ -4,9 +4,20 @@ import type { CollectionEntry } from 'astro:content';
 interface Props {
   posts: CollectionEntry<'posts'>[];
   groupByYear?: boolean;
+  /** Emits the haystack the search box filters on. Off elsewhere, so the short
+   *  lists don't carry a copy of their own text. */
+  searchable?: boolean;
 }
 
-const { posts, groupByYear = true } = Astro.props;
+const { posts, groupByYear = true, searchable = false } = Astro.props;
+
+// Spaces are dropped so "경사 하강" still finds 경사하강법 — Korean compounds are
+// written both ways and a reader should not have to guess which.
+const haystack = (p: CollectionEntry<'posts'>) =>
+  [p.data.title, p.data.description, ...p.data.topics, p.data.date.getFullYear()]
+    .join(' ')
+    .toLowerCase()
+    .replace(/\s+/g, '');
 
 const fmt = (d: Date) =>
   `${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
@@ -27,16 +38,18 @@ const groups = groupByYear
 
 {
   groups.map(([year, items]) => (
-    <section>
+    <section class="group">
       {year !== null && (
         <div class="year">
           <span class="year__n">{year}</span>
-          <span class="year__count">{items.length}편</span>
+          <span class="year__count" data-count={items.length}>
+            {items.length}편
+          </span>
         </div>
       )}
       <ul class="list">
         {items.map((p) => (
-          <li class="row">
+          <li class="row" data-q={searchable ? haystack(p) : undefined}>
             <a class="row__link" href={`/posts/${p.id}`}>
               <time class="row__date" datetime={p.data.date.toISOString().slice(0, 10)}>
                 {year === null ? fmtFull(p.data.date) : fmt(p.data.date)}

@@ -28,15 +28,11 @@ const none = topic === NO_TOPIC;
 <Base
   title={none ? '주제 없는 글' : `${topic}`}
   description={none
-    ? `아직 주제가 붙지 않은 글 ${posts.length}편.`
-    : `${topic} 주제의 글 ${posts.length}편.`}
+    ? `아직 주제가 붙지 않은 글 ${posts.length}편이에요.`
+    : `${topic} 주제의 글 ${posts.length}편이에요.`}
 >
   <h1 class="lede">{topic}</h1>
-  <p class="sub">
-    {none ? '아직 주제가 붙지 않은 글' : '이 주제의 글'} {posts.length}편. <a href="/topics"
-      >전체 주제 보기</a
-    >
-  </p>
+  <p class="sub"><a href="/topics">전체 topics 보기</a></p>
 
   <PostList posts={posts} />
 </Base>
