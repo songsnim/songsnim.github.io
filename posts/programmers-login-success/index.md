@@ -2,9 +2,7 @@
 title: "[프로그래머스] 로그인 성공?"
 date: 2023-06-22
 tags:
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '로그인 성공?' 문제 풀이."
 cover: "./explanation-1.png"
 draft: false

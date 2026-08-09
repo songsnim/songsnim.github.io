@@ -3,10 +3,6 @@ title: "백준 미세먼지 안녕"
 date: 2023-06-28
 tags:
   - "코테"
-  - "python"
-  - "구현"
-  - "백준"
-  - "삼성코테"
 description: "백준 '미세먼지 안녕' 문제 풀이."
 cover: "./problem-figure-1.png"
 draft: false

@@ -2,10 +2,7 @@
 title: "[프로그래머스] 전화번호목록"
 date: 2023-06-20
 tags:
-  - "hash"
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '전화번호목록' 문제 풀이."
 cover: "./explanation-1.png"
 draft: false

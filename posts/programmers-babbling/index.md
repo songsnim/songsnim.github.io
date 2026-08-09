@@ -2,9 +2,7 @@
 title: "[프로그래머스] 옹알이"
 date: 2023-06-21
 tags:
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '옹알이' 문제 풀이."
 draft: false
 ---

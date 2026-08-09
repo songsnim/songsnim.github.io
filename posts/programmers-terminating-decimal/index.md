@@ -2,10 +2,7 @@
 title: "[프로그래머스] 유한소수 판별하기"
 date: 2023-06-21
 tags:
-  - "math"
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '유한소수 판별하기' 문제 풀이."
 draft: false
 ---

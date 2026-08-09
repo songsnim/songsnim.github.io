@@ -2,9 +2,7 @@
 title: "[프로그래머스] 숫자 짝꿍"
 date: 2023-06-22
 tags:
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '숫자 짝꿍' 문제 풀이."
 cover: "./explanation-1.png"
 draft: false

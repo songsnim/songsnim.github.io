@@ -2,8 +2,6 @@
 title: "[Softeer] 우물 안 개구리"
 date: 2023-07-06
 tags:
-  - "Softeer"
-  - "python"
   - "코테"
 description: "Softeer '우물 안 개구리' 문제 풀이."
 draft: false

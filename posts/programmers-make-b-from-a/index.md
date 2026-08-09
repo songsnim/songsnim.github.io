@@ -2,9 +2,7 @@
 title: "[프로그래머스] A로 B 만들기"
 date: 2023-06-17
 tags:
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 'A로 B 만들기' 문제 풀이."
 draft: false
 ---

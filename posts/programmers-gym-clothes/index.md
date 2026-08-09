@@ -2,10 +2,7 @@
 title: "[프로그래머스] 체육복"
 date: 2023-06-20
 tags:
-  - "greedy"
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '체육복' 문제 풀이."
 cover: "./explanation-1.png"
 draft: false

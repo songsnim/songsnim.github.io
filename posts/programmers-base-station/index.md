@@ -2,9 +2,7 @@
 title: "[프로그래머스] 기지국설치"
 date: 2023-06-23
 tags:
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '기지국설치' 문제 풀이."
 cover: "./problem-figure-1.png"
 draft: false

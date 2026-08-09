@@ -3,9 +3,6 @@ title: "백준 신입 사원"
 date: 2023-06-27
 tags:
   - "코테"
-  - "greedy"
-  - "python"
-  - "백준"
 description: "백준 '신입 사원' 문제 풀이."
 draft: false
 ---

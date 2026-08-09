@@ -2,9 +2,6 @@
 title: "[백준] 회의실 배정"
 date: 2023-06-25
 tags:
-  - "python"
-  - "그리디"
-  - "백준"
   - "코테"
 description: "백준 '회의실 배정' 문제 풀이."
 draft: false

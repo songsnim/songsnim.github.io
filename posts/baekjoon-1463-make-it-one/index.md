@@ -3,9 +3,6 @@ title: "백준 1로 만들기"
 date: 2023-06-30
 tags:
   - "코테"
-  - "DP"
-  - "python"
-  - "백준"
 description: "백준 '1로 만들기' 문제 풀이."
 draft: false
 ---

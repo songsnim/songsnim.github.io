@@ -2,9 +2,6 @@
 title: "[백준] 단지번호 붙이기"
 date: 2023-06-30
 tags:
-  - "DFS"
-  - "python"
-  - "백준"
   - "코테"
 description: "백준 '단지번호 붙이기' 문제 풀이."
 draft: false

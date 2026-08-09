@@ -2,10 +2,7 @@
 title: "[프로그래머스] 주사위의 개수"
 date: 2023-06-20
 tags:
-  - "math"
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '주사위의 개수' 문제 풀이."
 draft: false
 ---

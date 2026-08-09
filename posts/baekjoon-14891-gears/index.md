@@ -3,9 +3,6 @@ title: "백준 톱니바퀴"
 date: 2023-06-25
 tags:
   - "코테"
-  - "python"
-  - "구현"
-  - "백준"
 description: "백준 '톱니바퀴' 문제 풀이."
 cover: "./problem-figure-1.png"
 draft: false

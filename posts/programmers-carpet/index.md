@@ -2,10 +2,7 @@
 title: "[프로그래머스] 카펫"
 date: 2023-06-19
 tags:
-  - "python"
-  - "완전탐색"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '카펫' 문제 풀이."
 cover: "./explanation-1.png"
 draft: false

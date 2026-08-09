@@ -2,10 +2,7 @@
 title: "[프로그래머스] 완주하지 못한 선수"
 date: 2023-06-21
 tags:
-  - "hash"
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '완주하지 못한 선수' 문제 풀이."
 cover: "./explanation-1.png"
 draft: false

@@ -2,9 +2,7 @@
 title: "[프로그래머스] 한 번만 등장한 문자"
 date: 2023-06-18
 tags:
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '한 번만 등장한 문자' 문제 풀이."
 cover: "./explanation-1.png"
 draft: false

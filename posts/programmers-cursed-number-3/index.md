@@ -2,9 +2,7 @@
 title: "[프로그래머스] 저주의 숫자 3"
 date: 2023-06-21
 tags:
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '저주의 숫자 3' 문제 풀이."
 cover: "./explanation-1.png"
 draft: false

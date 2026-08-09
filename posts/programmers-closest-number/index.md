@@ -2,9 +2,7 @@
 title: "[프로그래머스] 가까운 수"
 date: 2023-06-23
 tags:
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '가까운 수' 문제 풀이."
 cover: "./explanation-1.png"
 draft: false

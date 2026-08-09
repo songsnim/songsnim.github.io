@@ -3,8 +3,6 @@ title: "백준 치킨 배달"
 date: 2023-06-26
 tags:
   - "코테"
-  - "python"
-  - "프로그래머스"
 description: "백준 '치킨 배달' 문제 풀이."
 draft: false
 ---

@@ -3,11 +3,6 @@ title: "백준 청소년 상어"
 date: 2023-06-26
 tags:
   - "코테"
-  - "DFS"
-  - "python"
-  - "백준"
-  - "삼성코테"
-  - "프로그래머스"
 description: "백준 '청소년 상어' 문제 풀이."
 cover: "./problem-figure-1.png"
 draft: false

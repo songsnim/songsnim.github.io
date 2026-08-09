@@ -2,9 +2,6 @@
 title: "[백준] 드래곤 커브"
 date: 2023-06-29
 tags:
-  - "python"
-  - "구현"
-  - "백준"
   - "코테"
 description: "백준 '드래곤 커브' 문제 풀이."
 cover: "./problem-figure-1.png"

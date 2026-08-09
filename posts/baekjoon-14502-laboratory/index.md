@@ -3,11 +3,6 @@ title: "백준 연구소"
 date: 2023-06-27
 tags:
   - "코테"
-  - "BFS"
-  - "python"
-  - "구현"
-  - "백준"
-  - "삼성코테"
 description: "백준 '연구소' 문제 풀이."
 draft: false
 ---

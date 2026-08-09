@@ -2,10 +2,7 @@
 title: "[프로그래머스] 다트게임"
 date: 2023-06-23
 tags:
-  - "python"
-  - "정규식"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 '다트게임' 문제 풀이."
 draft: false
 ---

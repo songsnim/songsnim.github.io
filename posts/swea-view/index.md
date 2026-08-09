@@ -2,8 +2,6 @@
 title: "[SWEA] 조망권 확보"
 date: 2023-06-24
 tags:
-  - "python"
-  - "삼성코테"
   - "코테"
 description: "SWEA '조망권 확보' 문제 풀이."
 draft: false

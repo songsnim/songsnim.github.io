@@ -2,10 +2,7 @@
 title: "[프로그래머스] N개의 최소공배수"
 date: 2023-06-17
 tags:
-  - "math"
-  - "python"
   - "코테"
-  - "프로그래머스"
 description: "프로그래머스 'N개의 최소공배수' 문제 풀이."
 draft: false
 ---
