@@ -21,6 +21,12 @@ const year = new Date().getFullYear();
     <title>{full}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {/* The 32px copy is what the browser tab actually shows; the full-size
+        character is offered too so high-DPI tabs and bookmarks have something to
+        scale from. Both are generated from public/character.png. */}
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/character.png" sizes="420x420" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="alternate" type="application/rss+xml" title={site} href="/rss.xml" />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={full} />
