@@ -1,7 +1,7 @@
 ---
 title: "[python] 타입 힌트 시 따옴표를 쓰는 이유"
 date: 2025-09-11
-tags:
+topics:
   - "Dev"
 description: "순환 참조와 자기 클래스 타입힌트에서 따옴표(전방 참조)를 쓰는 이유."
 draft: false

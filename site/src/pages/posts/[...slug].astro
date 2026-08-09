@@ -30,9 +30,9 @@ const fmt = (d: Date) =>
         {post.data.updated && <span>수정 {fmt(post.data.updated)}</span>}
       </div>
       {
-        post.data.tags.length > 0 && (
+        post.data.topics.length > 0 && (
           <ul class="tags">
-            {post.data.tags.map((t) => (
+            {post.data.topics.map((t) => (
               <li>
                 <a class="tag" href={`/tags/${tagSlug(t)}`}>
                   {t}

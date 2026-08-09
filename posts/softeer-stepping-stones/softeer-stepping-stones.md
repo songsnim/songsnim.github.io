@@ -1,7 +1,7 @@
 ---
 title: "[Softeer] 징검다리"
 date: 2023-07-07
-tags:
+topics:
   - "코테"
 description: "Softeer '징검다리' 문제 풀이."
 draft: false

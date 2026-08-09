@@ -1,7 +1,7 @@
 ---
 title: "[Softeer] 조립라인"
 date: 2023-07-07
-tags:
+topics:
   - "코테"
 description: "Softeer '조립라인' 문제 풀이."
 draft: false

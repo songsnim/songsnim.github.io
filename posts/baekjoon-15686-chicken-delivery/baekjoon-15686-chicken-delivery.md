@@ -1,7 +1,7 @@
 ---
 title: "백준 치킨 배달"
 date: 2023-06-26
-tags:
+topics:
   - "코테"
 description: "백준 '치킨 배달' 문제 풀이."
 draft: false

@@ -1,7 +1,7 @@
 ---
 title: "[ML] BatchNorm이 학습을 안정화시키는 진짜 이유"
 date: 2025-11-04
-tags:
+topics:
   - "ML"
 description: "BatchNorm의 효과가 Internal Covariate Shift 제거 때문이 아님을 짚고 진짜 원인을 찾는다."
 cover: "./cover.png"

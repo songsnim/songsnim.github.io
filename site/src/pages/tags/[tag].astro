@@ -13,7 +13,7 @@ export const getStaticPaths = (async () => {
     props: {
       tag,
       posts: posts
-        .filter((p) => (tag === UNTAGGED ? p.data.tags.length === 0 : p.data.tags.includes(tag)))
+        .filter((p) => (tag === UNTAGGED ? p.data.topics.length === 0 : p.data.topics.includes(tag)))
         .sort((a, b) => b.data.date.getTime() - a.data.date.getTime()),
     },
   }));

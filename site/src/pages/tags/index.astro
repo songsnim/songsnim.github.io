@@ -9,8 +9,8 @@ const tags = await getTags();
 const real = tags.filter(({ tag }) => tag !== UNTAGGED).length;
 ---
 
-<Base title="태그" description={`${real}개 태그로 분류된 ${posts.length}편의 글.`}>
-  <h1 class="lede">태그</h1>
+<Base title="Tag" description={`${real}개 태그로 분류된 ${posts.length}편의 글.`}>
+  <h1 class="lede">Tag</h1>
   <p class="sub">{posts.length}편의 글이 {real}개 태그에 걸쳐 있다.</p>
 
   <ul class="tags">

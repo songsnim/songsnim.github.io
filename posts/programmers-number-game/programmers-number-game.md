@@ -1,7 +1,7 @@
 ---
 title: "[프로그래머스] 숫자 게임"
 date: 2023-06-22
-tags:
+topics:
   - "코테"
 description: "프로그래머스 '숫자 게임' 문제 풀이."
 cover: "./explanation-1.png"

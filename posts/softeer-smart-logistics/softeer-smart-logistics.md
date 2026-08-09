@@ -1,7 +1,7 @@
 ---
 title: "[Softeer] 스마트물류"
 date: 2023-07-06
-tags:
+topics:
   - "코테"
 description: "Softeer '스마트물류' 문제 풀이."
 draft: false

@@ -1,7 +1,7 @@
 ---
 title: "Python eval()과 대체재"
 date: 2023-06-21
-tags:
+topics:
   - "Python"
 description: "eval()의 동작과 보안 위험, 그리고 안전한 대체재."
 draft: false

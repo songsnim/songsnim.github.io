@@ -2,7 +2,6 @@
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import PostList from '../components/PostList.astro';
-import Distribution from '../components/Distribution.astro';
 
 const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime()
@@ -18,8 +17,6 @@ const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
     Machine Learning Engineer. ML 이론을 수식으로 유도하고, 운영 중에 부딪힌 문제와 그때의 판단
     근거를 기록한다.
   </p>
-
-  <Distribution posts={posts} />
 
   <PostList posts={posts} />
 </Base>

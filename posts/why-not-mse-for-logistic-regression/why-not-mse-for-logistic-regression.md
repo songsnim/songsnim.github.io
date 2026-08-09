@@ -1,7 +1,7 @@
 ---
 title: "[ML] MSE를 Logistic Regression의 Loss로 사용하지 않는 이유"
 date: 2025-10-09
-tags:
+topics:
   - "ML"
 description: "Logistic Regression에서 MSE가 아닌 BCE를 쓰는 이유를 볼록성과 gradient로 설명한다."
 cover: "./loss-derivative-y0.png"

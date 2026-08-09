@@ -1,7 +1,7 @@
 ---
 title: "[Softeer] 바이러스"
 date: 2023-07-05
-tags:
+topics:
   - "코테"
 description: "Softeer '바이러스' 문제 풀이."
 draft: false

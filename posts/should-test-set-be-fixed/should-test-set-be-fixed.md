@@ -1,7 +1,7 @@
 ---
 title: "[ML] test set은 고정되어야 하는가?"
 date: 2025-08-30
-tags:
+topics:
   - "ML"
 description: "data drift가 발생하는 production 환경에서 test set을 고정해야 하는지 따져본다."
 draft: false

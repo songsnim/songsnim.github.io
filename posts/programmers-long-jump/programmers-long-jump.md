@@ -1,7 +1,7 @@
 ---
 title: "[프로그래머스] 멀리 뛰기"
 date: 2023-06-22
-tags:
+topics:
   - "코테"
 description: "프로그래머스 '멀리 뛰기' 문제 풀이."
 draft: false

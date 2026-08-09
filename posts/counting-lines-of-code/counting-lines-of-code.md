@@ -1,7 +1,7 @@
 ---
 title: "프로젝트 코드 줄 수 세는 법"
 date: 2023-11-26
-tags:
+topics:
   - "Dev"
 description: "shell 명령과 도구로 프로젝트 전체 코드 줄 수를 세는 방법."
 draft: false

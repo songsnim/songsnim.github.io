@@ -1,7 +1,7 @@
 ---
 title: "[프로그래머스] 치킨 쿠폰"
 date: 2023-06-19
-tags:
+topics:
   - "코테"
 description: "프로그래머스 '치킨 쿠폰' 문제 풀이."
 draft: false

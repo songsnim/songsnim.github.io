@@ -1,7 +1,7 @@
 ---
 title: "[SWEA] 백만장자 프로젝트"
 date: 2023-06-24
-tags:
+topics:
   - "코테"
 description: "SWEA '백만장자 프로젝트' 문제 풀이."
 draft: false

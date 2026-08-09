@@ -1,7 +1,7 @@
 ---
 title: "[ML] 경사하강법 수식으로 바닥부터 구현하기"
 date: 2025-10-04
-tags:
+topics:
   - "ML"
 description: "2층 신경망을 예로 경사하강법을 수식으로 전개하고 코드로 구현한다."
 draft: false

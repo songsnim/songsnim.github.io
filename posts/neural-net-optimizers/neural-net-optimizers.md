@@ -1,7 +1,7 @@
 ---
 title: "[ML] Neural Net Optimizer 파헤치기"
 date: 2025-10-10
-tags:
+topics:
   - "ML"
 description: "SGD의 문제점에서 출발해 Momentum, RMSProp, Adam으로 이어지는 optimizer의 발전."
 draft: false

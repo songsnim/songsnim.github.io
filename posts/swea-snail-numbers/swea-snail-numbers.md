@@ -1,7 +1,7 @@
 ---
 title: "[SWEA] 달팽이 숫자"
 date: 2023-06-29
-tags:
+topics:
   - "코테"
 description: "SWEA '달팽이 숫자' 문제 풀이."
 draft: false

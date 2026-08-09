@@ -1,7 +1,7 @@
 ---
 title: "[ML] PCA(주성분 분석)"
 date: 2025-10-07
-tags:
+topics:
   - "ML"
 description: "차원 축소 기법 PCA가 무엇이며 왜, 어떻게 쓰는지 정리한다."
 draft: false

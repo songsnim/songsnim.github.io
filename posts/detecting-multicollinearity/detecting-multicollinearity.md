@@ -1,7 +1,7 @@
 ---
 title: "[ML] 다중공선성을 탐지하는 법 "
 date: 2025-10-14
-tags:
+topics:
   - "ML"
 description: "다중공선성이 회귀 모델에 미치는 악영향과 VIF 기반 탐지법."
 draft: false

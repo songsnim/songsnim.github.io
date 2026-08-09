@@ -1,7 +1,7 @@
 ---
 title: "[프로그래머스] 콜라 문제"
 date: 2023-06-18
-tags:
+topics:
   - "코테"
 description: "프로그래머스 '콜라 문제' 문제 풀이."
 cover: "./explanation-1.png"

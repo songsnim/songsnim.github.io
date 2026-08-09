@@ -1,7 +1,7 @@
 ---
 title: "[백준] 로봇청소기"
 date: 2023-06-28
-tags:
+topics:
   - "코테"
 description: "백준 '로봇청소기' 문제 풀이."
 draft: false

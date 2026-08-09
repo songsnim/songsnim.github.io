@@ -1,7 +1,7 @@
 ---
 title: "소프트웨어 테스트의 종류"
 date: 2026-08-06
-tags:
+topics:
   - "Engineering"
 description: "단위·통합·E2E 등 소프트웨어 테스트의 종류와 각각이 보장하는 것을 정리한다."
 draft: false

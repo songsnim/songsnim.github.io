@@ -29,13 +29,17 @@ put drafts and scratch notes elsewhere in the vault, or mark them `draft: true`.
    ---
    title: "글 제목"
    date: 2026-08-09
-   tags:
+   topics:
      - "ML"
    description: "목록과 검색결과에 노출되는 한 줄 요약."
    cover: "./first-image.png" # optional
    draft: false
    ---
    ```
+
+   Blog tags live under `topics`, not `tags`. Obsidian reads `tags` into the vault's own
+   tag pane, so keeping the keys apart stops vault tags from reaching the site and site
+   tags from cluttering the vault.
 
 3. Write. `$...$` and `$$...$$` render as math; leave a blank line around every `$$` block.
 4. Publish with Obsidian Git: **Commit and push**. GitHub Actions validates the posts,

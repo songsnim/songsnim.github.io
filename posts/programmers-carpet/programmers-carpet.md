@@ -1,7 +1,7 @@
 ---
 title: "[프로그래머스] 카펫"
 date: 2023-06-19
-tags:
+topics:
   - "코테"
 description: "프로그래머스 '카펫' 문제 풀이."
 cover: "./explanation-1.png"

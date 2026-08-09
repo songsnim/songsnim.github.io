@@ -15,7 +15,10 @@ const posts = defineCollection({
     title: z.string(),
     date: z.coerce.date(),
     updated: z.coerce.date().optional(),
-    tags: z.array(z.string()).default([]),
+    // `topics`, not `tags`: Obsidian claims the `tags` frontmatter key for the
+    // vault's own tag pane, so a blog tag would show up there and a vault tag
+    // would show up on the site. Separate keys keep the two systems apart.
+    topics: z.array(z.string()).default([]),
     description: z.string(),
     cover: z.string().optional(),
     draft: z.boolean().default(false),

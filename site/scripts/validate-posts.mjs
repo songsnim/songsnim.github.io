@@ -17,7 +17,7 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../posts');
-const REQUIRED = ['title', 'date', 'tags', 'description', 'draft'];
+const REQUIRED = ['title', 'date', 'topics', 'description', 'draft'];
 
 const errors = [];
 const warnings = [];

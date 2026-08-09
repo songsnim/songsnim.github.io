@@ -1,7 +1,7 @@
 ---
 title: "[백준] 퇴사"
 date: 2023-06-25
-tags:
+topics:
   - "코테"
 description: "백준 '퇴사' 문제 풀이."
 cover: "./explanation-1.png"

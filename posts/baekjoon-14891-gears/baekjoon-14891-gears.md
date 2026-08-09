@@ -1,7 +1,7 @@
 ---
 title: "백준 톱니바퀴"
 date: 2023-06-25
-tags:
+topics:
   - "코테"
 description: "백준 '톱니바퀴' 문제 풀이."
 cover: "./problem-figure-1.png"

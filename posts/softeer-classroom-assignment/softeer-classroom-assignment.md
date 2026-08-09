@@ -1,7 +1,7 @@
 ---
 title: "[Softeer] 강의실 배정"
 date: 2023-07-06
-tags:
+topics:
   - "코테"
 description: "Softeer '강의실 배정' 문제 풀이."
 draft: false

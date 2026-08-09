@@ -1,7 +1,7 @@
 ---
 title: "[ML] MAP관점에서 regularization 바라보기"
 date: 2025-11-02
-tags:
+topics:
   - "ML"
 description: "L1·L2 규제를 MAP 추정의 사전분포로 해석한다."
 draft: false

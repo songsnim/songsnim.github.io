@@ -1,7 +1,7 @@
 ---
 title: "포스트모템: 위기를 기회로"
 date: 2026-08-04
-tags:
+topics:
   - "Ops"
 description: "장애를 범인 색출이 아닌 학습으로 전환하는 비난 없는 포스트모템."
 draft: false

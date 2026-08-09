@@ -1,7 +1,7 @@
 ---
 title: "[SWEA] 최빈수 구하기"
 date: 2023-06-24
-tags:
+topics:
   - "코테"
 description: "SWEA '최빈수 구하기' 문제 풀이."
 draft: false

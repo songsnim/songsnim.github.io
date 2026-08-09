@@ -1,7 +1,7 @@
 ---
 title: "백준 연구소"
 date: 2023-06-27
-tags:
+topics:
   - "코테"
 description: "백준 '연구소' 문제 풀이."
 draft: false

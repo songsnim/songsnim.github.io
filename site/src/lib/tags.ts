@@ -20,7 +20,7 @@ export const UNTAGGED = 'None';
 export async function getTags(): Promise<TagInfo[]> {
   const posts = await getCollection('posts', ({ data }) => !data.draft);
   const counts = new Map<string, number>();
-  for (const p of posts) for (const t of p.data.tags) counts.set(t, (counts.get(t) ?? 0) + 1);
+  for (const p of posts) for (const t of p.data.topics) counts.set(t, (counts.get(t) ?? 0) + 1);
 
   const seen = new Map<string, string>();
   const tags: TagInfo[] = [];
@@ -36,7 +36,7 @@ export async function getTags(): Promise<TagInfo[]> {
   }
   tags.sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
 
-  const untagged = posts.filter((p) => p.data.tags.length === 0).length;
+  const untagged = posts.filter((p) => p.data.topics.length === 0).length;
   if (untagged) tags.push({ tag: UNTAGGED, slug: tagSlug(UNTAGGED), count: untagged });
   return tags;
 }

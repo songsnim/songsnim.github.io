@@ -1,7 +1,7 @@
 ---
 title: "Pandas Unnamed:0 제거"
 date: 2023-06-22
-tags:
+topics:
   - "Python"
 description: "pandas에서 Unnamed: 0 컬럼이 왜 생기고 어떻게 없애는지."
 draft: false

@@ -1,7 +1,7 @@
 ---
 title: "[프로그래머스] 2차원으로 만들기"
 date: 2023-06-24
-tags:
+topics:
   - "코테"
 description: "프로그래머스 '2차원으로 만들기' 문제 풀이."
 draft: false
