@@ -44,6 +44,27 @@ interface HitListStat {
 }
 
 /**
+ * The API allows four requests a second, and the page wants five panels, so the
+ * requests are spaced out instead of being fired together. The rejection is worth
+ * avoiding rather than handling: GoatCounter turns a request away before the
+ * middleware that adds the CORS headers runs, so the browser cannot read the 429
+ * and reports it as an unexplained "Failed to fetch".
+ */
+const GAP = 300;
+
+let turn: Promise<unknown> = Promise.resolve();
+
+/** Puts a request at the back of the queue, at least GAP after the one before it. */
+function queue<T>(job: () => Promise<T>): Promise<T> {
+  const mine = turn.then(() => new Promise((go) => setTimeout(go, GAP))).then(job);
+  // The queue advances even when a job fails, or one bad request would wedge it.
+  turn = mine.catch(() => {});
+  return mine;
+}
+
+const RETRIES = 2;
+
+/**
  * GoatCounter reports failures as `{"error": "..."}` or `{"errors": {...}}`; a
  * bad key comes back as 401 with no useful body at all, so the status is worth
  * keeping in the message.
@@ -52,13 +73,26 @@ async function call<T>(base: string, path: string, key: string, params: Record<s
   const url = new URL(`${base}/api/v0/${path}`);
   for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
 
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${key}` } });
-  const body = await res.json().catch(() => null);
-  if (!res.ok) {
-    const why = body?.error ?? (body?.errors && JSON.stringify(body.errors));
-    throw new Error(why ? `${res.status} — ${why}` : `HTTP ${res.status}`);
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await queue(async () => {
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${key}` } });
+        const body = await res.json().catch(() => null);
+        if (!res.ok) {
+          const why = body?.error ?? (body?.errors && JSON.stringify(body.errors));
+          throw new Error(why ? `${res.status} — ${why}` : `HTTP ${res.status}`);
+        }
+        return body as T;
+      });
+    } catch (e) {
+      // A wrong key fails the same way every time, so only the failures that a
+      // pause can fix are worth repeating: a rate limit, and the CORS-blinded
+      // TypeError that is usually the same thing.
+      const retryable = e instanceof TypeError || (e instanceof Error && e.message.startsWith('429'));
+      if (!retryable || attempt === RETRIES) throw e;
+      await new Promise((go) => setTimeout(go, 1000 * (attempt + 1)));
+    }
   }
-  return body as T;
 }
 
 /**

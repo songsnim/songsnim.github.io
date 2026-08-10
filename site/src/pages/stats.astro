@@ -205,8 +205,16 @@ const RANGES = [
         body.hidden = false;
       } catch (e) {
         // A wrong key is the overwhelmingly likely cause, so the prompt comes back
-        // with the reason attached rather than the page going blank.
-        error.textContent = `불러오지 못했어요 — ${e instanceof Error ? e.message : e}`;
+        // with the reason attached rather than the page going blank. A TypeError
+        // says only "Failed to fetch": the request never got a readable answer,
+        // which on this API means it was turned away before the CORS headers.
+        const why =
+          e instanceof TypeError
+            ? '요청이 거절됐어요. 잠시 뒤 다시 시도해 주세요.'
+            : e instanceof Error
+              ? e.message
+              : String(e);
+        error.textContent = `불러오지 못했어요 — ${why}`;
         error.hidden = false;
         gate.hidden = false;
         body.hidden = true;
