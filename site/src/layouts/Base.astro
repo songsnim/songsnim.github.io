@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { counter } from '../lib/analytics';
 
 interface Props {
   title: string;
@@ -41,6 +42,13 @@ const year = new Date().getFullYear();
         if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
       })();
     </script>
+    {
+      counter && (
+        /* Last in the head and async, so a slow or blocked counter never holds
+           up the page. See lib/analytics.ts for how own visits are excluded. */
+        <script data-goatcounter={counter} async src="//gc.zgo.at/count.js" />
+      )
+    }
   </head>
   <body>
     <div class="shell">
