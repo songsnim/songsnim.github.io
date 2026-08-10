@@ -41,10 +41,11 @@ const dashboard = counter?.replace(/\/count$/, '') ?? null;
         </form>
 
         <div class="frame" id="frame" hidden>
-          <iframe id="board" title="GoatCounter" loading="lazy" />
+          <iframe id="board" title="GoatCounter" />
         </div>
 
-        <p class="sub" id="forget" hidden>
+        <p class="sub gate__foot" id="foot" hidden>
+          <a id="tab" href={dashboard} target="_blank" rel="noreferrer">새 탭에서 열기</a>
           <a href="/stats?t=">토큰 잊기</a>
         </p>
       </>
@@ -60,7 +61,7 @@ const dashboard = counter?.replace(/\/count$/, '') ?? null;
     const gate = document.getElementById('gate');
     const frame = document.getElementById('frame');
     const board = document.getElementById('board');
-    const forget = document.getElementById('forget');
+    const foot = document.getElementById('foot');
     const KEY = 'goatcounter-token';
 
     // `?t=` in the address bar is how the token first arrives — that keeps it out
@@ -81,11 +82,20 @@ const dashboard = counter?.replace(/\/count$/, '') ?? null;
         return;
       }
       gate.hidden = true;
+      // Unhidden before the src is assigned: an iframe told to load while its
+      // container is `display: none` may never start.
+      frame.hidden = false;
+      foot.hidden = false;
       // `hideui` drops GoatCounter's own header, which would otherwise sit inside
       // the frame repeating navigation this page already has.
-      board.src = `${dashboard}/?access-token=${encodeURIComponent(token)}&hideui=1`;
-      frame.hidden = false;
-      forget.hidden = false;
+      const dash = `${dashboard}/?access-token=${encodeURIComponent(token)}`;
+      board.src = `${dash}&hideui=1`;
+      // GoatCounter authenticates the token by setting a cookie and redirecting,
+      // and in a frame that cookie is third-party — a browser that drops it sends
+      // the frame to the login screen or leaves it blank. Nothing here can tell
+      // which happened, so the same dashboard is offered as a normal tab, where
+      // the cookie is first-party and always kept.
+      document.getElementById('tab').href = dash;
     };
 
     gate.addEventListener('submit', (e) => {
@@ -138,6 +148,13 @@ const dashboard = counter?.replace(/\/count$/, '') ?? null;
   .gate__go:focus-visible {
     color: var(--accent);
     border-color: var(--accent);
+  }
+
+  .gate__foot {
+    display: flex;
+    gap: 1.25rem;
+    margin: 0.75rem 0 0;
+    font-size: 0.875rem;
   }
 
   /* The dashboard is a whole page of its own, so it gets the height of one and
