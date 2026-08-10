@@ -21,3 +21,6 @@ const SITE = 'songsnim';
  *     browser on the network at once.
  */
 export const counter = SITE ? `https://${SITE}.goatcounter.com/count` : null;
+
+/** Where /stats reads the numbers back from. Same account, same subdomain. */
+export const api = SITE ? `https://${SITE}.goatcounter.com` : null;

@@ -1,15 +1,21 @@
 ---
 import Base from '../layouts/Base.astro';
-import { counter } from '../lib/analytics';
+import { api } from '../lib/analytics';
 
 /**
- * The GoatCounter dashboard, framed here so the numbers can be read without
- * leaving the site. GoatCounter is set to "viewable with the secret token", and
- * the token is deliberately absent from this repository: the reader supplies it
- * once and the browser remembers it. A stranger who finds this page sees the
- * prompt and nothing else.
+ * The site's own reading of its own numbers. GoatCounter holds the data and its
+ * JSON API answers cross-origin, so everything below is drawn here, in the
+ * blog's own type and colour, from a key the reader supplies once.
+ *
+ * Nothing is prerendered: the page ships empty and fills in. That is the point —
+ * a visitor without a key gets a prompt and no numbers at all.
  */
-const dashboard = counter?.replace(/\/count$/, '') ?? null;
+const RANGES = [
+  { days: 7, label: '7일' },
+  { days: 30, label: '30일' },
+  { days: 90, label: '90일' },
+  { days: 365, label: '1년' },
+];
 ---
 
 <Base title="Stats" description="방문 집계.">
@@ -17,108 +23,317 @@ const dashboard = counter?.replace(/\/count$/, '') ?? null;
     <meta name="robots" content="noindex" />
   </Fragment>
 
-  <h1 class="lede">Stats</h1>
-  <p class="sub">GoatCounter 집계. 토큰을 넣으면 이 자리에 대시보드가 열려요.</p>
-
   {
-    dashboard ? (
-      <>
+    api ? (
+      <div class="board" data-api={api}>
+        <header class="board__head">
+          <h1 class="lede">Stats</h1>
+          <div class="board__ranges" id="ranges" role="group" aria-label="기간" hidden>
+            {RANGES.map(({ days, label }) => (
+              <button class="range" type="button" data-days={days} aria-pressed="false">
+                {label}
+              </button>
+            ))}
+          </div>
+        </header>
+
         <form class="gate" id="gate" hidden>
-          <label class="gate__label" for="token">
-            secret token
+          <label class="gate__label" for="key">
+            goatcounter api key
           </label>
           <div class="find__field">
             <input
               class="find__input"
-              id="token"
+              id="key"
               type="password"
               autocomplete="off"
               spellcheck="false"
-              placeholder="GoatCounter Settings에서 복사"
+              placeholder="Read statistics 권한만 준 키"
             />
           </div>
-          <button class="gate__go" type="submit">열기</button>
+          <button class="gate__go" type="submit">불러오기</button>
+          <p class="gate__note">
+            브라우저에만 저장돼요. 저장소에는 안 들어가고, 다른 방문자에게는 이 입력창만 보여요.
+          </p>
         </form>
 
-        <div class="frame" id="frame" hidden>
-          <iframe id="board" title="GoatCounter" />
-        </div>
+        <p class="board__error" id="error" hidden />
 
-        <p class="sub gate__foot" id="foot" hidden>
-          <a id="tab" href={dashboard} target="_blank" rel="noreferrer">새 탭에서 열기</a>
-          <a href="/stats?t=">토큰 잊기</a>
-        </p>
-      </>
+        <div id="body" hidden>
+          <section class="hero">
+            <p class="hero__n" id="total">—</p>
+            <p class="hero__label" id="total-label">방문자</p>
+          </section>
+
+          <section class="panel">
+            <h2 class="panel__title">
+              <span id="plot-title">일별 방문자</span>
+              <span class="panel__peak" id="peak" />
+            </h2>
+            {/* The tooltip lives outside the plot so a bar near the edge cannot clip it. */}
+            <div class="plot__wrap">
+              <div class="plot" id="plot" aria-label="일별 방문자" />
+              <div class="tip" id="tip" hidden />
+            </div>
+            <div class="plot__axis">
+              <span id="axis-from" />
+              <span id="axis-to" />
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2 class="panel__title">많이 읽힌 글</h2>
+            <ol class="rank" id="pages" />
+          </section>
+
+          <section class="panel">
+            <h2 class="panel__title">유입 경로</h2>
+            <ol class="rank" id="refs" />
+          </section>
+
+          <div class="pair">
+            <section class="panel">
+              <h2 class="panel__title">국가</h2>
+              <ol class="rank" id="locations" />
+            </section>
+            <section class="panel">
+              <h2 class="panel__title">브라우저</h2>
+              <ol class="rank" id="browsers" />
+            </section>
+          </div>
+
+          <p class="board__foot">
+            <button class="board__link" type="button" id="forget">키 잊기</button>
+            <a href={api} target="_blank" rel="noreferrer">GoatCounter에서 보기</a>
+          </p>
+        </div>
+      </div>
     ) : (
-      <p>집계가 꺼져 있어요.</p>
+      <>
+        <h1 class="lede">Stats</h1>
+        <p class="sub">집계가 꺼져 있어요.</p>
+      </>
     )
   }
 </Base>
 
-<script is:inline define:vars={{ dashboard }}>
-  (() => {
-    if (!dashboard) return;
-    const gate = document.getElementById('gate');
-    const frame = document.getElementById('frame');
-    const board = document.getElementById('board');
-    const foot = document.getElementById('foot');
-    const KEY = 'goatcounter-token';
+<script>
+  import { breakdown, dropKey, overview, pages, readKey, writeKey, type Row } from '../lib/goatcounter';
+  import { draw } from '../lib/barchart';
 
-    // `?t=` in the address bar is how the token first arrives — that keeps it out
-    // of the repository and out of the built page. An empty `t` forgets it again.
-    const url = new URL(location.href);
-    const passed = url.searchParams.get('t');
-    if (passed !== null) {
-      if (passed) localStorage.setItem(KEY, passed);
-      else localStorage.removeItem(KEY);
-      url.searchParams.delete('t');
-      history.replaceState(null, '', url);
-    }
+  const board = document.querySelector<HTMLElement>('.board');
+  const base = board?.dataset.api;
+  if (board && base) {
+    const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+    const gate = el<HTMLFormElement>('gate');
+    const body = el('body');
+    const error = el('error');
+    const ranges = el('ranges');
+    const plot = el('plot');
+    const tip = el('tip');
 
-    const show = (token) => {
-      if (!token) {
-        gate.hidden = false;
-        document.getElementById('token').focus();
+    let days = 30;
+
+    const show = (n: number) => n.toLocaleString('ko-KR');
+
+    /** Ranked lists all look the same: a name, its share as a bar behind the row, its count. */
+    function rank(host: HTMLElement, rows: Row[]) {
+      host.replaceChildren();
+      if (!rows.length) {
+        const empty = document.createElement('li');
+        empty.className = 'rank__empty';
+        empty.textContent = '아직 없어요.';
+        host.append(empty);
         return;
       }
-      gate.hidden = true;
-      // Unhidden before the src is assigned: an iframe told to load while its
-      // container is `display: none` may never start.
-      frame.hidden = false;
-      foot.hidden = false;
-      // `hideui` drops GoatCounter's own header, which would otherwise sit inside
-      // the frame repeating navigation this page already has.
-      const dash = `${dashboard}/?access-token=${encodeURIComponent(token)}`;
-      board.src = `${dash}&hideui=1`;
-      // GoatCounter authenticates the token by setting a cookie and redirecting,
-      // and in a frame that cookie is third-party — a browser that drops it sends
-      // the frame to the login screen or leaves it blank. Nothing here can tell
-      // which happened, so the same dashboard is offered as a normal tab, where
-      // the cookie is first-party and always kept.
-      document.getElementById('tab').href = dash;
+      const peak = Math.max(1, ...rows.map((r) => r.count));
+      for (const row of rows) {
+        const li = document.createElement('li');
+        li.className = 'rank__row';
+        // The bar is a background on the row rather than an element of its own, so
+        // the text sits on top of it and the row stays one line.
+        li.style.setProperty('--share', `${(row.count / peak) * 100}%`);
+
+        const name = document.createElement(row.href ? 'a' : 'span');
+        name.className = 'rank__name';
+        if (row.href && name instanceof HTMLAnchorElement) name.href = row.href;
+        name.textContent = row.name;
+
+        const n = document.createElement('span');
+        n.className = 'rank__n';
+        n.textContent = show(row.count);
+
+        li.append(name, n);
+        host.append(li);
+      }
+    }
+
+    async function load(key: string) {
+      error.hidden = true;
+      board.classList.add('board--busy');
+      try {
+        // One request per panel, all at once: a slow breakdown should not hold up
+        // the headline number.
+        const [total, top, refs, locations, browsers] = await Promise.all([
+          overview(base, key, days),
+          pages(base, key, days, 20),
+          breakdown(base, key, 'toprefs', days, 10),
+          breakdown(base, key, 'locations', days, 8),
+          breakdown(base, key, 'browsers', days, 8),
+        ]);
+
+        el('total').textContent = show(total.total);
+        el('total-label').textContent = `방문자 · 최근 ${days}일`;
+
+        // A long range is drawn by week, so the caption has to say which it is —
+        // otherwise the peak reads as a daily figure.
+        const grouping = draw(plot, total.days);
+        el('plot-title').textContent = grouping === 'week' ? '주별 방문자' : '일별 방문자';
+        plot.setAttribute('aria-label', el('plot-title').textContent);
+        const peak = plot.dataset.peak ?? '0';
+        el('peak').textContent = `최고 ${show(Number(peak))}`;
+        el('axis-from').textContent = total.days[0]?.day ?? '';
+        el('axis-to').textContent = total.days.at(-1)?.day ?? '';
+
+        rank(el('pages'), top);
+        rank(el('refs'), refs);
+        rank(el('locations'), locations);
+        rank(el('browsers'), browsers);
+
+        gate.hidden = true;
+        ranges.hidden = false;
+        body.hidden = false;
+      } catch (e) {
+        // A wrong key is the overwhelmingly likely cause, so the prompt comes back
+        // with the reason attached rather than the page going blank.
+        error.textContent = `불러오지 못했어요 — ${e instanceof Error ? e.message : e}`;
+        error.hidden = false;
+        gate.hidden = false;
+        body.hidden = true;
+        ranges.hidden = true;
+      } finally {
+        board.classList.remove('board--busy');
+      }
+    }
+
+    // Hovering or focusing a column names the day and its count. The columns are
+    // created and destroyed on every load, so the plot listens on their behalf.
+    const point = (target: EventTarget | null) => {
+      const col = target instanceof Element ? target.closest<HTMLElement>('.plot__col') : null;
+      if (!col) return tip.setAttribute('hidden', '');
+      tip.textContent = `${col.dataset.label} · ${show(Number(col.dataset.count))}`;
+      tip.removeAttribute('hidden');
+      // Anchored to the column, then clamped so an edge column stays on screen.
+      const box = plot.getBoundingClientRect();
+      const bar = col.getBoundingClientRect();
+      const x = bar.left - box.left + bar.width / 2;
+      tip.style.left = `${Math.min(Math.max(x, 0), box.width)}px`;
     };
+    plot.addEventListener('pointermove', (e) => point(e.target));
+    plot.addEventListener('focusin', (e) => point(e.target));
+    plot.addEventListener('pointerleave', () => tip.setAttribute('hidden', ''));
+    plot.addEventListener('focusout', () => tip.setAttribute('hidden', ''));
+
+    for (const button of ranges.querySelectorAll<HTMLButtonElement>('.range')) {
+      button.addEventListener('click', () => {
+        days = Number(button.dataset.days);
+        for (const other of ranges.querySelectorAll('.range')) {
+          other.setAttribute('aria-pressed', String(other === button));
+        }
+        void load(readKey());
+      });
+    }
+    const mark = () => {
+      for (const b of ranges.querySelectorAll<HTMLButtonElement>('.range')) {
+        b.setAttribute('aria-pressed', String(Number(b.dataset.days) === days));
+      }
+    };
+    mark();
 
     gate.addEventListener('submit', (e) => {
       e.preventDefault();
-      const token = document.getElementById('token').value.trim();
-      if (!token) return;
-      localStorage.setItem(KEY, token);
-      show(token);
+      const key = el<HTMLInputElement>('key').value.trim();
+      if (!key) return;
+      writeKey(key);
+      void load(key);
     });
 
-    show(localStorage.getItem(KEY));
-  })();
+    el('forget').addEventListener('click', () => {
+      dropKey();
+      location.reload();
+    });
+
+    // `?k=` in the address bar is the other way in, so the key can be pasted from
+    // a password manager without the page ever holding it in markup.
+    const url = new URL(location.href);
+    const passed = url.searchParams.get('k');
+    if (passed) {
+      writeKey(passed);
+      url.searchParams.delete('k');
+      history.replaceState(null, '', url);
+    }
+
+    const key = readKey();
+    if (key) void load(key);
+    else gate.hidden = false;
+  }
 </script>
 
 <style>
+  .board__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .board__head .lede {
+    margin: 0;
+  }
+
+  /* One row of controls above the panels, as a segmented set rather than four
+     loose buttons — they are one choice, not four actions. */
+  .board__ranges {
+    display: flex;
+    border: 1px solid var(--rule);
+  }
+
+  .range {
+    border: 0;
+    border-left: 1px solid var(--rule);
+    background: none;
+    padding: 0.3rem 0.7rem;
+    font: inherit;
+    font-size: 0.8125rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition:
+      color 140ms ease,
+      background-color 140ms ease;
+  }
+
+  .range:first-child {
+    border-left: 0;
+  }
+
+  .range:hover {
+    color: var(--ink);
+  }
+
+  .range[aria-pressed='true'] {
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+
   .gate {
     display: grid;
     gap: 0.6rem;
-    max-width: 24rem;
+    max-width: 26rem;
   }
 
-  /* `display: grid` would otherwise win over the browser's own rule for
-     `hidden`, and the form would stay on screen behind the dashboard. */
+  /* `display: grid` would otherwise beat the browser's own rule for `hidden`. */
   .gate[hidden] {
     display: none;
   }
@@ -150,23 +365,217 @@ const dashboard = counter?.replace(/\/count$/, '') ?? null;
     border-color: var(--accent);
   }
 
-  .gate__foot {
-    display: flex;
-    gap: 1.25rem;
-    margin: 0.75rem 0 0;
+  .gate__note,
+  .board__error {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--muted);
+    max-width: 32rem;
+  }
+
+  .board__error {
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+  }
+
+  /* The headline number is the answer to the only question this page exists for,
+     so it is set in the display face at article-title size and nothing competes. */
+  .hero {
+    margin-bottom: 3rem;
+  }
+
+  .hero__n {
+    font-family: var(--display);
+    font-size: clamp(2.5rem, 9vw, 4rem);
+    line-height: 1;
+    margin: 0;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hero__label {
+    margin: 0.5rem 0 0;
+    color: var(--muted);
     font-size: 0.875rem;
   }
 
-  /* The dashboard is a whole page of its own, so it gets the height of one and
-     scrolls internally rather than stretching this page. */
-  .frame {
-    border: 1px solid var(--rule);
+  .panel {
+    margin-bottom: 3rem;
   }
 
-  .frame iframe {
-    display: block;
+  .panel__title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.75rem;
+    font-weight: 400;
+    font-family: var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0 0 0.9rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .panel__peak {
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .plot__wrap {
+    position: relative;
+  }
+
+  .plot {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 9rem;
+  }
+
+  .plot :global(.plot__col) {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    cursor: default;
+  }
+
+  .plot :global(.plot__col:focus-visible) {
+    outline: 1px solid var(--focus);
+    outline-offset: 1px;
+  }
+
+  /* Rounded only at the free end; the baseline end stays square so the bar reads
+     as standing on the axis rather than floating. */
+  .plot :global(.plot__bar) {
     width: 100%;
-    height: min(80vh, 900px);
+    background: var(--accent);
+    border-radius: 4px 4px 0 0;
+    transition: background-color 140ms ease;
+  }
+
+  .plot :global(.plot__col:hover .plot__bar),
+  .plot :global(.plot__col:focus-visible .plot__bar) {
+    background: var(--ink);
+  }
+
+  .plot__axis {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    color: var(--faint);
+  }
+
+  .tip {
+    position: absolute;
+    bottom: calc(100% + 0.4rem);
+    transform: translateX(-50%);
+    white-space: nowrap;
+    pointer-events: none;
+    background: var(--surface-warm);
+    border: 1px solid var(--rule);
+    padding: 0.2rem 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    color: var(--ink);
+  }
+
+  .rank {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    /* Without a gap the share bars of successive rows meet and read as one
+       stepped shape rather than as separate measurements. */
+    display: grid;
+    gap: 2px;
+  }
+
+  .rank :global(.rank__row) {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.4rem 0.5rem;
+    /* The share bar is the row's own background, drawn from the left. Behind the
+       text, so the row stays a single line at any width. */
+    background: linear-gradient(to right, var(--accent-soft) var(--share), transparent var(--share));
+  }
+
+  .rank :global(.rank__name) {
+    /* A flex item will not shrink below its content unless told to, and without
+       that the ellipsis never appears. */
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .rank :global(a.rank__name:hover) {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+  }
+
+  .rank :global(.rank__n) {
+    flex: none;
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .rank :global(.rank__empty) {
+    padding: 0.4rem 0.5rem;
+    color: var(--faint);
+    font-size: 0.875rem;
+  }
+
+  .pair {
+    display: grid;
+    gap: 0 3rem;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  }
+
+  .board--busy {
+    opacity: 0.55;
+  }
+
+  .board__foot {
+    display: flex;
+    gap: 1.25rem;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+
+  .board__link {
     border: 0;
+    background: none;
+    padding: 0;
+    font: inherit;
+    color: var(--muted);
+    text-decoration: underline;
+    text-decoration-color: var(--rule);
+    cursor: pointer;
+  }
+
+  .board__link:hover {
+    color: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .range,
+    .gate__go,
+    .plot :global(.plot__bar) {
+      transition: none;
+    }
   }
 </style>
