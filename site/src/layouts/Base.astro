@@ -42,6 +42,7 @@ const year = new Date().getFullYear();
         if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t;
       })();
     </script>
+    <slot name="head" />
     {
       counter && (
         /* Last in the head and async, so a slow or blocked counter never holds

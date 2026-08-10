@@ -1,0 +1,155 @@
+---
+import Base from '../layouts/Base.astro';
+import { counter } from '../lib/analytics';
+
+/**
+ * The GoatCounter dashboard, framed here so the numbers can be read without
+ * leaving the site. GoatCounter is set to "viewable with the secret token", and
+ * the token is deliberately absent from this repository: the reader supplies it
+ * once and the browser remembers it. A stranger who finds this page sees the
+ * prompt and nothing else.
+ */
+const dashboard = counter?.replace(/\/count$/, '') ?? null;
+---
+
+<Base title="Stats" description="방문 집계.">
+  <Fragment slot="head">
+    <meta name="robots" content="noindex" />
+  </Fragment>
+
+  <h1 class="lede">Stats</h1>
+  <p class="sub">GoatCounter 집계. 토큰을 넣으면 이 자리에 대시보드가 열려요.</p>
+
+  {
+    dashboard ? (
+      <>
+        <form class="gate" id="gate" hidden>
+          <label class="gate__label" for="token">
+            secret token
+          </label>
+          <div class="find__field">
+            <input
+              class="find__input"
+              id="token"
+              type="password"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="GoatCounter Settings에서 복사"
+            />
+          </div>
+          <button class="gate__go" type="submit">열기</button>
+        </form>
+
+        <div class="frame" id="frame" hidden>
+          <iframe id="board" title="GoatCounter" loading="lazy" />
+        </div>
+
+        <p class="sub" id="forget" hidden>
+          <a href="/stats?t=">토큰 잊기</a>
+        </p>
+      </>
+    ) : (
+      <p>집계가 꺼져 있어요.</p>
+    )
+  }
+</Base>
+
+<script is:inline define:vars={{ dashboard }}>
+  (() => {
+    if (!dashboard) return;
+    const gate = document.getElementById('gate');
+    const frame = document.getElementById('frame');
+    const board = document.getElementById('board');
+    const forget = document.getElementById('forget');
+    const KEY = 'goatcounter-token';
+
+    // `?t=` in the address bar is how the token first arrives — that keeps it out
+    // of the repository and out of the built page. An empty `t` forgets it again.
+    const url = new URL(location.href);
+    const passed = url.searchParams.get('t');
+    if (passed !== null) {
+      if (passed) localStorage.setItem(KEY, passed);
+      else localStorage.removeItem(KEY);
+      url.searchParams.delete('t');
+      history.replaceState(null, '', url);
+    }
+
+    const show = (token) => {
+      if (!token) {
+        gate.hidden = false;
+        document.getElementById('token').focus();
+        return;
+      }
+      gate.hidden = true;
+      // `hideui` drops GoatCounter's own header, which would otherwise sit inside
+      // the frame repeating navigation this page already has.
+      board.src = `${dashboard}/?access-token=${encodeURIComponent(token)}&hideui=1`;
+      frame.hidden = false;
+      forget.hidden = false;
+    };
+
+    gate.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const token = document.getElementById('token').value.trim();
+      if (!token) return;
+      localStorage.setItem(KEY, token);
+      show(token);
+    });
+
+    show(localStorage.getItem(KEY));
+  })();
+</script>
+
+<style>
+  .gate {
+    display: grid;
+    gap: 0.6rem;
+    max-width: 24rem;
+  }
+
+  /* `display: grid` would otherwise win over the browser's own rule for
+     `hidden`, and the form would stay on screen behind the dashboard. */
+  .gate[hidden] {
+    display: none;
+  }
+
+  .gate__label {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+
+  .gate__go {
+    justify-self: start;
+    border: 1px solid var(--rule);
+    background: none;
+    padding: 0.4rem 1rem;
+    font: inherit;
+    color: var(--ink);
+    cursor: pointer;
+    transition:
+      color 140ms ease,
+      border-color 140ms ease;
+  }
+
+  .gate__go:hover,
+  .gate__go:focus-visible {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* The dashboard is a whole page of its own, so it gets the height of one and
+     scrolls internally rather than stretching this page. */
+  .frame {
+    border: 1px solid var(--rule);
+  }
+
+  .frame iframe {
+    display: block;
+    width: 100%;
+    height: min(80vh, 900px);
+    border: 0;
+  }
+</style>

@@ -41,7 +41,9 @@ function obsidianOpener() {
 export default defineConfig({
   vite: { plugins: [obsidianOpener()] },
   site: 'https://songsnim.github.io',
-  integrations: [mdx(), sitemap()],
+  // /stats is the author's own dashboard behind a token — nothing for a crawler
+  // to index, and listing it would only advertise where it is.
+  integrations: [mdx(), sitemap({ filter: (page) => !page.endsWith('/stats/') })],
   // The topic index used to live at /tags. Anything already pointing there keeps working.
   redirects: { '/tags': '/topics' },
   markdown: {
