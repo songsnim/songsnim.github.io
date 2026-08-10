@@ -210,7 +210,7 @@ const RANGES = [
         // which on this API means it was turned away before the CORS headers.
         const why =
           e instanceof TypeError
-            ? '요청이 거절됐어요. 잠시 뒤 다시 시도해 주세요.'
+            ? 'goatcounter.com 요청이 막혔어요. 광고·트래커 차단기가 켜져 있는지 확인해 주세요.'
             : e instanceof Error
               ? e.message
               : String(e);
