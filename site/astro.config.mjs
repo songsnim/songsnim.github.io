@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 
@@ -47,7 +48,12 @@ export default defineConfig({
   // The topic index used to live at /tags. Anything already pointing there keeps working.
   redirects: { '/tags': '/topics' },
   markdown: {
-    remarkPlugins: [remarkMath],
+    // Posts write numeric ranges as `1~3`, and GFM's strikethrough treats a
+    // single tilde as a delimiter, so two ranges on one line used to collapse
+    // into struck-through text. Running remark-gfm by hand is the only way to
+    // pass `singleTilde: false`; `~~` still strikes through as expected.
+    gfm: false,
+    remarkPlugins: [[remarkGfm, { singleTilde: false }], remarkMath],
     rehypePlugins: [rehypeKatex],
     shikiConfig: {
       themes: { light: 'ayu-light', dark: 'ayu-dark' },
