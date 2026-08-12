@@ -16,15 +16,20 @@ const posts = defineCollection({
     generateId: ({ entry }) => entry.replace(/\/[^/]+\.md$/, '').replace(/^\d{3}-/, ''),
   }),
   schema: z.object({
-    title: z.string(),
+    // `.min(1)` on the text fields, not a bare `z.string()`: an empty `title:`
+    // or `description:` is valid YAML, so a key left blank while drafting used
+    // to pass every check and ship a post with an empty <title>, an empty card
+    // in the index, and an empty OG description. Blank is a missing value, so
+    // it fails here the same way a missing key does.
+    title: z.string().min(1),
     date: z.coerce.date(),
     updated: z.coerce.date().optional(),
     // `topics`, not `tags`: Obsidian claims the `tags` frontmatter key for the
     // vault's own tag pane, so a blog tag would show up there and a vault tag
     // would show up on the site. Separate keys keep the two systems apart.
     topics: z.array(z.string()).default([]),
-    description: z.string(),
-    cover: z.string().optional(),
+    description: z.string().min(1),
+    cover: z.string().min(1).optional(),
     draft: z.boolean().default(false),
   }),
 });
