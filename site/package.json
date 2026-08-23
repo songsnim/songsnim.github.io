@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
+    "new": "node scripts/new-post.mjs",
     "validate": "node scripts/validate-posts.mjs",
     "build": "astro build",
     "preview": "astro preview",
