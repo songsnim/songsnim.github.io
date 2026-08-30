@@ -7,7 +7,7 @@ topics:
 description: compact와 automemory를 버려라.
 draft: false
 ---
-Agentic coding에서 결과물의 품질은 모델이 무엇을 아는지가 아니라 그 순간 context에 무엇이 들어 있는지에 달려 있다. 그래서 무엇을 넣고 무엇을 뺄지 결정하는 책임은 사용자에게 있다. 이 글은 그 책임을 지키려면 `/compact`와 automemory 대신 `/clear`와 handoff 문서를 써야 한다는 이야기다.
+Agentic coding 결과물의 품질은 context에 달려 있다. 따라서, context에 무엇을 넣고 무엇을 뺄지 결정하는 책임은 사용자가 쥐고 있어야 한다. 이 글은 그 책임을 지키기 위해 `/compact`와 automemory 대신 `/clear`와 handoff 문서를 써야 한다는 이야기다.
 
 ## 1. compact는 통제할 수 없다
 
