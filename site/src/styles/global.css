@@ -364,54 +364,20 @@ hr {
   filter: var(--emph-glow);
 }
 
-/* One sentence, one voice — it sits at the same level as the role line above. */
-.masthead__line {
-  font-family: var(--mono);
-  font-size: 0.9375rem;
-  line-height: 1.9;
-  margin: var(--space-lg) 0 0;
-  color: var(--muted);
-}
-
-.masthead__slash {
-  color: var(--rule);
-  margin: 0 0.4em;
-}
-
-
-.masthead__tail {
-  font-family: var(--body);
-  margin-left: 0.65em;
-}
-
 @media (prefers-reduced-motion: no-preference) {
   /* The head animates as a unit so the character arrives with the name. */
   .masthead__head,
-  .masthead__row,
-  .masthead__line {
+  .masthead__row {
     animation: masthead-in 620ms cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
   }
   .masthead__row {
     animation-delay: 90ms;
-  }
-  .masthead__line {
-    animation-delay: 180ms;
   }
   @keyframes masthead-in {
     from {
       opacity: 0;
       transform: translateY(0.35em);
     }
-  }
-}
-
-@media (max-width: 34rem) {
-  .masthead__line {
-    line-height: 2.1;
-  }
-  .masthead__tail {
-    display: block;
-    margin-left: 0;
   }
 }
 
