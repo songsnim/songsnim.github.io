@@ -124,3 +124,66 @@ const fmt = (d: Date) =>
     }
   })();
 </script>
+
+<script is:inline>
+  (() => {
+    // Each footnote is copied out of the list at the end of the post and parked
+    // next to the reference that points at it, so the reader never leaves the
+    // sentence. Clicking toggles it, which is the only thing a touch screen can
+    // do; the pointer case is CSS hover.
+    for (const ref of document.querySelectorAll('a[data-footnote-ref]')) {
+      const note = document.querySelector(decodeURIComponent(ref.hash));
+      const sup = ref.closest('sup');
+      if (!note || !sup) continue;
+
+      const tip = document.createElement('span');
+      tip.className = 'fn-tip';
+      tip.innerHTML = note.innerHTML;
+      // The arrow back to the reference is navigation for the list at the
+      // bottom, and means nothing in a note sitting beside its own reference.
+      tip.querySelector('[data-footnote-backref]')?.remove();
+      sup.append(tip);
+
+      ref.addEventListener('click', (e) => {
+        e.preventDefault();
+        const open = sup.classList.contains('open');
+        close();
+        if (!open) {
+          place(tip);
+          sup.classList.add('open');
+        }
+      });
+      // The hover case never reaches the click handler, so it needs the same
+      // measurement before CSS reveals the note.
+      sup.addEventListener('pointerenter', () => place(tip));
+    }
+
+    // A note is centred on its reference, which puts it off screen whenever the
+    // reference sits near an edge, and above the line, which is wrong when the
+    // reference is on the first line on screen. Both are only knowable once the
+    // note has a box, so they are fixed here rather than in CSS. The note is
+    // laid out even while hidden, so it can be measured before it is shown.
+    const EDGE = 8;
+    function place(tip) {
+      tip.style.translate = '-50%';
+      tip.classList.remove('fn-tip--below');
+      const box = tip.getBoundingClientRect();
+      const overflow =
+        box.left < EDGE ? EDGE - box.left
+        : box.right > innerWidth - EDGE ? innerWidth - EDGE - box.right
+        : 0;
+      if (overflow) tip.style.translate = `calc(-50% + ${Math.round(overflow)}px)`;
+      if (box.top < EDGE) tip.classList.add('fn-tip--below');
+    }
+
+    const close = () => {
+      for (const el of document.querySelectorAll('sup.open')) el.classList.remove('open');
+    };
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('sup.open')) close();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') close();
+    });
+  })();
+</script>

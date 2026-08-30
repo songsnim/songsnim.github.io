@@ -1124,3 +1124,118 @@ hr {
   font-family: var(--mono);
   letter-spacing: 0.08em;
 }
+
+/* ── footnotes ──────────────────────────────────────────────────────────
+   GFM footnotes render as a superscript link into a list at the end of the
+   post. footnotes.js copies each list item back up beside its reference, so
+   the note reads where it is referenced and the list at the bottom is only a
+   fallback: no script, no hover, or a printed page. */
+.prose [data-footnotes] {
+  display: none;
+}
+
+@media print {
+  .prose [data-footnotes] {
+    display: block;
+  }
+}
+
+.prose sup:has(.fn-tip) {
+  position: relative;
+}
+
+/* GFM already numbers the reference; it only needs to read as a superscript
+   and to look like something that opens. */
+.prose a[data-footnote-ref] {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--accent);
+  border-bottom: 1px dotted var(--accent);
+  padding: 0 0.12em;
+  cursor: pointer;
+}
+
+.prose a[data-footnote-ref]:hover,
+.prose sup.open a[data-footnote-ref] {
+  background: var(--accent-soft);
+}
+
+.fn-tip {
+  position: absolute;
+  bottom: 1.7em;
+  left: 50%;
+  translate: -50%;
+  z-index: 10;
+  width: max-content;
+  max-width: min(28rem, 80vw);
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--surface);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--ink-soft);
+  text-align: left;
+  white-space: normal;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.12s;
+}
+
+.fn-tip p {
+  margin: 0;
+}
+
+.fn-tip p + p,
+.fn-tip blockquote {
+  margin-top: 0.5rem;
+}
+
+/* A note is often a quotation with a source line under it, so it carries the
+   same left rule the prose uses, at the smaller measure. */
+.fn-tip blockquote {
+  margin-bottom: 0.5rem;
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--rule);
+  color: var(--muted);
+}
+
+.fn-tip blockquote p + p {
+  margin-top: 0.35rem;
+}
+
+.fn-tip code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  background: var(--code-inline);
+  border-radius: 3px;
+  padding: 0 0.2em;
+}
+
+.fn-tip a {
+  color: var(--accent);
+}
+
+/* Flipped under the line when there is no room above it. */
+.fn-tip--below {
+  bottom: auto;
+  top: 1.7em;
+}
+
+.prose sup.open .fn-tip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* A tap leaves :hover stuck on touch devices, so hovering only opens the note
+   where a pointer can also leave. */
+@media (hover: hover) {
+  .prose sup:hover .fn-tip,
+  .prose sup:focus-within .fn-tip {
+    opacity: 1;
+    visibility: visible;
+  }
+}
