@@ -1,12 +1,12 @@
 ---
-title: 내가 context 주도권을 쥐는 방법
+title: context 주도권을 잃지 않는 방법
 date: 2026-08-30
 topics:
   - Dev
+  - Agent
 description: compact와 automemory를 버려라.
 draft: false
 ---
-
 Agentic coding에서 결과물의 품질은 모델이 무엇을 아는지가 아니라 그 순간 context에 무엇이 들어 있는지에 달려 있다. 그래서 무엇을 넣고 무엇을 뺄지 결정하는 책임은 사용자에게 있다. 이 글은 그 책임을 지키려면 `/compact`와 automemory 대신 `/clear`와 handoff 문서를 써야 한다는 이야기다.
 
 ## 1. compact는 통제할 수 없다
@@ -56,4 +56,4 @@ Automemory도 `/compact`처럼 대신 handoff같은 문서를 작성해야 하�
 
 비슷한 맥락에서 context 주도권을 쥐기 위해 automemory 기능을 꺼버리고, ADR, project-specific 정보는 사람이 직접 관리한다. 코드베이스 정보는 문서가 아니라 코드베이스 자체를 agent에게 읽힌다. 그럼 automemory도 필요 없고, 추가 문서를 제작하여 관리할 필요도 없어진다. 그리고 여전히 context 주도권을 쥐고 있다.
 
-Context engineering의 핵심은 context 주도권이라고 생각한다. 그러기 위해서는 눈에 보이고, 검토 가능한 설계의 영역으로 context를 모두 옮겨야 한다. 그러기 위해선, `/compact`, automemory에 의존하지 않아야 한다. 희망은 전략이 아니다.
+Context engineering의 핵심은 context 주도권이라고 생각한다. 눈에 보이고, 검토 가능한 설계의 영역으로 context를 모두 옮겨야 한다. 그러기 위해선, `/compact`, automemory를 버려야 한다. 희망은 전략이 아니다.
