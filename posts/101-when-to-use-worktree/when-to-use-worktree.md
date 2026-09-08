@@ -1,10 +1,10 @@
 ---
-title: worktree로 병렬 작업, 막 해도 될까?
+title: worktree로 병렬 작업하면 진짜 빨라질까?
 date: 2026-09-08
 topics:
   - Dev
   - Agent
-description: 병렬 작업의 선행 조건
+description: 병렬 작업으로 얻는 것과 잃는 것
 draft: false
 ---
 > "worktree 쓰면 에이전트 4개를 동시에 돌릴 수 있는데 왜 하나씩 해?"
