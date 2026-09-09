@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <!-- The site's own stylesheet: same colour tokens, same typefaces, same
+         light/dark switch as the article this figure sits in. -->
+    <link rel="stylesheet" href="/figure.css" />
+    <style>
+      /* The host's background shows through, so the figure has no edge of its
+         own — the site stylesheet paints `body`, and this undoes it. `!important`
+         because that rule and this one are equally specific and the site's is
+         free to move. `min-height` is the site's full-page rule, meaningless
+         inside a figure. */
+      html,
+      body {
+        margin: 0;
+        min-height: 0 !important;
+        background: transparent !important;
+        /* The site stylesheet declares `color-scheme: dark` in dark mode, and an
+           embedded document with a declared colour scheme gets an opaque canvas
+           painted under it by the browser — no `background: transparent` reaches
+           past that. `normal` gives the canvas back up, which is what lets the
+           host's own background, wallpaper included, show through. The palette
+           itself is unaffected: it comes from the `prefers-color-scheme` query,
+           not from this property. */
+        color-scheme: normal !important;
+      }
+
+      #plot {
+        display: block;
+        width: 100%;
+        height: 320px;
+      }
+
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: var(--space-lg);
+        margin-top: var(--space-sm);
+        font-family: var(--mono);
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .controls label {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+      }
+
+      output {
+        color: var(--ink);
+      }
+
+      input[type='range'] {
+        accent-color: var(--accent);
+        width: 120px;
+      }
+
+      button {
+        font: inherit;
+        color: var(--muted);
+        background: none;
+        border: 0;
+        border-bottom: 1px solid var(--rule);
+        padding: 0 0 2px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="plot"></canvas>
+    <div class="controls">
+      <label>
+        학습률 <output id="value">0.10</output>
+        <input id="rate" type="range" min="0" max="6" step="1" value="2" />
+      </label>
+      <button id="replay" type="button">다시 재생</button>
+    </div>
+
+    <script type="module">
+      /* Which palette to use is normally the system's, matching the site. A
+         host whose theme does not follow the system — Obsidian set to dark on a
+         light machine — can say so in the URL: `...html?theme=dark`. */
+      const theme = new URLSearchParams(location.search).get('theme');
+      if (theme === 'dark' || theme === 'light') {
+        document.documentElement.dataset.theme = theme;
+      }
+
+      const loss = (x) => 0.5 * x ** 2 + 0.6 * Math.sin(3 * x) + 1.2;
+      const grad = (x) => x + 1.8 * Math.cos(3 * x);
+
+      const DOMAIN = [-2.6, 2.6];
+      const RATES = [0.02, 0.05, 0.1, 0.2, 0.35, 0.6, 0.9];
+
+      const curve = Array.from({ length: 241 }, (_, i) => {
+        const x = DOMAIN[0] + ((DOMAIN[1] - DOMAIN[0]) * i) / 240;
+        return [x, loss(x)];
+      });
+
+      // One path per learning rate the slider can take, solved once up front, so
+      // dragging the slider is a lookup rather than a re-solve.
+      const paths = RATES.map((lr) => {
+        const xs = [2.35];
+        for (let i = 0; i < 60; i++) {
+          const x = xs.at(-1) - lr * grad(xs.at(-1));
+          xs.push(Math.min(DOMAIN[1], Math.max(DOMAIN[0], x)));
+        }
+        return xs.map((x) => [x, loss(x)]);
+      });
+
+      const canvas = document.getElementById('plot');
+      const rate = document.getElementById('rate');
+      const value = document.getElementById('value');
+      const replay = document.getElementById('replay');
+      const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      const yMax = Math.max(...curve.map(([, y]) => y)) * 1.08;
+      let step = still ? Infinity : 0;
+      let last = 0;
+
+      // Colours come from the stylesheet above rather than from literals here,
+      // so the figure follows the site's palette in both themes.
+      const token = (name) => getComputedStyle(canvas).getPropertyValue(name).trim() || '#888';
+
+      const draw = () => {
+        const dpr = devicePixelRatio || 1;
+        const w = canvas.clientWidth;
+        const h = canvas.clientHeight;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+
+        const pad = { top: 16, right: 8, bottom: 28, left: 8 };
+        const px = (x) =>
+          pad.left + ((x - DOMAIN[0]) / (DOMAIN[1] - DOMAIN[0])) * (w - pad.left - pad.right);
+        const py = (y) => h - pad.bottom - (y / yMax) * (h - pad.top - pad.bottom);
+
+        ctx.strokeStyle = token('--rule');
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(pad.left, h - pad.bottom);
+        ctx.lineTo(w - pad.right, h - pad.bottom);
+        ctx.stroke();
+
+        ctx.strokeStyle = token('--ink-soft');
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        curve.forEach(([x, y], i) => (i ? ctx.lineTo(px(x), py(y)) : ctx.moveTo(px(x), py(y))));
+        ctx.stroke();
+
+        const path = paths[Number(rate.value)];
+        const shown = Math.min(path.length, Math.floor(step) + 1);
+        const accent = token('--accent');
+
+        ctx.strokeStyle = accent;
+        ctx.globalAlpha = 0.55;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let i = 0; i < shown; i++) {
+          const [x, y] = path[i];
+          i ? ctx.lineTo(px(x), py(y)) : ctx.moveTo(px(x), py(y));
+        }
+        ctx.stroke();
+
+        for (let i = 0; i < shown; i++) {
+          const [x, y] = path[i];
+          const head = i === shown - 1;
+          ctx.fillStyle = accent;
+          ctx.globalAlpha = head ? 1 : 0.25;
+          ctx.beginPath();
+          ctx.arc(px(x), py(y), head ? 4 : 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        ctx.fillStyle = token('--faint');
+        ctx.font = `11px ${token('--mono')}`;
+        ctx.fillText(`step ${shown - 1}`, pad.left, h - 8);
+      };
+
+      const frame = (t) => {
+        if (step < paths[0].length && t - last > 60) {
+          step += 1;
+          last = t;
+        }
+        draw();
+        requestAnimationFrame(frame);
+      };
+
+      const restart = () => {
+        step = still ? Infinity : 0;
+        last = 0;
+      };
+
+      rate.addEventListener('input', () => {
+        value.textContent = RATES[Number(rate.value)].toFixed(2);
+        restart();
+      });
+      replay.addEventListener('click', restart);
+      addEventListener('resize', draw);
+      requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>

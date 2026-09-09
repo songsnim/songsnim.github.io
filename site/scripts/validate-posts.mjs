@@ -123,6 +123,21 @@ for (const slug of slugs) {
       fail(slug, `image path must start with ./ — got ${url}`);
     }
   }
+  // Interactive figures are standalone HTML documents in the post folder, shown
+  // through an <iframe>. The note points at the dev server so Obsidian renders
+  // them too; the build rewrites that origin away (see astro.config.mjs).
+  for (const [, url] of body.matchAll(/<iframe[^>]*\ssrc="([^"]+)"/g)) {
+    const local = url.match(/^(?:https?:\/\/localhost(?::\d+)?)?\/posts\/([^/]+)\/([^/"]+\.html)$/);
+    if (local) {
+      const [, linked, name] = local;
+      used.add(name);
+      if (linked !== urlSlug(slug)) fail(slug, `figure iframe points at another post: ${linked}`);
+      else if (!existsSync(join(dir, name))) fail(slug, `figure file not found: ${name}`);
+    } else if (!/^https?:/.test(url)) {
+      fail(slug, `figure iframe src must be /posts/<slug>/<file>.html — got ${url}`);
+    }
+  }
+
   for (const f of entries) {
     if (!hidden(f) && !f.endsWith('.md') && !used.has(f)) {
       warn(slug, `file is not referenced by the post: ${f}`);

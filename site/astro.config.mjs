@@ -39,6 +39,27 @@ function obsidianOpener() {
   };
 }
 
+/**
+ * A figure is embedded in a note as `<iframe src="http://localhost:4321/...">`,
+ * because that is the one form Obsidian will also render: it resolves nothing
+ * relative to the note's folder, but it does load an absolute URL, so a running
+ * dev server shows the author the same figure the reader will get. The published
+ * site must not point at the author's machine, so the origin is stripped here
+ * and the iframe becomes site-relative. Dev keeps working either way — the URL
+ * it strips is the dev server itself.
+ */
+function remarkFigureSrc() {
+  return (tree) => {
+    const strip = (node) => {
+      if (node.type === 'html') {
+        node.value = node.value.replace(/(<iframe[^>]*\ssrc=")https?:\/\/localhost(?::\d+)?/g, '$1');
+      }
+      node.children?.forEach(strip);
+    };
+    strip(tree);
+  };
+}
+
 export default defineConfig({
   vite: { plugins: [obsidianOpener()] },
   site: 'https://songsnim.github.io',
@@ -53,7 +74,7 @@ export default defineConfig({
     // into struck-through text. Running remark-gfm by hand is the only way to
     // pass `singleTilde: false`; `~~` still strikes through as expected.
     gfm: false,
-    remarkPlugins: [[remarkGfm, { singleTilde: false }], remarkMath],
+    remarkPlugins: [[remarkGfm, { singleTilde: false }], remarkMath, remarkFigureSrc],
     rehypePlugins: [rehypeKatex],
     shikiConfig: {
       themes: { light: 'ayu-light', dark: 'ayu-dark' },

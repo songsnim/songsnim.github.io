@@ -8,6 +8,7 @@
     "new": "node scripts/new-post.mjs",
     "validate": "node scripts/validate-posts.mjs",
     "build": "astro build",
+    "postbuild": "! grep -rn 'http://localhost' dist --include=*.html",
     "preview": "astro preview",
     "check": "astro check"
   },
