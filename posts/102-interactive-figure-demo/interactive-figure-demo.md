@@ -4,10 +4,11 @@ date: 2026-09-09
 topics:
   - Dev
 description: 글과 같은 색, 같은 활자를 쓰는 상호작용 가능한 그림을 포스트 폴더 안에 두고, Obsidian과 웹에서 같은 모습으로 보는 방법.
-draft: true
+draft: false
 ---
 
-정적인 그림으로는 설명이 늘어지는 개념이 있다. 학습률과 수렴의 관계가 그렇다. 값을 바꿔보는 행위 자체가 설명이므로, 그림은 읽는 것이 아니라 만지는 것이어야 한다.
+정적인 그림으로는 설명이 늘어지는 개념이 있다. 학습률과 수렴의 관계가 그렇다. 값을 바꿔보는 행위 자체가 설명이므로, 그림은 읽는 것이 아니라 만지는 것이어야 한다. 
+
 
 <iframe src="http://localhost:4321/posts/interactive-figure-demo/gradient-descent.html" style="width:100%;aspect-ratio:16/10;border:0" loading="lazy" title="학습률에 따른 경사하강 경로"></iframe>
 

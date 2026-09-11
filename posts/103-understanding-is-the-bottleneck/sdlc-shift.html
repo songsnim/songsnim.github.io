@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="/figure.css" />
+    <style>
+      /* The host's background shows through, so the figure has no edge of its
+         own. `color-scheme: normal` is what lets it: an embedded document with
+         a declared scheme gets an opaque canvas painted under it. */
+      html,
+      body {
+        margin: 0;
+        min-height: 0 !important;
+        background: transparent !important;
+        color-scheme: normal !important;
+      }
+
+      /* The one place this figure writes colour values instead of reading site
+         tokens: the stages need to be told apart, and the site palette has no
+         categorical scale. These are ayu hues, bright enough to carry dark
+         label text and to sit on either the light or the dark page, so they
+         stay fixed across themes; everything around them still uses tokens. */
+      body {
+        --design: #55b4d4;
+        --build: #86b300;
+        --test: #a37acc;
+        --review: #fa8d3e;
+        --ship: #4cbf99;
+        --maintain: #8a9199;
+        --chip-ink: #0b0e14;
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-md);
+        margin-bottom: var(--space-sm);
+      }
+
+      .name {
+        flex: 0 0 5em;
+        font-family: var(--mono);
+        font-size: 0.8rem;
+        color: var(--muted);
+        text-align: right;
+      }
+
+      .bar {
+        display: flex;
+        flex: 1;
+        height: 38px;
+      }
+
+      .seg {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35em;
+        container-type: inline-size;
+        overflow: hidden;
+        border-right: 1px solid var(--bg);
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        line-height: 1;
+        white-space: nowrap;
+        color: var(--chip-ink);
+      }
+
+      .seg:last-child {
+        border-right: 0;
+      }
+
+      /* A segment too narrow for its name keeps the number, which is the part
+         that cannot be recovered from the row above. */
+      @container (max-width: 82px) {
+        .seg b {
+          display: none;
+        }
+      }
+
+      .seg b {
+        font-weight: inherit;
+      }
+
+      .seg i {
+        font-style: normal;
+        opacity: 0.75;
+      }
+
+      .note {
+        margin: var(--space-base) 0 0 calc(5em + var(--space-md));
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--faint);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="row">
+      <div class="name">agent 이전</div>
+      <div class="bar">
+        <div class="seg" style="width: 20%; background: var(--design)"><b>요구사항·설계</b><i>20%</i></div>
+        <div class="seg" style="width: 40%; background: var(--build)"><b>구현</b><i>40%</i></div>
+        <div class="seg" style="width: 15%; background: var(--test)"><b>테스트</b><i>15%</i></div>
+        <div class="seg" style="width: 10%; background: var(--review)"><b>코드 리뷰</b><i>10%</i></div>
+        <div class="seg" style="width: 8%; background: var(--ship)"><b>통합·배포</b><i>8%</i></div>
+        <div class="seg" style="width: 7%; background: var(--maintain)"><b>유지보수</b><i>7%</i></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="name">agent 이후</div>
+      <div class="bar">
+        <div class="seg" style="width: 22%; background: var(--design)"><b>요구사항·설계</b><i>22%</i></div>
+        <div class="seg" style="width: 15%; background: var(--build)"><b>구현</b><i>15%</i></div>
+        <div class="seg" style="width: 12%; background: var(--test)"><b>테스트</b><i>12%</i></div>
+        <div class="seg" style="width: 33%; background: var(--review)"><b>코드 리뷰</b><i>33%</i></div>
+        <div class="seg" style="width: 8%; background: var(--ship)"><b>통합·배포</b><i>8%</i></div>
+        <div class="seg" style="width: 10%; background: var(--maintain)"><b>유지보수</b><i>10%</i></div>
+      </div>
+    </div>
+
+    <p class="note">단위는 전체 대비 %. 출처가 있는 측정치가 아니라 논지를 드러내기 위한 근사다.</p>
+  </body>
+</html>
