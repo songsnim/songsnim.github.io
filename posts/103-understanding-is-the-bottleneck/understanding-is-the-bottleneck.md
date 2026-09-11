@@ -48,10 +48,10 @@ Agent는 내가 모르는 것을 자주 끌고 온다. 처음 보는 디자인 �
 
 - [**microworld**](https://www.edweek.org/education/seymour-paperts-microworld-an-educational-utopia/1983/05) - 메커니즘을 요약하지 말고, 조작 가능한 형태로 만들어주게 한다. 설명을 읽는 것보다 동작을 만져 보는 것이 빠르다. 
 - **[socratic](https://en.wikipedia.org/wiki/Socratic_method) / quiz** - 내가 무엇을 모르는지도 몰라 질문할 게 없다. 그래서 반대로 agent가 우리에게 질문한다. 내가 뭘 모르는지 적나라하게 파고든다.
-- [**feynman](https://fs.blog/feynman-technique/)/ short-essay** - 인출 효과를 노리고 내가 다시 설명한다. 막히거나 잘못 설명한 부분을 agent가 다시 고쳐준다. 
+- **[feynman](https://fs.blog/feynman-technique/)/ short-essay** - 인출 효과를 노리고 내가 다시 설명한다. 막히거나 잘못 설명한 부분을 agent가 다시 고쳐준다. 
 - **five-whys / first-principles** - 2단계인 결정 이해 단계에서 유용하다. 기술적 의사 결정의 가장 밑바닥까지 파고들게 유도한다.
 
-요약을 받아 읽는 방식은 먼저, 읽기가 싫다는 게 문제다. 줄 글보다 단 하나의 figure가 훨씬 더 이해하기 쉬운 경우가 많다. 게다가 읽고 나서도 내가 이해를 한건지 자기 객관화가 안 된다는게 문제다. 결국 내가 승인한 PR이라면 내가 책임지고, 다른 사람에게 설명할 수 있어야 한다. 이 때 `feynman` 이나 `short-essay` 세션이 큰 도움이 된다. 
+요약을 받아 읽는 방식은 먼저, 읽기가 싫다는 게 문제다. 줄 글보다 단 하나의 figure(`microworld`)가 훨씬 더 이해하기 쉬운 경우가 많다. 게다가 읽고 나서도 내가 이해를 한건지 자기 객관화(`socratic, quiz`)가 안 된다는게 문제다. 결국 내가 승인한 PR이라면 내가 책임지고, 다른 사람에게 설명할 수 있어야 한다. 이 때 `feynman` 이나 `short-essay` 세션이 큰 도움이 된다. 
 
 ## 4. mind-meld
 
@@ -64,9 +64,10 @@ Agent는 내가 모르는 것을 자주 끌고 온다. 처음 보는 디자인 �
   /five-whys "why does this repo pin every version"
   /socratic "Why Dagster, but not Airflow?"
   ```
-- **PR 하나**: PR 하나가 올라오면 `microworld`로 pr diff의 before와 after, 혹은 추가된 모듈이나 기능을 조작해보며 이해한다. `quiz`로 이해도를 측정하고, 내가 놓친 부분 학습에 적합한 도구를 `mind-meld`가 알아서 골라 학습시켜준다. 그리고 인출효과를 위해 내가 동료에게 설명하는 짧은 글로 최종 이해를 확정 짓는다. 무엇이 변했는지, 왜 그렇게 했는지, 무엇이 깨질 수 있는지 세 축으로 채점하고, 통과하지 못하면 다시 돌린다. 결과는 리포트로 남는다. 남은 불명확한 지점과 agent에게 되물을 질문이 함께 적힌다.
+- **PR 하나**: PR 하나가 올라오면 `microworld`로 pr diff의 before와 after, 혹은 추가된 모듈이나 기능을 조작해보며 이해한다. `quiz`로 이해도를 측정하고, 내가 놓친 부분 학습에 적합한 도구를 `mind-meld`가 알아서 골라 학습시켜준다. 그리고 인출효과를 위해 내가 동료에게 설명하는 짧은 글로 최종 이해를 확정 짓는다. 무엇이 변했는지, 왜 그렇게 했는지, 무엇이 깨질 수 있는지 세 축으로 채점하고, 통과하지 못하면 다시 돌린다. 결과는 리포트로 남는다. 남은 불명확한 지점과 agent에게 되물을 질문이 함께 적힌다. 이 모든 과정은 `/mind-meld` 와 pr 번호를 호출하는 것만으로 자동으로 진행된다.[^infra]
 	```
 	/mind-meld #127
 	```
+[^infra]: github이나 gitlab과 mcp든 api로든 연동이 되어 있어야 한다.
 ## 5. 마치며
 Agent 코드 작성 속도와 발 맞추기 위해 코드 리뷰를 멈추면 더 큰 기술 부채가 발생한다. 그렇다고 agent에게 코드 리뷰를 맡기자니 LLM 모델 학습 알고리즘 상 유지보수성이나 설계 퀄리티를 잡아내기 어렵다. 결국 사람이 해야하는데, agent가 사용하는 기법, 스택, 개념, 용어와 의사결정을 빠르게 이해하는 것이 관건이다. 나는 학습 속도를 가속시키는 것이 agentic coding의 새로운 leverage라고 생각한다. 그래서 [mind-meld](https://github.com/songsnim/mind-meld) 를 제작했다. `mind-meld`를 쓴다고 Agent 코드 작성 속도를 완전히 따라 잡을 수는 없지만, 적어도 코드 베이스 주도권을 잃지 않을 수 있으며, `mind-meld`로 줄이는 시간이 곧 개발 시간의 단축이 된다는 효능감을 가질 수 있다. 거기다, 새로운 개념을 빠르게 익히는 경험 자체가 여간 즐거운 게 아니다.
