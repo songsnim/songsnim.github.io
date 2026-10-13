@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transformer Level 4</title>
+    <link rel="stylesheet" href="/figure.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css" />
+    <style>
+      /* The host's background shows through, so the figure has no edge of its
+         own. color-scheme is left to /figure.css on purpose: an iframe whose
+         scheme differs from its host's gets an opaque canvas, so it must match
+         the host (dark in dark), not be reset to `normal`. */
+      html,
+      body {
+        margin: 0;
+        min-height: 0 !important;
+        background: transparent !important;
+      }
+
+      .fig {
+        display: grid;
+        grid-template-columns: minmax(0, 810px) 18rem;
+        justify-content: center;
+        gap: var(--space-lg);
+        height: 100vh;
+        box-sizing: border-box;
+        padding: var(--space-base);
+        font-family: var(--body);
+        color: var(--ink);
+      }
+
+      /* Drawn in CSS pixels and shown at 90% (900 units in an 810px column), so
+         labels match the panel's 0.9rem. Narrower than that, it scales. */
+      svg {
+        width: 100%;
+        height: 100%;
+        font-family: var(--body);
+        font-size: 1rem;
+      }
+
+      .node rect {
+        fill: var(--surface-warm);
+        stroke: var(--rule);
+        stroke-width: 1.5;
+      }
+      .node {
+        cursor: pointer;
+      }
+      .node:hover rect,
+      .node:focus rect {
+        stroke: var(--muted);
+        outline: none;
+      }
+      .ghost {
+        fill: var(--surface-warm);
+        stroke: var(--rule);
+        stroke-width: 1.5;
+        pointer-events: none;
+      }
+      .node.sel rect {
+        fill: var(--accent-soft);
+        stroke: var(--accent);
+        stroke-width: 2.5;
+      }
+      .node .lab div {
+        color: var(--ink);
+        font-weight: 700;
+      }
+
+      .edge {
+        fill: none;
+        stroke: var(--ink-soft);
+        stroke-width: 1.8;
+      }
+      .edge.mem {
+        stroke-dasharray: 6 4;
+      }
+      .edge.res {
+        stroke: var(--muted);
+        stroke-width: 1.4;
+      }
+      .ah {
+        fill: var(--ink-soft);
+      }
+
+      /* Labels are HTML in <foreignObject> so symbols can be KaTeX, set the
+         same way as the article's math. */
+      .lab {
+        pointer-events: none;
+        overflow: visible;
+      }
+      .lab div {
+        font-family: var(--body);
+        line-height: 24px;
+        white-space: nowrap;
+        color: var(--muted);
+      }
+      .lab.n div {
+        color: var(--ink);
+      }
+      .lab.c div {
+        text-align: center;
+      }
+
+      aside {
+        overflow-y: auto;
+        align-self: center;
+        max-height: 100%;
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+      .mode {
+        display: flex;
+        gap: var(--space-xs);
+        margin-bottom: var(--space-md);
+      }
+      .mode button {
+        flex: 1;
+        font: inherit;
+        padding: var(--space-xs) var(--space-sm);
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--rule);
+        border-radius: var(--r-sm);
+        cursor: pointer;
+      }
+      .mode button[aria-pressed='true'] {
+        color: var(--ink);
+        border-color: var(--accent);
+        background: var(--accent-soft);
+      }
+      aside h3 {
+        margin: 0 0 var(--space-xs);
+        font-size: 1em;
+      }
+      aside p {
+        margin: var(--space-sm) 0;
+      }
+      .rows {
+        font-family: var(--mono);
+        margin: var(--space-sm) 0;
+      }
+      .rows div {
+        margin-bottom: var(--space-xs);
+      }
+      .rows .k {
+        color: var(--muted);
+        font-family: var(--body);
+      }
+      .conv {
+        color: var(--muted);
+        border-left: 2px solid var(--rule);
+        padding-left: var(--space-sm);
+      }
+      .ex {
+        color: var(--faint);
+      }
+
+      /* Left column: view tabs above the diagram (or the table of uses). */
+      .left {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+        min-height: 0;
+      }
+      .left svg {
+        flex: 1;
+        min-height: 0;
+      }
+      .mode.views {
+        flex-wrap: wrap;
+      }
+      .mode.views button {
+        flex: none;
+      }
+      #uses {
+        overflow: auto;
+        font-size: 0.9rem;
+        line-height: 1.5;
+      }
+      #uses table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      #uses th,
+      #uses td {
+        text-align: left;
+        vertical-align: top;
+        padding: var(--space-xs) var(--space-sm);
+        border-bottom: 1px solid var(--rule);
+      }
+      /* Keep each shape on one line instead of breaking at '=' or '·'. */
+      #uses .katex,
+      #uses th,
+      #uses td:nth-child(3) {
+        white-space: nowrap;
+      }
+      #uses th {
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .r div {
+        text-align: right;
+      }
+
+      @media (max-width: 560px) {
+        .fig {
+          grid-template-columns: 1fr;
+          grid-template-rows: 60% 40%;
+          height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="fig">
+      <div class="left">
+        <div class="mode views" role="group" aria-label="view">
+          <button data-view="mha">Multi-Head</button>
+          <button data-view="sdpa">Scaled Dot-Product</button>
+          <button data-view="ffn">FFN</button>
+          <button data-view="an">Add &amp; Norm</button>
+          <button data-view="uses">사용처</button>
+        </div>
+        <svg id="dia" viewBox="0 0 900 500" role="img" aria-label="Transformer level 4 diagram"></svg>
+        <div id="uses" hidden></div>
+      </div>
+      <aside>
+        <div class="mode" role="group" aria-label="mode">
+          <button data-mode="train">학습</button>
+          <button data-mode="infer">추론</button>
+        </div>
+        <div class="mode" id="kinds" role="group" aria-label="attention"></div>
+        <div id="panel" aria-live="polite"></div>
+        <p class="ex" id="ex"></p>
+      </aside>
+    </div>
+
+    <script type="module">
+      import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.mjs';
+
+      const theme = new URLSearchParams(location.search).get('theme');
+      if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+
+      // Fixed example: base model (Sec. 3, Table 3), EN-DE vocab (Sec. 5.1), beam 4 (Sec. 6.1).
+      const B = 2, n = 10, m = 7, dm = 512, dff = 2048, beam = 4, t = 3, h = 8, dk = 64;
+      const Bb = B * beam;
+      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+      const tex = (s) => katex.renderToString(s, { throwOnError: false });
+      // Prose with $...$ spans set as math, like the article's Markdown.
+      const md = (s) => s.split(/\$(.+?)\$/).map((p, i) => (i % 2 ? tex(p) : p)).join('');
+      const SYM = {
+        d_model: 'd_{\\text{model}}', d_ff: 'd_{ff}', 'B·beam': 'B \\cdot \\text{beam}',
+        'h·d_k': 'h \\cdot d_k', 'h·d_v': 'h \\cdot d_v',
+      };
+      const num = (x) => (x >= 10000 ? String(x).replace(/(\d)(?=(\d{3})+$)/g, '$1{,}') : String(x));
+      const symT = (sy) => tex('(' + sy.map((x) => SYM[x] ?? x).join(', ') + ')');
+      const numT = (nu) => tex('= (' + nu.map(num).join(', ') + ')');
+
+      let mode = 'train';
+      let view = 'mha';
+      let kind = 'enc';
+      let sel = 'sdpa_h';
+      const DEF = { mha: 'sdpa_h', sdpa: 'mm1', ffn: 'w1', an: 'an_ln', uses: null };
+
+      // (batch, length) per side: decoder is (B, m) in training, (B·beam, t) at inference step t.
+      const src = { sy: ['B', 'n'], nu: [B, n] };
+      const dec = (inf) => (inf ? { sy: ['B·beam', 't'], nu: [Bb, t] } : { sy: ['B', 'm'], nu: [B, m] });
+      // Source side as the decoder sees it: copied per beam at inference.
+      const srcAt = (inf) => (inf ? { sy: ['B·beam', 'n'], nu: [Bb, n] } : src);
+      const S = (sy, nu) => ({ sy, nu });
+      const withD = (s, d) => S([...s.sy, d[0]], [...s.nu, d[1]]);
+      const heads = (s, d) => S([s.sy[0], 'h', s.sy[1], d], [s.nu[0], h, s.nu[1], dk]);
+      const score = (q, k) => S([q.sy[0], 'h', q.sy[1], k.sy[1]], [q.nu[0], h, q.nu[1], k.nu[1]]);
+      const row = (k, s) => [k, s.sy, s.nu];
+
+      // Where Q and K, V come from in each of the three attentions.
+      const KINDS = {
+        enc: { name: 'enc self', q: () => src, k: () => src },
+        dself: { name: 'dec masked', q: dec, k: dec },
+        cross: { name: 'enc-dec', q: dec, k: srcAt },
+      };
+      const QSRC = {
+        enc: '이전 encoder layer의 출력(첫 layer는 embedding + PE)이다.',
+        dself: '이전 decoder layer의 출력(첫 layer는 embedding + PE)이다.',
+        cross: '바로 아래 masked self-attention 뒤 Add & Norm의 출력이다.',
+      };
+      const KSRC = (inf) => ({
+        enc: 'Q와 같은 텐서다(self-attention).',
+        dself: 'Q와 같은 텐서다(self-attention).',
+        cross: 'encoder의 최종 출력 $z$다. 모든 decoder layer가 같은 $z$를 쓴다.' + (inf ? ' 추론에서는 beam size만큼 복제한다(구현 관례).' : ''),
+      });
+      const MASK = (inf) => {
+        const d = dec(inf), s = srcAt(inf);
+        return {
+          enc: ['$\\text{Mask (padding)}$', 'causal mask가 없다. padding 위치를 key에서 가리는 mask만 쓰며, 이는 구현 관례다.', [row('padding mask', S(['B', '1', '1', 'n'], [B, 1, 1, n]))]],
+          dself: ['$\\text{Mask (causal)}$', '$j > i$인 key 위치의 softmax 입력을 $-\\infty$로 바꿔 위치 $i$가 미래를 보지 못하게 한다. target padding mask와 합치는 것은 구현 관례다.',
+            [row('causal mask', S(['1', '1', d.sy[1], d.sy[1]], [1, 1, d.nu[1], d.nu[1]])), row('padding과 합친 mask', S([d.sy[0], '1', d.sy[1], d.sy[1]], [d.nu[0], 1, d.nu[1], d.nu[1]]))]],
+          cross: ['$\\text{Mask (padding)}$', 'causal mask가 없다. source padding만 가리며, 이는 구현 관례다.', [row('source padding mask', S([s.sy[0], '1', '1', 'n'], [s.nu[0], 1, 1, n]))]],
+        }[kind];
+      };
+      // FFN and Add & Norm only care which side they are on.
+      const side = (inf) => (kind === 'enc' ? src : dec(inf));
+
+      const INFO = {
+        // Multi-Head Attention
+        q_in: (inf) => ({ t: 'Query 입력', d: QSRC[kind], rows: [row('$Q$', withD(KINDS[kind].q(inf), ['d_model', dm]))] }),
+        k_in: (inf) => ({ t: 'Key 입력', d: KSRC(inf)[kind], rows: [row('$K$', withD(KINDS[kind].k(inf), ['d_model', dm]))] }),
+        v_in: (inf) => ({ t: 'Value 입력', d: KSRC(inf)[kind], rows: [row('$V$', withD(KINDS[kind].k(inf), ['d_model', dm]))] }),
+        proj: (inf) => ({
+          t: 'Linear projection $W_i^Q, W_i^K, W_i^V$',
+          d: `head $i = 1, \\dots, h$마다 따로 $W_i^Q, W_i^K \\in \\mathbb{R}^{d_{\\text{model}} \\times d_k}$, $W_i^V \\in \\mathbb{R}^{d_{\\text{model}} \\times d_v}$를 두며 $d_k = d_v = d_{\\text{model}} / h = ${dk}$다. $h$개를 이어 붙이면 $(d_{\\text{model}}, h \\cdot d_k) = (${dm}, ${h * dk})$ 행렬 하나가 된다.`,
+          rows: [
+            ['$W_i^Q$ (head 하나)', ['d_model', 'd_k'], [dm, dk]],
+            row('$Q$, head별', heads(KINDS[kind].q(inf), 'd_k')),
+            row('$K$, $V$, head별', heads(KINDS[kind].k(inf), 'd_k')),
+          ],
+          conv: 'projection을 행렬 하나로 묶어 계산한 뒤 $(h, d_k)$로 나누고 head 축을 앞으로 옮기는 것(reshape, transpose)과 bias 유무는 구현 관례다.',
+        }),
+        sdpa_h: (inf) => ({
+          t: `Scaled Dot-Product Attention, $h = ${h}$개 병렬`,
+          d: 'head마다 독립적으로 attention을 계산한다. head 하나의 차원이 $d_{\\text{model}} / h$로 줄어 전체 계산량은 차원 전체를 쓰는 single-head attention과 비슷하다. 내부는 Scaled Dot-Product 탭에서 본다.',
+          rows: [row('score', score(KINDS[kind].q(inf), KINDS[kind].k(inf))), row('head 출력', heads(KINDS[kind].q(inf), 'd_v'))],
+        }),
+        concat: (inf) => ({
+          t: 'Concat$(\\text{head}_1, \\dots, \\text{head}_h)$',
+          d: `head 출력을 이어 붙여 $h \\cdot d_v = ${h * dk} = d_{\\text{model}}$ 차원을 만든다.`,
+          rows: [row('concat', withD(KINDS[kind].q(inf), ['h·d_v', h * dk]))],
+          conv: 'transpose 후 reshape로 구현하는 것은 구현 관례다.',
+        }),
+        wo: (inf) => ({
+          t: 'Output projection $W^O$',
+          d: '$\\mathrm{MultiHead}(Q, K, V) = \\mathrm{Concat}(\\text{head}_1, \\dots, \\text{head}_h) W^O$이고 $W^O \\in \\mathbb{R}^{h d_v \\times d_{\\text{model}}}$다.',
+          rows: [['$W^O$', ['h·d_v', 'd_model'], [h * dk, dm]], row('출력', withD(KINDS[kind].q(inf), ['d_model', dm]))],
+        }),
+        // Scaled Dot-Product Attention, one head's inputs.
+        sq: (inf) => ({ t: '$Q$, head별', d: QSRC[kind] + ' $W_i^Q$로 투영한 뒤 head별로 나눈 값이다.', rows: [row('$Q$', heads(KINDS[kind].q(inf), 'd_k'))] }),
+        sk: (inf) => ({ t: '$K$, head별', d: KSRC(inf)[kind] + ' $W_i^K$로 투영한 뒤 head별로 나눈 값이다.', rows: [row('$K$', heads(KINDS[kind].k(inf), 'd_k'))] }),
+        sv: (inf) => ({ t: '$V$, head별', d: KSRC(inf)[kind] + ' $W_i^V$로 투영한 뒤 head별로 나눈 값이다.', rows: [row('$V$', heads(KINDS[kind].k(inf), 'd_v'))] }),
+        mm1: (inf) => {
+          const q = KINDS[kind].q(inf), k = KINDS[kind].k(inf);
+          return {
+            t: 'MatMul $QK^\\top$',
+            d: 'query와 모든 key의 내적이다. 각 원소는 query와 key가 얼마나 맞는지를 나타내는 점수다.',
+            rows: [row('$Q$', heads(q, 'd_k')), row('$K^\\top$', S([k.sy[0], 'h', 'd_k', k.sy[1]], [k.nu[0], h, dk, k.nu[1]])), row('$QK^\\top$', score(q, k))],
+          };
+        },
+        scale: (inf) => ({
+          t: 'Scale $\\div \\sqrt{d_k}$',
+          d: `$q$와 $k$의 원소가 평균 0, 분산 1인 독립 변수라면 $q \\cdot k$는 평균 0, 분산 $d_k$를 갖는다. $d_k$가 크면 내적이 커져 softmax가 기울기가 매우 작은 영역으로 밀리므로 $\\sqrt{d_k} = \\sqrt{${dk}} = ${Math.sqrt(dk)}$로 나눈다.`,
+          rows: [row('score', score(KINDS[kind].q(inf), KINDS[kind].k(inf)))],
+        }),
+        maskn: (inf) => ({ t: md(MASK(inf)[0]), d: MASK(inf)[1], rows: MASK(inf)[2] }),
+        smax: (inf) => ({
+          t: 'SoftMax',
+          d: 'key 축(마지막 축) 방향으로 정규화해 value에 줄 가중치를 만든다.',
+          rows: [row('weight', score(KINDS[kind].q(inf), KINDS[kind].k(inf)))],
+          conv: '번역 실험에서 attention weight에 dropout을 적용했는지는 논문에 없다.',
+        }),
+        mm2: (inf) => ({
+          t: 'MatMul $\\cdot V$',
+          d: '$\\mathrm{Attention}(Q, K, V) = \\mathrm{softmax}(QK^\\top / \\sqrt{d_k}) V$. 가중치로 value를 가중합한다.',
+          rows: [row('$V$', heads(KINDS[kind].k(inf), 'd_v')), row('출력', heads(KINDS[kind].q(inf), 'd_v'))],
+        }),
+        // Feed Forward
+        w1: (inf) => ({
+          t: 'Linear $W_1 + b_1$',
+          d: '$\\mathrm{FFN}(x) = \\max(0, xW_1 + b_1) W_2 + b_2$. 위치마다 따로, 같은 가중치로 적용하며 kernel size 1인 convolution 2개와 같다. 가중치는 layer마다 다르다.',
+          rows: [['$W_1$', ['d_model', 'd_ff'], [dm, dff]], row('출력', withD(side(inf), ['d_ff', dff]))],
+        }),
+        relu: (inf) => ({ t: 'ReLU', d: '$\\max(0, \\cdot)$를 원소별로 적용한다.', rows: [row('출력', withD(side(inf), ['d_ff', dff]))] }),
+        w2: (inf) => ({
+          t: 'Linear $W_2 + b_2$',
+          d: `다시 $d_{\\text{model}}$ 차원으로 줄인다. FFN 하나의 파라미터는 bias를 빼면 $2 \\cdot d_{\\text{model}} \\cdot d_{ff} \\approx ${((2 * dm * dff) / 1e6).toFixed(1)}\\text{M}$개다.`,
+          rows: [['$W_2$', ['d_ff', 'd_model'], [dff, dm]], row('출력', withD(side(inf), ['d_model', dm]))],
+        }),
+        // Add & Norm
+        an_sub: (inf) => ({ t: '$\\mathrm{Sublayer}(x)$', d: 'self-attention, encoder-decoder attention, FFN 중 하나다.', rows: [row('$x$, $\\mathrm{Sublayer}(x)$', withD(side(inf), ['d_model', dm]))] }),
+        an_drop: (inf) => ({
+          t: 'Dropout',
+          d: 'sub-layer 출력에, $x$에 더하기 전에 적용한다. $P_{drop} = 0.1$이다.',
+          rows: [row('출력', withD(side(inf), ['d_model', dm]))],
+          conv: inf ? '추론에서는 dropout을 끈다.' : '',
+        }),
+        an_add: (inf) => ({
+          t: 'Residual $x + \\cdot$',
+          d: 'residual connection이다. 모든 sub-layer와 embedding의 출력이 $d_{\\text{model}}$ 차원으로 같아서 더할 수 있다.',
+          rows: [row('합', withD(side(inf), ['d_model', dm]))],
+        }),
+        an_ln: (inf) => ({
+          t: 'LayerNorm',
+          d: '위치(token)마다 $d_{\\text{model}}$ 축을 따라 평균과 분산으로 정규화한다. 결과가 다음 sub-layer의 입력 $x$가 된다.',
+          rows: [['정규화 축', ['d_model'], [dm]], row('출력', withD(side(inf), ['d_model', dm]))],
+          conv: '학습되는 gain, bias와 $\\epsilon$ 값은 논문에 없다.',
+        }),
+      };
+
+      // An HTML label whose first line's top sits at (x, y).
+      const fo = (x, y, html, cls = '', w = 260) =>
+        `<foreignObject class="lab ${cls}" x="${x}" y="${y}" width="${w}" height="28"><div xmlns="http://www.w3.org/1999/xhtml">${html}</div></foreignObject>`;
+      // A one-line node, 40 tall; the label is HTML so it can hold math.
+      const node = (id, x, y, w, label) =>
+        `<g class="node${sel === id ? ' sel' : ''}" data-id="${id}" tabindex="0" role="button" aria-label="${esc(label.replace(/\$/g, ''))}">` +
+        `<rect x="${x}" y="${y}" width="${w}" height="40" rx="8"/>` + fo(x, y + 8, md(label), 'c', w) + `</g>`;
+      // h parallel copies, drawn as two boxes behind, offset up and right.
+      const many = (id, x, y, w, label) =>
+        [8, 4].map((d) => `<rect class="ghost" x="${x + d}" y="${y - d}" width="${w}" height="40" rx="8"/>`).join('') + node(id, x, y, w, label);
+      const line = (pts, cls = '', arrow = true) =>
+        `<path class="edge ${cls}" d="M${pts.map((p) => p.join(' ')).join(' L')}"${arrow ? ' marker-end="url(#ah)"' : ''}/>`;
+      // Shape label: symbols over values, top at (x, y); cls 'r' right-aligns it in [x, x + 260].
+      const shape = (x, y, s, cls = '') => fo(x, y, symT(s.sy), cls) + fo(x, y + 28, numT(s.nu), `n ${cls}`);
+
+      const VIEWS = {
+        // Rows from the bottom: inputs, projections, attention (its copies reach 8 higher), concat, W^O.
+        mha(inf) {
+          const q = KINDS[kind].q(inf), k = KINDS[kind].k(inf);
+          let b = '';
+          // Labels sit at cx + 86, clear of the stacked projection boxes (cx - 70 to cx + 78).
+          [['q_in', '$Q$', 150], ['k_in', '$K$', 450], ['v_in', '$V$', 750]].forEach(([id, l, cx], i) => {
+            b += node(id, cx - 70, 454, 140, l) + line([[cx, 454], [cx, 400]]);
+            b += many('proj' + i, cx - 70, 358, 140, `Linear $W_i^${l[1]}$`) + line([[cx, 358], [cx, 304]]);
+          });
+          b += fo(-186, 366, md(`$h = ${h}$개`), 'r');
+          b += shape(236, 398, withD(q, ['d_model', dm])) + shape(536, 398, withD(k, ['d_model', dm]));
+          b += shape(236, 302, heads(q, 'd_k')) + shape(536, 302, heads(k, 'd_k'));
+          b += many('sdpa_h', 70, 262, 760, 'Scaled Dot-Product Attention') + line([[450, 262], [450, 200]]);
+          b += shape(462, 198, heads(q, 'd_v'));
+          b += node('concat', 300, 158, 300, 'Concat') + line([[450, 158], [450, 104]]);
+          b += shape(462, 102, withD(q, ['h·d_v', h * dk]));
+          b += node('wo', 300, 62, 300, 'Linear $W^O$') + line([[450, 62], [450, 12]]);
+          b += shape(462, 4, withD(q, ['d_model', dm]));
+          return b;
+        },
+        // A chain at x 180-420 (Q, K into it), V up the right into the second MatMul.
+        sdpa(inf) {
+          const q = KINDS[kind].q(inf), k = KINDS[kind].k(inf);
+          let b = fo(0, 0, md('$\\mathrm{Attention}(Q, K, V) = \\mathrm{softmax}(QK^\\top / \\sqrt{d_k}) V$'), 'n', 440);
+          b += node('sq', 190, 454, 80, '$Q$') + node('sk', 330, 454, 80, '$K$') + node('sv', 710, 454, 100, '$V$');
+          b += line([[230, 454], [266, 416]]) + line([[370, 454], [334, 416]]);
+          b += shape(-80, 440, heads(q, 'd_k'), 'r') + shape(422, 440, heads(k, 'd_k'));
+          [['mm1', 'MatMul $QK^\\top$', 372], ['scale', 'Scale $\\div \\sqrt{d_k}$', 290], ['maskn', MASK(inf)[0], 208], ['smax', 'SoftMax', 126]].forEach(
+            ([id, l, y], i) => (b += node(id, 180, y, 240, l) + (i < 3 ? line([[300, y], [300, y - 40]]) : ''))
+          );
+          b += fo(-80, 216, 'score', 'r') + shape(-80, 244, score(q, k), 'r');
+          b += line([[300, 126], [300, 80], [557, 80]]);
+          b += node('mm2', 560, 60, 240, 'MatMul $\\cdot V$');
+          b += line([[760, 454], [760, 102]]) + shape(488, 260, heads(k, 'd_v'), 'r');
+          b += line([[680, 60], [680, 8]]) + shape(692, 4, heads(q, 'd_v'));
+          return b;
+        },
+        ffn(inf) {
+          const s = side(inf);
+          let b = fo(0, 0, md('$\\mathrm{FFN}(x) = \\max(0, xW_1 + b_1) W_2 + b_2$'), 'n', 440);
+          b += fo(0, 28, '위치마다 독립, 같은 가중치', '', 440);
+          b += line([[450, 496], [450, 412]]) + shape(462, 420, withD(s, ['d_model', dm]));
+          b += node('w1', 300, 370, 300, 'Linear $W_1 + b_1$') + line([[450, 370], [450, 296]]);
+          b += shape(462, 302, withD(s, ['d_ff', dff]));
+          b += node('relu', 330, 254, 240, 'ReLU $\\max(0, \\cdot)$') + line([[450, 254], [450, 180]]);
+          b += shape(462, 186, withD(s, ['d_ff', dff]));
+          b += node('w2', 300, 138, 300, 'Linear $W_2 + b_2$') + line([[450, 138], [450, 64]]);
+          b += shape(462, 70, withD(s, ['d_model', dm]));
+          return b;
+        },
+        // Residual taken off the input and added after dropout; every step keeps the input shape.
+        an(inf) {
+          let b = fo(0, 0, md('$\\mathrm{LayerNorm}(x + \\mathrm{Dropout}(\\mathrm{Sublayer}(x)))$'), 'n', 440);
+          b += line([[450, 496], [450, 402]]) + fo(462, 468, md('$x$'), '', 20) + shape(462, 404, withD(side(inf), ['d_model', dm]));
+          b += node('an_sub', 300, 360, 300, '$\\mathrm{Sublayer}(x)$') + line([[450, 360], [450, 302]]);
+          b += node('an_drop', 360, 260, 180, 'Dropout') + line([[450, 260], [450, 202]]);
+          b += node('an_add', 390, 160, 120, '$x + \\cdot$') + line([[450, 160], [450, 102]]);
+          b += node('an_ln', 330, 60, 240, 'LayerNorm') + line([[450, 60], [450, 12]]);
+          b += line([[450, 476], [250, 476], [250, 180], [387, 180]], 'res') + fo(120, 300, 'residual', '', 120);
+          return b;
+        },
+      };
+
+      // The three attentions side by side; inference columns use beam 4 at step t.
+      function usesTable() {
+        const sh = (s) => `${symT(s.sy)}<br>${numT(s.nu)}`;
+        const r = [
+          ['Encoder self-attention', '이전 encoder layer', '$Q$와 같음', 'padding', sh(score(src, src)), '실행 1회', '실행 1회'],
+          ['Decoder masked self-attention', '이전 decoder layer', '$Q$와 같음', 'causal + padding', sh(score(dec(false), dec(false))), sh(score(dec(true), dec(true))),
+            sh(S(['B·beam', 'h', '1', 't'], [Bb, h, 1, t]))],
+          ['Encoder-decoder attention', '아래 Add & Norm', '$z$', 'padding', sh(score(dec(false), src)), sh(score(dec(true), srcAt(true))),
+            sh(S(['B·beam', 'h', '1', 'n'], [Bb, h, 1, n]))],
+        ];
+        return '<table><tr><th>사용처</th><th>$Q$</th><th>$K$, $V$</th><th>mask</th><th>학습 score</th><th>추론 score</th><th>추론, KV-cache</th></tr>'.replace(/\$(.+?)\$/g, (_, x) => tex(x)) +
+          r.map((c) => '<tr>' + c.map((x) => `<td>${md(x)}</td>`).join('') + '</tr>').join('') + '</table>';
+      }
+
+      function draw() {
+        const inf = mode === 'infer';
+        const uses = view === 'uses';
+        document.getElementById('dia').style.display = uses ? 'none' : '';
+        document.getElementById('uses').hidden = !uses;
+        // FFN and Add & Norm only distinguish encoder from decoder.
+        const kinds = uses ? [] : view === 'ffn' || view === 'an' ? [['enc', 'encoder'], ['dself', 'decoder']] : Object.entries(KINDS).map(([k, v]) => [k, v.name]);
+        if (kinds.length && !kinds.some(([k]) => k === kind)) kind = 'dself';
+        document.getElementById('kinds').hidden = !kinds.length;
+        document.getElementById('kinds').innerHTML = kinds.map(([k, l]) => `<button data-kind="${k}" aria-pressed="${k === kind}">${l}</button>`).join('');
+
+        if (uses) {
+          document.getElementById('uses').innerHTML = usesTable();
+          document.getElementById('panel').innerHTML =
+            '<h3>세 가지 attention</h3><p>' +
+            md('같은 Multi-Head Attention 모듈이 세 곳에서 쓰인다. 달라지는 것은 $Q$와 $K, V$의 출처, mask, score shape뿐이다. 추론 열은 beam size 4, step $t = 3$ 기준이다.') +
+            '</p><p class="conv">' + md('KV-cache와 score의 축 순서 $(B, h, \\cdot, \\cdot)$는 구현 관례다.') + '</p>';
+        } else {
+          document.getElementById('dia').innerHTML =
+            `<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0 0L10 5L0 10z"/></marker></defs>` +
+            VIEWS[view](inf);
+          const it = INFO[sel.startsWith('proj') ? 'proj' : sel](inf);
+          document.getElementById('panel').innerHTML =
+            `<h3>${md(it.t)}</h3><p>${md(it.d)}</p>` +
+            `<div class="rows">${it.rows
+              .map(([k, s, v]) => `<div><span class="k">${md(k)}</span><br>${symT(s)}<br>${numT(v)}</div>`)
+              .join('')}</div>` +
+            (it.conv ? `<p class="conv">${md(it.conv)}</p>` : '');
+        }
+        document.querySelectorAll('[data-mode]').forEach((x) => x.setAttribute('aria-pressed', x.dataset.mode === mode));
+        document.querySelectorAll('[data-view]').forEach((x) => x.setAttribute('aria-pressed', x.dataset.view === view));
+      }
+
+      document.getElementById('ex').innerHTML = md(
+        '예시: base 모델, $B=2$, $n=10$, $m=7$, $h=8$, $d_k=64$, beam size 4, 추론 step $t=3$'
+      );
+      const pick = (g) => {
+        sel = g.dataset.id;
+        draw();
+      };
+      document.getElementById('dia').addEventListener('click', (e) => {
+        const g = e.target.closest('.node');
+        if (g) pick(g);
+      });
+      document.getElementById('dia').addEventListener('keydown', (e) => {
+        const g = e.target.closest('.node');
+        if (g && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          pick(g);
+          document.querySelector(`[data-id="${sel}"]`).focus();
+        }
+      });
+      document.querySelector('.fig').addEventListener('click', (e) => {
+        const x = e.target.closest('button');
+        if (!x) return;
+        if (x.dataset.mode) mode = x.dataset.mode;
+        if (x.dataset.view) (view = x.dataset.view), (sel = DEF[view]);
+        if (x.dataset.kind) kind = x.dataset.kind;
+        draw();
+      });
+      draw();
+    </script>
+  </body>
+</html>

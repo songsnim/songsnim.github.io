@@ -1,6 +1,6 @@
 ---
 title: "mind-meld: Agent 코드를 이해하는 속도가 곧 개발 속도"
-date: 2026-09-11
+published: 2026-09-11
 topics:
   - Dev
   - Agent

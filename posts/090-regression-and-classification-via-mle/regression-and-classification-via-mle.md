@@ -1,6 +1,6 @@
 ---
 title: "[ML] MLE 관점에서 회귀와 분류 바라보기"
-date: 2025-10-14
+published: 2025-10-14
 topics:
   - ML
   - Math

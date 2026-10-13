@@ -17,7 +17,7 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../posts');
-const REQUIRED = ['title', 'date', 'topics', 'description', 'draft'];
+const REQUIRED = ['title', 'topics', 'description', 'draft'];
 
 const errors = [];
 const warnings = [];
@@ -100,9 +100,14 @@ for (const slug of slugs) {
     if (!topic.replace(/["']/g, '').trim()) fail(slug, 'topics holds an empty entry');
   }
 
-  const date = frontmatter.match(/^date: (\d{4}-\d{2}-\d{2})$/m);
-  if (!date) fail(slug, 'date must be YYYY-MM-DD');
-  else order.push({ slug, n: Number(slug.match(PREFIX)?.[1] ?? 0), date: date[1] });
+  // `published:` is optional: without it the build reads the first publish out
+  // of git (see content.config.ts). Present, it must still be a usable date.
+  const date = frontmatter.match(/^published: *(.+)$/m);
+  if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date[1].trim())) {
+    fail(slug, 'published must be YYYY-MM-DD');
+  } else if (date) {
+    order.push({ slug, n: Number(slug.match(PREFIX)?.[1] ?? 0), date: date[1].trim() });
+  }
 
   const cover = frontmatter.match(/^cover: "\.\/(.+)"$/m);
   if (cover && !existsSync(join(dir, cover[1]))) {

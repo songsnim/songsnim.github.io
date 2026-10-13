@@ -1,6 +1,6 @@
 ---
 title: "[백준] 퇴사"
-date: 2023-06-25
+published: 2023-06-25
 topics:
   - "코딩테스트"
 description: "백준 '퇴사' 문제 풀이."

@@ -1,6 +1,6 @@
 ---
 title: "[Softeer] 강의실 배정"
-date: 2023-07-06
+published: 2023-07-06
 topics:
   - "코딩테스트"
 description: "Softeer '강의실 배정' 문제 풀이."

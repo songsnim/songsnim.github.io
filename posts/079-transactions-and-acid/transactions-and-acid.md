@@ -1,6 +1,6 @@
 ---
 title: "[DB] 트랜잭션과 ACID"
-date: 2025-08-15
+published: 2025-08-15
 topics:
   - Dev
   - Data

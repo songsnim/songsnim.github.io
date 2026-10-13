@@ -1,6 +1,6 @@
 ---
 title: "bbox 포맷, xyxy와 xywh 무엇을 써야 할까?"
-date: 2025-08-06
+published: 2025-08-06
 topics:
   - "ML"
 description: "객체 탐지의 두 bbox 포맷 xyxy와 xywh를 언제 어떻게 써야 하는지."

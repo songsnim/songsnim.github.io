@@ -14,7 +14,7 @@ const { posts, groupByYear = true, searchable = false } = Astro.props;
 // Spaces are dropped so "경사 하강" still finds 경사하강법 — Korean compounds are
 // written both ways and a reader should not have to guess which.
 const haystack = (p: CollectionEntry<'posts'>) =>
-  [p.data.title, p.data.description, ...p.data.topics, p.data.date.getFullYear()]
+  [p.data.title, p.data.description, ...p.data.topics, p.data.published.getFullYear()]
     .join(' ')
     .toLowerCase()
     .replace(/\s+/g, '');
@@ -27,7 +27,7 @@ const fmtFull = (d: Date) =>
 const groups = groupByYear
   ? [
       ...posts.reduce((m, p) => {
-        const y = p.data.date.getFullYear();
+        const y = p.data.published.getFullYear();
         if (!m.has(y)) m.set(y, []);
         m.get(y)!.push(p);
         return m;
@@ -51,8 +51,8 @@ const groups = groupByYear
         {items.map((p) => (
           <li class="row" data-q={searchable ? haystack(p) : undefined}>
             <a class="row__link" href={`/posts/${p.id}`}>
-              <time class="row__date" datetime={p.data.date.toISOString().slice(0, 10)}>
-                {year === null ? fmtFull(p.data.date) : fmt(p.data.date)}
+              <time class="row__date" datetime={p.data.published.toISOString().slice(0, 10)}>
+                {year === null ? fmtFull(p.data.published) : fmt(p.data.published)}
               </time>
               <span class="row__title">{p.data.title}</span>
               <span class="row__desc">{p.data.description}</span>

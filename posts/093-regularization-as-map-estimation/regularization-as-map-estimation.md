@@ -1,6 +1,6 @@
 ---
 title: "[ML] MAP관점에서 regularization 바라보기"
-date: 2025-11-02
+published: 2025-11-02
 topics:
   - ML
   - Math

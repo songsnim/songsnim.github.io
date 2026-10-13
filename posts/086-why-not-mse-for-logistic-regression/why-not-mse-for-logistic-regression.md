@@ -1,6 +1,6 @@
 ---
 title: "[ML] MSE를 Logistic Regression의 Loss로 사용하지 않는 이유"
-date: 2025-10-09
+published: 2025-10-09
 topics:
   - ML
   - Math

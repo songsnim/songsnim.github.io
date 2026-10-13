@@ -1,6 +1,6 @@
 ---
 title: "Pascal VOC segmentation annotation 둘러보기"
-date: 2023-11-04
+published: 2023-11-04
 topics:
   - "ML"
 description: "Pascal VOC 2012의 segmentation annotation 구조를 직접 뜯어본다."

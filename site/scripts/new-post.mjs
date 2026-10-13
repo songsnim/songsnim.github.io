@@ -7,6 +7,9 @@
  * The number is one past the highest folder in posts/ (gaps stay gaps), the
  * markdown file is named after the slug, and an already-created empty note is
  * filled in place rather than duplicated — Obsidian often makes the note first.
+ *
+ * No `published:` is written: the build takes it from the first commit that published
+ * the post (see content.config.ts), so drafting for a month does not backdate it.
  */
 import { readdirSync, existsSync, mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
@@ -33,14 +36,12 @@ if (existing && readFileSync(join(ROOT, existing, `${slug}.md`), 'utf8').trim())
 const next = String(Math.max(0, ...dirs.map((d) => +d.slice(0, 3))) + 1).padStart(3, '0');
 const dir = join(ROOT, existing ?? `${next}-${slug}`);
 const file = join(dir, `${slug}.md`);
-const today = new Date().toLocaleDateString('sv-SE'); // sv-SE is ISO, in local time
 
 mkdirSync(dir, { recursive: true });
 writeFileSync(
   file,
   `---
 title: "${title ?? slug}"
-date: ${today}
 topics:
   - "${topic}"
 description: "TODO: 한 줄 요약"

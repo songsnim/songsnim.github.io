@@ -1,6 +1,6 @@
 ---
 title: 저수지 샘플링
-date: 2025-10-30
+published: 2025-10-30
 topics:
   - ML
   - Math

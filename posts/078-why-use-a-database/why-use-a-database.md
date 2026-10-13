@@ -1,6 +1,6 @@
 ---
 title: "[DB] 왜 DB를 써야하는가?: 무결성, 동시성, 속도"
-date: 2025-08-14
+published: 2025-08-14
 topics:
   - Dev
   - Data

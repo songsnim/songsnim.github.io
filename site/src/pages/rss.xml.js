@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 
 export async function GET(context) {
   const posts = (await getCollection('posts', ({ data }) => !data.draft)).sort(
-    (a, b) => b.data.date.getTime() - a.data.date.getTime()
+    (a, b) => b.data.published.getTime() - a.data.published.getTime()
   );
 
   return rss({
@@ -13,7 +13,7 @@ export async function GET(context) {
     items: posts.map((post) => ({
       title: post.data.title,
       description: post.data.description,
-      pubDate: post.data.date,
+      pubDate: post.data.published,
       categories: post.data.topics,
       link: `/posts/${post.id}`,
     })),

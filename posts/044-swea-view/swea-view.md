@@ -1,6 +1,6 @@
 ---
 title: "[SWEA] 조망권 확보"
-date: 2023-06-24
+published: 2023-06-24
 topics:
   - "코딩테스트"
 description: "SWEA '조망권 확보' 문제 풀이."

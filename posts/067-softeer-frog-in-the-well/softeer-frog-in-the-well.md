@@ -1,6 +1,6 @@
 ---
 title: "[Softeer] 우물 안 개구리"
-date: 2023-07-06
+published: 2023-07-06
 topics:
   - "코딩테스트"
 description: "Softeer '우물 안 개구리' 문제 풀이."

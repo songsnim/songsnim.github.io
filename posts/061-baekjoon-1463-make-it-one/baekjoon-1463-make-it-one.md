@@ -1,6 +1,6 @@
 ---
 title: "백준 1로 만들기"
-date: 2023-06-30
+published: 2023-06-30
 topics:
   - "코딩테스트"
 description: "백준 '1로 만들기' 문제 풀이."

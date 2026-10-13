@@ -35,7 +35,6 @@ put drafts and scratch notes elsewhere in the vault, or mark them `draft: true`.
    ```yaml
    ---
    title: "글 제목"
-   date: 2026-08-09
    topics:
      - "ML"
    description: "목록과 검색결과에 노출되는 한 줄 요약."
@@ -54,6 +53,10 @@ put drafts and scratch notes elsewhere in the vault, or mark them `draft: true`.
 
 `draft: true` keeps a post in the repository but out of the build, so unfinished work can
 sit here safely.
+
+No `published:` key: the published date is the commit that first set `draft: false`, read
+out of git at build time, so editing a post later never moves it. Adding an explicit
+`published: YYYY-MM-DD` to the frontmatter overrides that, and is the only way to change it.
 
 ## Checking before you push
 

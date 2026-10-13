@@ -1,6 +1,6 @@
 ---
 title: "[SWEA] 달팽이 숫자"
-date: 2023-06-29
+published: 2023-06-29
 topics:
   - "코딩테스트"
 description: "SWEA '달팽이 숫자' 문제 풀이."

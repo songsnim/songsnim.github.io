@@ -1,6 +1,6 @@
 ---
 title: "Python global() 동적 변수 할당"
-date: 2023-06-14
+published: 2023-06-14
 topics:
   - "Dev"
 description: "global()로 문자열 변수명을 써서 동적으로 전역변수를 할당하는 법."

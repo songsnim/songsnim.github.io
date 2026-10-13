@@ -1,6 +1,6 @@
 ---
 title: "[Softeer] 바이러스"
-date: 2023-07-05
+published: 2023-07-05
 topics:
   - "코딩테스트"
 description: "Softeer '바이러스' 문제 풀이."

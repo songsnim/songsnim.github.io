@@ -1,6 +1,6 @@
 ---
 title: "Python 스택/큐 구현"
-date: 2023-06-16
+published: 2023-06-16
 topics:
   - "Dev"
 description: "파이썬 리스트와 deque로 스택과 큐를 구현한다."

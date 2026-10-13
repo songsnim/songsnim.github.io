@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Learning Rate Warmup</title>
+    <link rel="stylesheet" href="/figure.css" />
+    <style>
+      /* Transparent so the host's background shows through; color-scheme is
+         left to /figure.css so the iframe matches its host. */
+      html,
+      body {
+        margin: 0;
+        min-height: 0 !important;
+        background: transparent !important;
+      }
+      .fig {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+        height: 100vh;
+        box-sizing: border-box;
+        padding: var(--space-sm) 0;
+        font-family: var(--body);
+        font-size: 0.9rem;
+        color: var(--ink);
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xs) var(--space-lg);
+        align-items: center;
+      }
+      .controls label {
+        display: flex;
+        gap: var(--space-sm);
+        align-items: center;
+        color: var(--muted);
+      }
+      .controls input {
+        accent-color: var(--accent);
+      }
+      svg {
+        flex: 1;
+        min-height: 0;
+        width: 100%;
+        font-family: var(--body);
+        font-size: 14px;
+      }
+      .grid {
+        stroke: var(--rule);
+      }
+      .tick {
+        fill: var(--muted);
+      }
+      .warm {
+        fill: var(--accent-soft);
+      }
+      .curve {
+        fill: none;
+        stroke: var(--accent);
+        stroke-width: 2.5;
+      }
+      .nowarm {
+        fill: none;
+        stroke: var(--muted);
+        stroke-width: 1.5;
+        stroke-dasharray: 6 4;
+      }
+      .dot {
+        fill: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="fig">
+      <div class="controls">
+        <label>warmup_steps <input id="wu" type="range" min="500" max="16000" step="500" value="4000" /><span id="wuv"></span></label>
+        <label>step <input id="st" type="range" min="1" max="100000" step="1" value="4000" /></label>
+      </div>
+      <svg id="plot" viewBox="0 0 800 340" role="img" aria-label="learning rate schedule"></svg>
+    </div>
+
+    <script type="module">
+      const theme = new URLSearchParams(location.search).get('theme');
+      if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+
+      // Sec. 5.3: lrate = d_model^-0.5 * min(step^-0.5, step * warmup^-1.5); base model, 100K steps.
+      const dm = 512, maxS = 100000;
+      const lr = (s, wu) => dm ** -0.5 * Math.min(s ** -0.5, s * wu ** -1.5);
+
+      // Plot area; y axis is fixed to the default schedule's peak so changing warmup moves the curve.
+      const L = 64, R = 784, T = 14, Bt = 306;
+      const yMax = 9e-4;
+      const X = (s) => L + ((R - L) * s) / maxS;
+      const Y = (v) => Bt - ((Bt - T) * Math.min(v, yMax)) / yMax;
+      const path = (f) =>
+        'M' + Array.from({ length: 721 }, (_, i) => Math.max(1, (maxS * i) / 720)).map((s) => `${X(s).toFixed(1)} ${Y(f(s)).toFixed(1)}`).join(' L');
+
+      function draw() {
+        const wu = +document.getElementById('wu').value;
+        const st = +document.getElementById('st').value;
+        let b = '';
+        for (let v = 0; v <= 8; v += 2) {
+          const y = Y(v * 1e-4);
+          b += `<line class="grid" x1="${L}" x2="${R}" y1="${y}" y2="${y}"/><text class="tick" x="${L - 8}" y="${y + 5}" text-anchor="end">${v}</text>`;
+        }
+        for (let k = 0; k <= 4; k++) {
+          const s = (maxS * k) / 4;
+          b += `<text class="tick" x="${X(s)}" y="${Bt + 22}" text-anchor="middle">${s / 1000}K</text>`;
+        }
+        b += `<text class="tick" x="${L - 8}" y="${T - 2}" text-anchor="end">×1e-4</text>`;
+        b += `<rect class="warm" x="${L}" y="${T}" width="${X(wu) - L}" height="${Bt - T}"/>`;
+        // Without warmup the schedule is step^-0.5 from step 1, far above the plot at the start.
+        b += `<path class="nowarm" d="${path((s) => dm ** -0.5 * s ** -0.5)}"/>`;
+        b += `<path class="curve" d="${path((s) => lr(s, wu))}"/>`;
+        b += `<circle class="dot" cx="${X(st)}" cy="${Y(lr(st, wu))}" r="5"/>`;
+        document.getElementById('plot').innerHTML = b;
+        document.getElementById('wuv').textContent = wu;
+      }
+      ['wu', 'st'].forEach((id) => document.getElementById(id).addEventListener('input', draw));
+      draw();
+    </script>
+  </body>
+</html>

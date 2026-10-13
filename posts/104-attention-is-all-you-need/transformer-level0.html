@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transformer Level 0</title>
+    <link rel="stylesheet" href="/figure.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css" />
+    <style>
+      /* The host's background shows through, so the figure has no edge of its
+         own. color-scheme is left to /figure.css on purpose: an iframe whose
+         scheme differs from its host's gets an opaque canvas, so it must match
+         the host (dark in dark), not be reset to `normal`. */
+      html,
+      body {
+        margin: 0;
+        min-height: 0 !important;
+        background: transparent !important;
+      }
+
+      .fig {
+        display: grid;
+        grid-template-columns: minmax(0, 810px) 18rem;
+        justify-content: center;
+        gap: var(--space-lg);
+        height: 100vh;
+        box-sizing: border-box;
+        padding: var(--space-base);
+        font-family: var(--body);
+        color: var(--ink);
+      }
+
+      /* Drawn in CSS pixels and shown at 90% (900 units in an 810px column), so
+         labels match the panel's 0.9rem. Narrower than that, it scales. */
+      svg {
+        width: 100%;
+        height: 100%;
+        font-family: var(--body);
+        font-size: 1rem;
+      }
+
+      .node rect {
+        fill: var(--surface-warm);
+        stroke: var(--rule);
+        stroke-width: 1.5;
+      }
+      .node {
+        cursor: pointer;
+      }
+      .node:hover rect,
+      .node:focus rect {
+        stroke: var(--muted);
+        outline: none;
+      }
+      .node.sel rect {
+        fill: var(--accent-soft);
+        stroke: var(--accent);
+        stroke-width: 2.5;
+      }
+      .node text {
+        fill: var(--ink);
+        font-weight: 700;
+      }
+
+      .edge {
+        fill: none;
+        stroke: var(--ink-soft);
+        stroke-width: 1.8;
+      }
+      .edge.mem {
+        stroke-dasharray: 6 4;
+      }
+      .edge.loop {
+        stroke: var(--accent);
+        stroke-width: 2.2;
+        stroke-dasharray: 7 5;
+      }
+      .ah {
+        fill: var(--ink-soft);
+      }
+      .ah-loop {
+        fill: var(--accent);
+      }
+
+      /* Labels are HTML in <foreignObject> so symbols can be KaTeX, set the
+         same way as the article's math. */
+      .lab {
+        pointer-events: none;
+        overflow: visible;
+      }
+      .lab div {
+        font-family: var(--body);
+        line-height: 24px;
+        white-space: nowrap;
+        color: var(--muted);
+      }
+      .lab.n div {
+        color: var(--ink);
+      }
+      .lab.c div {
+        text-align: center;
+      }
+      .loop-text {
+        fill: var(--accent);
+      }
+
+      aside {
+        overflow-y: auto;
+        align-self: center;
+        max-height: 100%;
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+      .mode {
+        display: flex;
+        gap: var(--space-xs);
+        margin-bottom: var(--space-md);
+      }
+      .mode button {
+        flex: 1;
+        font: inherit;
+        padding: var(--space-xs) var(--space-sm);
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--rule);
+        border-radius: var(--r-sm);
+        cursor: pointer;
+      }
+      .mode button[aria-pressed='true'] {
+        color: var(--ink);
+        border-color: var(--accent);
+        background: var(--accent-soft);
+      }
+      aside h3 {
+        margin: 0 0 var(--space-xs);
+        font-size: 1em;
+      }
+      aside p {
+        margin: var(--space-sm) 0;
+      }
+      .rows {
+        font-family: var(--mono);
+        margin: var(--space-sm) 0;
+      }
+      .rows div {
+        margin-bottom: var(--space-xs);
+      }
+      .rows .k {
+        color: var(--muted);
+        font-family: var(--body);
+      }
+      .conv {
+        color: var(--muted);
+        border-left: 2px solid var(--rule);
+        padding-left: var(--space-sm);
+      }
+      .ex {
+        color: var(--faint);
+      }
+
+      @media (max-width: 560px) {
+        .fig {
+          grid-template-columns: 1fr;
+          grid-template-rows: 60% 40%;
+          height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="fig">
+      <svg id="dia" viewBox="0 0 900 544" role="img" aria-label="Transformer level 0 diagram"></svg>
+      <aside>
+        <div class="mode" role="group" aria-label="mode">
+          <button data-mode="train">학습</button>
+          <button data-mode="infer">추론</button>
+        </div>
+        <div id="panel" aria-live="polite"></div>
+        <p class="ex" id="ex"></p>
+      </aside>
+    </div>
+
+    <script type="module">
+      import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.mjs';
+
+      const theme = new URLSearchParams(location.search).get('theme');
+      if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+
+      // Fixed example: base model (Sec. 3, Table 3), EN-DE vocab (Sec. 5.1), beam 4 (Sec. 6.1).
+      const B = 2, n = 10, m = 7, dm = 512, V = 37000, beam = 4, t = 3, N = 6;
+      const Bb = B * beam;
+      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+      const tex = (s) => katex.renderToString(s, { throwOnError: false });
+      // Prose with $...$ spans set as math, like the article's Markdown.
+      const md = (s) => s.split(/\$(.+?)\$/).map((p, i) => (i % 2 ? tex(p) : p)).join('');
+      const SYM = { d_model: 'd_{\\text{model}}', 'B·beam': 'B \\cdot \\text{beam}' };
+      const num = (x) => (x >= 10000 ? String(x).replace(/(\d)(?=(\d{3})+$)/g, '$1{,}') : String(x));
+      const symT = (sy) => tex('(' + sy.map((x) => SYM[x] ?? x).join(', ') + ')');
+      const numT = (nu) => tex('= (' + nu.map(num).join(', ') + ')');
+
+      let mode = 'train';
+      let sel = 'encoder';
+
+      const INFO = {
+        enc_in: (inf) => ({
+          t: 'Encoder input',
+          d: 'source 문장의 token id sequence $(x_1, \\dots, x_n)$. EN-DE는 source와 target이 공유하는 BPE vocab(약 37000), EN-FR은 word-piece 32000을 쓴다.',
+          rows: [['source token ids', ['B', 'n'], [B, n]]],
+          conv: inf ? '추론에서 encoder는 문장 $B$개에 대해 한 번만 실행한다.' : '',
+        }),
+        encoder: () => ({
+          t: 'Encoder',
+          d: `같은 구조의 layer $N = ${N}$개를 쌓은 stack. 각 layer는 self-attention과 FFN 두 sub-layer로 구성되며, 입력과 출력의 shape이 같다. self-attention에는 mask가 없어 모든 위치가 좌우를 모두 본다.`,
+          rows: [
+            ['입력 (embedding + PE)', ['B', 'n', 'd_model'], [B, n, dm]],
+            ['출력', ['B', 'n', 'd_model'], [B, n, dm]],
+          ],
+        }),
+        enc_out: (inf) => ({
+          t: 'Encoder output $z$',
+          d: '연속 표현 $z = (z_1, \\dots, z_n)$. 마지막 encoder layer의 출력이며, 모든 decoder layer의 encoder-decoder attention에서 key와 value로 쓰인다.',
+          rows: [['$z$', ['B', 'n', 'd_model'], [B, n, dm]]].concat(
+            inf ? [['beam 복제 후', ['B·beam', 'n', 'd_model'], [Bb, n, dm]]] : []
+          ),
+          conv: inf ? '추론 시 $z$를 beam size만큼 복제하는 것은 구현 관례다. 논문에는 없다.' : '',
+        }),
+        dec_in: (inf) => ({
+          t: 'Decoder input',
+          d: inf
+            ? '추론: 지금까지 생성한 prefix $t$개를 넣는다. 매 step 예측한 token이 끝에 붙는다.'
+            : '학습: 정답 target을 오른쪽으로 한 칸 민 sequence $y_0 \\dots y_{m-1}$를 넣는다(teacher forcing). $y_0$는 시작 token이다. causal mask와 함께 쓰여 위치 $i$의 예측이 $i$ 이전 출력에만 의존한다.',
+          rows: [inf ? ['prefix token ids', ['B·beam', 't'], [Bb, t]] : ['$y_0 \\dots y_{m-1}$', ['B', 'm'], [B, m]]],
+          conv: '시작 token $y_0$의 이름(&lt;s&gt; 등)과 기호는 논문에 없다. 구현 관례다.',
+        }),
+        decoder: (inf) => ({
+          t: 'Decoder',
+          d: `같은 구조의 layer $N = ${N}$개를 쌓은 stack. encoder layer의 두 sub-layer 사이에 $z$를 보는 encoder-decoder attention이 추가되고, self-attention에는 미래 위치를 가리는 mask가 걸린다.`,
+          rows: inf
+            ? [['입력/출력', ['B·beam', 't', 'd_model'], [Bb, t, dm]]]
+            : [['입력/출력', ['B', 'm', 'd_model'], [B, m, dm]]],
+        }),
+        dec_out: (inf) => ({
+          t: 'Decoder output',
+          d:
+            'decoder 출력에 linear 변환과 softmax를 적용해 다음 token의 확률분포를 낸다. ' +
+            (inf
+              ? '추론에서는 마지막 위치의 분포만 써서 beam을 확장한다. 고른 token은 decoder input 끝에 붙어 다음 step으로 돌아간다.'
+              : '학습에서는 $m$개 위치 전부에서 label smoothing $(\\epsilon_{ls} = 0.1)$을 적용한 cross-entropy를 한 번에 계산한다.'),
+          rows: inf
+            ? [
+                ['전체 위치', ['B·beam', 't', 'V'], [Bb, t, V]],
+                ['사용: 마지막 위치', ['B·beam', 'V'], [Bb, V]],
+              ]
+            : [
+                ['probabilities', ['B', 'm', 'V'], [B, m, V]],
+                ['labels $(y_1 \\dots y_m)$', ['B', 'm'], [B, m]],
+              ],
+        }),
+      };
+
+      // An HTML label whose first line's top sits at (x, y).
+      const fo = (x, y, html, cls = '', w = 260) =>
+        `<foreignObject class="lab ${cls}" x="${x}" y="${y}" width="${w}" height="28"><div xmlns="http://www.w3.org/1999/xhtml">${html}</div></foreignObject>`;
+      const node = (id, x, y, h, label, sub) =>
+        `<g class="node${sel === id ? ' sel' : ''}" data-id="${id}" tabindex="0" role="button" aria-label="${esc(label)}">` +
+        `<rect x="${x}" y="${y}" width="210" height="${h}" rx="8"/>` +
+        `<text x="${x + 105}" y="${y + h / 2 - 4}" text-anchor="middle">${esc(label)}</text>` +
+        fo(x, y + h / 2 + 2, sub, 'c', 210) + `</g>`;
+      const box = (id, x, y, label, sub) => node(id, x, y, 64, label, sub);
+      const bigbox = (id, x, y, label, sub) => node(id, x, y, 120, label, sub);
+      const line = (pts, cls = '') =>
+        `<path class="edge ${cls}" d="M${pts.map((p) => p.join(' ')).join(' L')}" marker-end="url(#${cls === 'loop' ? 'ahL' : 'ah'})"/>`;
+      // Labels stacked downward from (x, y), 28px apart; [html, cls] pairs.
+      const stack = (x, y, rows) => rows.map(([h, c], i) => fo(x, y + 28 * i, h, c)).join('');
+      const shape = (x, y, sy, nu) => stack(x, y, [[symT(sy), ''], [numT(nu), 'n']]);
+
+      function draw() {
+        const inf = mode === 'infer';
+        let b = `<defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0 0L10 5L0 10z"/></marker>
+          <marker id="ahL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah-loop" d="M0 0L10 5L0 10z"/></marker></defs>`;
+        // Encoder column, x 0-210. Shape labels sit right of each arrow and end
+        // before the z arrow at x 240.
+        b += box('enc_in', 0, 470, 'Encoder input', tex('x_1 \\dots x_n'));
+        b += bigbox('encoder', 0, 220, 'Encoder', tex(`N = ${N}`));
+        b += box('enc_out', 0, 10, 'Encoder output', tex('z = (z_1 \\dots z_n)'));
+        b += line([[40, 470], [40, 343]]) + shape(52, 378, ['B', 'n'], [B, n]);
+        b += line([[40, 220], [40, 77]]) + shape(52, 118, ['B', 'n', 'd_model'], [B, n, dm]);
+        // z into every decoder layer; its label fills the gap before the decoder.
+        b += line([[210, 42], [240, 42], [240, 310], [471, 310]], 'mem');
+        b += stack(252, 88, [
+          [md('$z$ → 모든 decoder'), ''],
+          [md('layer의 $K, V$'), ''],
+          [symT(inf ? ['B·beam', 'n', 'd_model'] : ['B', 'n', 'd_model']), ''],
+          [numT(inf ? [Bb, n, dm] : [B, n, dm]), 'n'],
+        ]);
+        // Decoder column, x 474-684. Labels end before the loop at x 755.
+        b += box('dec_in', 474, 470, 'Decoder input', inf ? '생성한 prefix' : tex('y_0 \\dots y_{m-1}'));
+        b += bigbox('decoder', 474, 220, 'Decoder', tex(`N = ${N}`));
+        b += box('dec_out', 474, 10, 'Decoder output', 'output probabilities');
+        b += line([[514, 470], [514, 343]]) + shape(526, 378, inf ? ['B·beam', 't'] : ['B', 'm'], inf ? [Bb, t] : [B, m]);
+        b += line([[514, 220], [514, 77]]) +
+          shape(526, 118, inf ? ['B·beam', 't', 'd_model'] : ['B', 'm', 'd_model'], inf ? [Bb, t, dm] : [B, m, dm]);
+        // Autoregressive loop, labelled beside the arrow itself.
+        if (inf) {
+          b += line([[684, 42], [755, 42], [755, 502], [687, 502]], 'loop');
+          b += ['autoregressive', 'loop:', '예측 token을', 'decoder input', '끝에 붙임']
+            .map((s, i) => `<text class="loop-text" x="767" y="${210 + 24 * i}">${s}</text>`)
+            .join('');
+        }
+        document.getElementById('dia').innerHTML = b;
+
+        const it = INFO[sel](inf);
+        document.getElementById('panel').innerHTML =
+          `<h3>${md(it.t)}</h3><p>${md(it.d)}</p>` +
+          `<div class="rows">${it.rows
+            .map(([k, sy, nu]) => `<div><span class="k">${md(k)}</span><br>${symT(sy)}<br>${numT(nu)}</div>`)
+            .join('')}</div>` +
+          (it.conv ? `<p class="conv">${md(it.conv)}</p>` : '');
+        document.querySelectorAll('.mode button').forEach((x) => x.setAttribute('aria-pressed', x.dataset.mode === mode));
+      }
+
+      document.getElementById('ex').innerHTML = md(
+        '예시: base 모델, $B=2$, $n=10$, $m=7$, $V=37{,}000$ (EN-DE BPE), beam size 4, 추론 step $t=3$'
+      );
+      document.getElementById('dia').addEventListener('click', (e) => {
+        const g = e.target.closest('.node');
+        if (g) (sel = g.dataset.id), draw();
+      });
+      document.getElementById('dia').addEventListener('keydown', (e) => {
+        const g = e.target.closest('.node');
+        if (g && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          sel = g.dataset.id;
+          draw();
+          document.querySelector(`[data-id="${sel}"]`).focus();
+        }
+      });
+      document.querySelectorAll('.mode button').forEach((x) =>
+        x.addEventListener('click', () => ((mode = x.dataset.mode), draw()))
+      );
+      draw();
+    </script>
+  </body>
+</html>

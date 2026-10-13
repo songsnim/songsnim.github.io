@@ -1,6 +1,6 @@
 ---
 title: "[SWEA] 백만장자 프로젝트"
-date: 2023-06-24
+published: 2023-06-24
 topics:
   - "코딩테스트"
 description: "SWEA '백만장자 프로젝트' 문제 풀이."

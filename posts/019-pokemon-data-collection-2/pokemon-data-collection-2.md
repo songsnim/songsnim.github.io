@@ -1,6 +1,6 @@
 ---
 title: "[포켓몬] 2. 데이터 구축 (2)"
-date: 2023-06-21
+published: 2023-06-21
 topics: []
 description: 포켓몬 타입 상성표를 HTML에서 추출해 데이터로 구축한다.
 cover: ./type-chart-reference-page.png

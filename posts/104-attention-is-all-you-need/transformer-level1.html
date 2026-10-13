@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transformer Level 1</title>
+    <link rel="stylesheet" href="/figure.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css" />
+    <style>
+      /* The host's background shows through, so the figure has no edge of its
+         own. color-scheme is left to /figure.css on purpose: an iframe whose
+         scheme differs from its host's gets an opaque canvas, so it must match
+         the host (dark in dark), not be reset to `normal`. */
+      html,
+      body {
+        margin: 0;
+        min-height: 0 !important;
+        background: transparent !important;
+      }
+
+      .fig {
+        display: grid;
+        grid-template-columns: minmax(0, 810px) 18rem;
+        justify-content: center;
+        gap: var(--space-lg);
+        height: 100vh;
+        box-sizing: border-box;
+        padding: var(--space-base);
+        font-family: var(--body);
+        color: var(--ink);
+      }
+
+      /* Drawn in CSS pixels and shown at 90% (900 units in an 810px column), so
+         labels match the panel's 0.9rem. Narrower than that, it scales. */
+      svg {
+        width: 100%;
+        height: 100%;
+        font-family: var(--body);
+        font-size: 1rem;
+      }
+
+      .node rect {
+        fill: var(--surface-warm);
+        stroke: var(--rule);
+        stroke-width: 1.5;
+      }
+      .node {
+        cursor: pointer;
+      }
+      .node:hover rect,
+      .node:focus rect {
+        stroke: var(--muted);
+        outline: none;
+      }
+      .node.sel rect {
+        fill: var(--accent-soft);
+        stroke: var(--accent);
+        stroke-width: 2.5;
+      }
+      .node text {
+        fill: var(--ink);
+        font-weight: 700;
+      }
+
+      .edge {
+        fill: none;
+        stroke: var(--ink-soft);
+        stroke-width: 1.8;
+      }
+      .edge.mem {
+        stroke-dasharray: 6 4;
+      }
+      .ah {
+        fill: var(--ink-soft);
+      }
+
+      /* Labels are HTML in <foreignObject> so symbols can be KaTeX, set the
+         same way as the article's math. */
+      .lab {
+        pointer-events: none;
+        overflow: visible;
+      }
+      .lab div {
+        font-family: var(--body);
+        line-height: 24px;
+        white-space: nowrap;
+        color: var(--muted);
+      }
+      .lab.n div {
+        color: var(--ink);
+      }
+      .lab.c div {
+        text-align: center;
+      }
+
+      aside {
+        overflow-y: auto;
+        align-self: center;
+        max-height: 100%;
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+      .mode {
+        display: flex;
+        gap: var(--space-xs);
+        margin-bottom: var(--space-md);
+      }
+      .mode button {
+        flex: 1;
+        font: inherit;
+        padding: var(--space-xs) var(--space-sm);
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--rule);
+        border-radius: var(--r-sm);
+        cursor: pointer;
+      }
+      .mode button[aria-pressed='true'] {
+        color: var(--ink);
+        border-color: var(--accent);
+        background: var(--accent-soft);
+      }
+      aside h3 {
+        margin: 0 0 var(--space-xs);
+        font-size: 1em;
+      }
+      aside p {
+        margin: var(--space-sm) 0;
+      }
+      .rows {
+        font-family: var(--mono);
+        margin: var(--space-sm) 0;
+      }
+      .rows div {
+        margin-bottom: var(--space-xs);
+      }
+      .rows .k {
+        color: var(--muted);
+        font-family: var(--body);
+      }
+      .conv {
+        color: var(--muted);
+        border-left: 2px solid var(--rule);
+        padding-left: var(--space-sm);
+      }
+      .ex {
+        color: var(--faint);
+      }
+
+      @media (max-width: 560px) {
+        .fig {
+          grid-template-columns: 1fr;
+          grid-template-rows: 60% 40%;
+          height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="fig">
+      <svg id="dia" viewBox="0 0 900 544" role="img" aria-label="Transformer level 1 diagram"></svg>
+      <aside>
+        <div class="mode" role="group" aria-label="mode">
+          <button data-mode="train">학습</button>
+          <button data-mode="infer">추론</button>
+        </div>
+        <div id="panel" aria-live="polite"></div>
+        <p class="ex" id="ex"></p>
+      </aside>
+    </div>
+
+
+    <script type="module">
+      import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.mjs';
+
+      const theme = new URLSearchParams(location.search).get('theme');
+      if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+
+      // Fixed example: base model (Sec. 3, Table 3), EN-DE vocab (Sec. 5.1), beam 4 (Sec. 6.1).
+      const B = 2, n = 10, m = 7, dm = 512, V = 37000, beam = 4, t = 3, N = 6, h = 8;
+      const Bb = B * beam;
+      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+      const tex = (s) => katex.renderToString(s, { throwOnError: false });
+      // Prose with $...$ spans set as math, like the article's Markdown.
+      const md = (s) => s.split(/\$(.+?)\$/).map((p, i) => (i % 2 ? tex(p) : p)).join('');
+      const SYM = { d_model: 'd_{\\text{model}}', 'B·beam': 'B \\cdot \\text{beam}' };
+      const num = (x) => (x >= 10000 ? String(x).replace(/(\d)(?=(\d{3})+$)/g, '$1{,}') : String(x));
+      const symT = (sy) => tex('(' + sy.map((x) => SYM[x] ?? x).join(', ') + ')');
+      const numT = (nu) => tex('= (' + nu.map(num).join(', ') + ')');
+
+      let mode = 'train';
+      let sel = 'encL0';
+
+      // Decoder-side batch and length: (B, m) in training, (B·beam, t) at inference step t.
+      const dec = (inf) => (inf ? { sy: ['B·beam', 't'], nu: [Bb, t] } : { sy: ['B', 'm'], nu: [B, m] });
+
+      const INFO = {
+        emb_src: () => ({
+          t: 'Input Embedding + PE',
+          d: 'source token id를 embedding 행렬 $E$에서 꺼내 $\\sqrt{d_{\\text{model}}}$을 곱하고, positional encoding을 더한 뒤 dropout $(P_{drop} = 0.1)$을 적용한다. 세부는 Level 2에서 다룬다.',
+          rows: [
+            ['입력: source token ids', ['B', 'n'], [B, n]],
+            ['출력: layer 1의 입력', ['B', 'n', 'd_model'], [B, n, dm]],
+          ],
+        }),
+        encL: (inf, i) => ({
+          t: `Encoder layer ${i + 1} / ${N}`,
+          d:
+            (i === 0 ? '입력은 embedding + PE다. ' : `입력은 encoder layer ${i}의 출력이다. `) +
+            (i === N - 1 ? '출력이 곧 $z$이며 모든 decoder layer로 간다. ' : `출력은 encoder layer ${i + 2}로 간다. `) +
+            'self-attention과 FFN 두 sub-layer로 구성된다. 모든 layer의 구조와 입출력 shape은 같지만 파라미터는 layer마다 따로 둔다.',
+          rows: [
+            ['입력/출력', ['B', 'n', 'd_model'], [B, n, dm]],
+            ['self-attention score', ['B', 'h', 'n', 'n'], [B, h, n, n]],
+          ],
+        }),
+        enc_out: (inf) => ({
+          t: 'Encoder output $z$',
+          d: `$z = (z_1, \\dots, z_n)$는 마지막 encoder layer $(N = ${N})$의 출력이다. 같은 $z$ 하나가 모든 decoder layer의 encoder-decoder attention에 key와 value로 들어간다. decoder layer $i$가 encoder layer $i$의 출력을 보는 구조가 아니다.`,
+          rows: [['$z$', ['B', 'n', 'd_model'], [B, n, dm]]].concat(
+            inf ? [['beam 복제 후', ['B·beam', 'n', 'd_model'], [Bb, n, dm]]] : []
+          ),
+          conv: inf ? '추론 시 $z$를 beam size만큼 복제하는 것은 구현 관례다. 논문에는 없다.' : '',
+        }),
+        emb_tgt: (inf) => ({
+          t: 'Output Embedding + PE',
+          d:
+            (inf
+              ? '추론: 지금까지 생성한 prefix $t$개를 넣는다. '
+              : '학습: 오른쪽으로 한 칸 shift한 target $y_0 \\dots y_{m-1}$을 넣는다. ') +
+            'source 쪽과 같은 순서로 처리한다. 두 embedding layer와 pre-softmax linear는 같은 가중치 행렬 $E$를 공유한다.',
+          rows: [
+            ['입력: token ids', dec(inf).sy, dec(inf).nu],
+            ['출력: layer 1의 입력', [...dec(inf).sy, 'd_model'], [...dec(inf).nu, dm]],
+          ],
+          conv: '시작 token $y_0$의 이름(&lt;s&gt; 등)과 기호는 논문에 없다. 구현 관례다.',
+        }),
+        decL: (inf, i) => {
+          const { sy, nu } = dec(inf);
+          const L = inf ? 't' : 'm', Lv = inf ? t : m;
+          return {
+            t: `Decoder layer ${i + 1} / ${N}`,
+            d:
+              (i === 0 ? '입력은 output embedding + PE다. ' : `입력은 decoder layer ${i}의 출력이다. `) +
+              (i === N - 1 ? '출력은 Linear + Softmax로 간다. ' : `출력은 decoder layer ${i + 2}로 간다. `) +
+              'masked self-attention, encoder-decoder attention, FFN 세 sub-layer로 구성된다. encoder-decoder attention은 층 번호와 관계없이 마지막 encoder 출력 $z$를 본다.',
+            rows: [
+              ['입력/출력', [...sy, 'd_model'], [...nu, dm]],
+              ['masked self-attention score', [sy[0], 'h', L, L], [nu[0], h, Lv, Lv]],
+              ['encoder-decoder attention score', [sy[0], 'h', L, 'n'], [nu[0], h, Lv, n]],
+            ],
+            conv: inf
+              ? 'KV-cache를 쓰면 query는 새 token 1개뿐이라 score의 query 축이 1이 된다. KV-cache는 논문에 없는 구현 최적화다.'
+              : '',
+          };
+        },
+        head: (inf) => ({
+          t: 'Linear + Softmax',
+          d:
+            '$d_{\\text{model}}$ 차원을 vocab 크기 $V$의 logit으로 바꾸고 softmax로 다음 token의 확률분포를 낸다. linear 가중치는 embedding 행렬 $E$와 공유한다. ' +
+            (inf
+              ? '추론에서는 마지막 위치의 분포만 써서 beam을 확장한다.'
+              : '학습에서는 $m$개 위치 전부에서 label smoothing $(\\epsilon_{ls} = 0.1)$을 적용한 cross-entropy를 계산한다.'),
+          rows: [
+            ['가중치', ['d_model', 'V'], [dm, V]],
+            ['probabilities', [...dec(inf).sy, 'V'], [...dec(inf).nu, V]],
+          ].concat(inf ? [['사용: 마지막 위치', ['B·beam', 'V'], [Bb, V]]] : [['labels $(y_1 \\dots y_m)$', ['B', 'm'], [B, m]]]),
+        }),
+      };
+
+      // An HTML label whose first line's top sits at (x, y).
+      const fo = (x, y, html, cls = '', w = 260) =>
+        `<foreignObject class="lab ${cls}" x="${x}" y="${y}" width="${w}" height="28"><div xmlns="http://www.w3.org/1999/xhtml">${html}</div></foreignObject>`;
+      // A 230-wide node; with no sub, the label is centred alone.
+      const node = (id, x, y, hh, label, sub) =>
+        `<g class="node${sel === id ? ' sel' : ''}" data-id="${id}" tabindex="0" role="button" aria-label="${esc(label)}">` +
+        `<rect x="${x}" y="${y}" width="230" height="${hh}" rx="8"/>` +
+        `<text x="${x + 115}" y="${y + hh / 2 + (sub ? -4 : 6)}" text-anchor="middle">${esc(label)}</text>` +
+        (sub ? fo(x, y + hh / 2 + 2, sub, 'c', 230) : '') + `</g>`;
+      const line = (pts, cls = '', arrow = true) =>
+        `<path class="edge ${cls}" d="M${pts.map((p) => p.join(' ')).join(' L')}"${arrow ? ' marker-end="url(#ah)"' : ''}/>`;
+      // Labels stacked downward from (x, y), 28px apart; [html, cls] pairs.
+      const stack = (x, y, rows) => rows.map(([html, c], i) => fo(x, y + 28 * i, html, c)).join('');
+
+      // Rows, bottom to top: embedding y 476, layers 1..N (40 tall, 20 apart) from y 408 up, output box y 20.
+      const LY = [...Array(N)].map((_, i) => 408 - 60 * i);
+
+      function draw() {
+        const inf = mode === 'infer';
+        const { sy, nu } = dec(inf);
+        let b = `<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0 0L10 5L0 10z"/></marker></defs>`;
+        // Two columns: encoder x 0-230, decoder x 474-704; arrows on each centre line.
+        for (const [x, p, emb, top] of [
+          [0, 'enc', ['emb_src', 'Input Embedding + PE', tex('x_1 \\dots x_n')], ['enc_out', 'Encoder output', tex('z = (z_1 \\dots z_n)')]],
+          [474, 'dec', ['emb_tgt', 'Output Embedding + PE', inf ? '생성한 prefix' : tex('y_0 \\dots y_{m-1}')], ['head', 'Linear + Softmax', tex('W = E^\\top')]],
+        ]) {
+          const cx = x + 115;
+          b += node(emb[0], x, 476, 60, emb[1], emb[2]);
+          b += line([[cx, 476], [cx, LY[0] + 42]]);
+          LY.forEach((y, i) => {
+            b += node(`${p}L${i}`, x, y, 40, `${p === 'enc' ? 'Encoder' : 'Decoder'} layer ${i + 1}`);
+            b += line([[cx, y], [cx, y - 18]]);
+          });
+          b += node(top[0], x, 20, 60, top[1], top[2]);
+        }
+        // Shape between layers, right of each stack.
+        b += stack(242, 250, [['layer 입출력', ''], [symT(['B', 'n', 'd_model']), ''], [numT([B, n, dm]), 'n']]);
+        b += stack(716, 250, [['layer 입출력', ''], [symT([...sy, 'd_model']), ''], [numT([...nu, dm]), 'n']]);
+        b += stack(716, 8, [['다음 token 확률', ''], [symT([...sy, 'V']), ''], [numT([...nu, V]), 'n']]);
+        // One z, from the top encoder layer into every decoder layer.
+        b += line([[230, 50], [448, 50], [448, LY[0] + 20]], 'mem', false);
+        b += LY.map((y) => line([[448, y + 20], [471, y + 20]], 'mem')).join('');
+        b += stack(256, 70, [
+          [md('같은 $z$ → 모든 decoder'), ''],
+          [md('layer의 $K, V$'), ''],
+          [symT(inf ? ['B·beam', 'n', 'd_model'] : ['B', 'n', 'd_model']), ''],
+          [numT(inf ? [Bb, n, dm] : [B, n, dm]), 'n'],
+        ]);
+        document.getElementById('dia').innerHTML = b;
+
+        const [, k, i] = sel.match(/^(.*?)(\d*)$/);
+        const it = INFO[k](inf, +i);
+        document.getElementById('panel').innerHTML =
+          `<h3>${md(it.t)}</h3><p>${md(it.d)}</p>` +
+          `<div class="rows">${it.rows
+            .map(([kk, s, v]) => `<div><span class="k">${md(kk)}</span><br>${symT(s)}<br>${numT(v)}</div>`)
+            .join('')}</div>` +
+          (it.conv ? `<p class="conv">${md(it.conv)}</p>` : '');
+        document.querySelectorAll('.mode button').forEach((x) => x.setAttribute('aria-pressed', x.dataset.mode === mode));
+      }
+
+      document.getElementById('ex').innerHTML = md(
+        '예시: base 모델, $B=2$, $n=10$, $m=7$, $h=8$, $V=37{,}000$ (EN-DE BPE), beam size 4, 추론 step $t=3$'
+      );
+      document.getElementById('dia').addEventListener('click', (e) => {
+        const g = e.target.closest('.node');
+        if (g) (sel = g.dataset.id), draw();
+      });
+      document.getElementById('dia').addEventListener('keydown', (e) => {
+        const g = e.target.closest('.node');
+        if (g && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          sel = g.dataset.id;
+          draw();
+          document.querySelector(`[data-id="${sel}"]`).focus();
+        }
+      });
+      document.querySelectorAll('.mode button').forEach((x) =>
+        x.addEventListener('click', () => ((mode = x.dataset.mode), draw()))
+      );
+      draw();
+    </script>
+  </body>
+</html>

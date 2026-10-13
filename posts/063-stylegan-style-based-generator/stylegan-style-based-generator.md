@@ -1,6 +1,6 @@
 ---
 title: "[StyleGAN 리뷰1] Style-based generator"
-date: 2023-06-30
+published: 2023-06-30
 topics:
   - ML
 tags:

@@ -1,6 +1,6 @@
 ---
 title: "[ML] Maximum Likelihood Estimation"
-date: 2025-10-14
+published: 2025-10-14
 topics:
   - ML
   - Math

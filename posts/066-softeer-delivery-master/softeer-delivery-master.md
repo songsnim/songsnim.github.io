@@ -1,6 +1,6 @@
 ---
 title: "[Softeer] 택배 마스터 광우"
-date: 2023-07-06
+published: 2023-07-06
 topics:
   - "코딩테스트"
 description: "Softeer '택배 마스터 광우' 문제 풀이."

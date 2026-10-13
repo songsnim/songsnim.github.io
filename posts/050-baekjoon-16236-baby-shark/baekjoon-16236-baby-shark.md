@@ -1,6 +1,6 @@
 ---
 title: "백준 아기상어"
-date: 2023-06-26
+published: 2023-06-26
 topics:
   - "코딩테스트"
 description: "백준 '아기상어' 문제 풀이."

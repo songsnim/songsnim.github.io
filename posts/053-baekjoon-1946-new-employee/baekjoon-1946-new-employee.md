@@ -1,6 +1,6 @@
 ---
 title: "백준 신입 사원"
-date: 2023-06-27
+published: 2023-06-27
 topics:
   - "코딩테스트"
 description: "백준 '신입 사원' 문제 풀이."

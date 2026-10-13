@@ -1,6 +1,6 @@
 ---
 title: 반복되는 코드, 접을까 말까?
-date: 2026-08-08
+published: 2026-08-08
 topics:
   - Dev
 description: 반복 코드를 추출하는 비용을 모델링하고 추출하는 시점 계산해본다.

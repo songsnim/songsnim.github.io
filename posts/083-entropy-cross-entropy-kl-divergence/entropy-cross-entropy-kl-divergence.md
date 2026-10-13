@@ -1,6 +1,6 @@
 ---
 title: "[ML] 정보량, Entropy, CrossEntropy, 그리고 KL-divergence"
-date: 2025-09-21
+published: 2025-09-21
 topics:
   - ML
   - Math

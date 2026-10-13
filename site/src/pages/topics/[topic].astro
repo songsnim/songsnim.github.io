@@ -16,7 +16,7 @@ export const getStaticPaths = (async () => {
         .filter((p) =>
           topic === NO_TOPIC ? p.data.topics.length === 0 : p.data.topics.includes(topic)
         )
-        .sort((a, b) => b.data.date.getTime() - a.data.date.getTime()),
+        .sort((a, b) => b.data.published.getTime() - a.data.published.getTime()),
     },
   }));
 }) satisfies GetStaticPaths;

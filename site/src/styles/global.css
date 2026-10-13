@@ -1205,3 +1205,25 @@ hr {
     visibility: visible;
   }
 }
+
+/* Anything marked `class="wide"` — a figure iframe, or a <div> wrapping a
+   Markdown table — leaves the text column and spans the window, centred on it,
+   up to 1600px. The column's left edge sits at (100vw - --shell)/2 + --gutter,
+   so centring needs only --shell and the width. It paints the page ground over
+   the outline rail it crosses. !important beats the inline width and
+   aspect-ratio Obsidian needs on an iframe, which gets a fixed 540px height. */
+@media (min-width: 46rem) {
+  article .wide {
+    --wide: min(100vw - 2 * var(--gutter), 1600px);
+    width: var(--wide) !important;
+    margin-left: calc((var(--shell) - var(--wide)) / 2 - var(--gutter));
+    position: relative;
+    z-index: 1;
+    background: var(--bg);
+  }
+
+  article iframe.wide {
+    aspect-ratio: auto !important;
+    height: 540px;
+  }
+}

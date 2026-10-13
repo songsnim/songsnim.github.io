@@ -1,6 +1,6 @@
 ---
 title: "[백준] 드래곤 커브"
-date: 2023-06-29
+published: 2023-06-29
 topics:
   - "코딩테스트"
 description: "백준 '드래곤 커브' 문제 풀이."

@@ -1,6 +1,6 @@
 ---
 title: "[Softeer] 징검다리"
-date: 2023-07-07
+published: 2023-07-07
 topics:
   - "코딩테스트"
 description: "Softeer '징검다리' 문제 풀이."

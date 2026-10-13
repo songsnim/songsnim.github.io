@@ -1,6 +1,6 @@
 ---
 title: "[Softeer] 조립라인"
-date: 2023-07-07
+published: 2023-07-07
 topics:
   - "코딩테스트"
 description: "Softeer '조립라인' 문제 풀이."

@@ -1,6 +1,6 @@
 ---
 title: "파이썬 경로 처리, os.path보단 pathlib"
-date: 2025-07-14
+published: 2025-07-14
 topics:
   - "Dev"
 description: "경로를 문자열이 아닌 객체로 다루는 pathlib이 os.path보다 나은 이유."

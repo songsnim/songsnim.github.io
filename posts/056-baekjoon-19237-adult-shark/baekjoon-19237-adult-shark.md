@@ -1,6 +1,6 @@
 ---
 title: "[백준] 어른 상어"
-date: 2023-06-28
+published: 2023-06-28
 topics:
   - "코딩테스트"
 description: "백준 '어른 상어' 문제 풀이."

@@ -1,6 +1,6 @@
 ---
 title: context 주도권을 잃지 않는 방법
-date: 2026-08-30
+published: 2026-08-30
 topics:
   - Dev
   - Agent

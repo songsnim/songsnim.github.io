@@ -1,6 +1,6 @@
 ---
 title: "[ML] Accuracy를 Loss로 사용할 수 없는 이유"
-date: 2025-09-17
+published: 2025-09-17
 topics:
   - "ML"
 description: "accuracy가 미분 불가능해 gradient descent의 loss가 될 수 없는 이유."

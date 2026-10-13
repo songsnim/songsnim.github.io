@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transformer Level 3</title>
+    <link rel="stylesheet" href="/figure.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css" />
+    <style>
+      /* The host's background shows through, so the figure has no edge of its
+         own. color-scheme is left to /figure.css on purpose: an iframe whose
+         scheme differs from its host's gets an opaque canvas, so it must match
+         the host (dark in dark), not be reset to `normal`. */
+      html,
+      body {
+        margin: 0;
+        min-height: 0 !important;
+        background: transparent !important;
+      }
+
+      .fig {
+        display: grid;
+        grid-template-columns: minmax(0, 810px) 18rem;
+        justify-content: center;
+        gap: var(--space-lg);
+        height: 100vh;
+        box-sizing: border-box;
+        padding: var(--space-base);
+        font-family: var(--body);
+        color: var(--ink);
+      }
+
+      /* Drawn in CSS pixels and shown at 90% (900 units in an 810px column), so
+         labels match the panel's 0.9rem. Narrower than that, it scales. */
+      svg {
+        width: 100%;
+        height: 100%;
+        font-family: var(--body);
+        font-size: 1rem;
+      }
+
+      .node rect {
+        fill: var(--surface-warm);
+        stroke: var(--rule);
+        stroke-width: 1.5;
+      }
+      .node {
+        cursor: pointer;
+      }
+      .node:hover rect,
+      .node:focus rect {
+        stroke: var(--muted);
+        outline: none;
+      }
+      .node.sel rect {
+        fill: var(--accent-soft);
+        stroke: var(--accent);
+        stroke-width: 2.5;
+      }
+      .node .lab div {
+        color: var(--ink);
+        font-weight: 700;
+      }
+
+      .edge {
+        fill: none;
+        stroke: var(--ink-soft);
+        stroke-width: 1.8;
+      }
+      .edge.mem {
+        stroke-dasharray: 6 4;
+      }
+      .edge.res {
+        stroke: var(--muted);
+        stroke-width: 1.4;
+      }
+      .ah {
+        fill: var(--ink-soft);
+      }
+
+      /* Labels are HTML in <foreignObject> so symbols can be KaTeX, set the
+         same way as the article's math. */
+      .lab {
+        pointer-events: none;
+        overflow: visible;
+      }
+      .lab div {
+        font-family: var(--body);
+        line-height: 24px;
+        white-space: nowrap;
+        color: var(--muted);
+      }
+      .lab.n div {
+        color: var(--ink);
+      }
+      .lab.c div {
+        text-align: center;
+      }
+
+      aside {
+        overflow-y: auto;
+        align-self: center;
+        max-height: 100%;
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+      .mode {
+        display: flex;
+        gap: var(--space-xs);
+        margin-bottom: var(--space-md);
+      }
+      .mode button {
+        flex: 1;
+        font: inherit;
+        padding: var(--space-xs) var(--space-sm);
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--rule);
+        border-radius: var(--r-sm);
+        cursor: pointer;
+      }
+      .mode button[aria-pressed='true'] {
+        color: var(--ink);
+        border-color: var(--accent);
+        background: var(--accent-soft);
+      }
+      aside h3 {
+        margin: 0 0 var(--space-xs);
+        font-size: 1em;
+      }
+      aside p {
+        margin: var(--space-sm) 0;
+      }
+      .rows {
+        font-family: var(--mono);
+        margin: var(--space-sm) 0;
+      }
+      .rows div {
+        margin-bottom: var(--space-xs);
+      }
+      .rows .k {
+        color: var(--muted);
+        font-family: var(--body);
+      }
+      .conv {
+        color: var(--muted);
+        border-left: 2px solid var(--rule);
+        padding-left: var(--space-sm);
+      }
+      .ex {
+        color: var(--faint);
+      }
+
+      @media (max-width: 560px) {
+        .fig {
+          grid-template-columns: 1fr;
+          grid-template-rows: 60% 40%;
+          height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="fig">
+      <svg id="dia" viewBox="0 0 900 544" role="img" aria-label="Transformer level 3 diagram"></svg>
+      <aside>
+        <div class="mode" role="group" aria-label="mode">
+          <button data-mode="train">학습</button>
+          <button data-mode="infer">추론</button>
+        </div>
+        <div id="panel" aria-live="polite"></div>
+        <p class="ex" id="ex"></p>
+      </aside>
+    </div>
+
+
+    <script type="module">
+      import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.mjs';
+
+      const theme = new URLSearchParams(location.search).get('theme');
+      if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+
+      // Fixed example: base model (Sec. 3, Table 3), EN-DE vocab (Sec. 5.1), beam 4 (Sec. 6.1).
+      const B = 2, n = 10, m = 7, dm = 512, dff = 2048, beam = 4, t = 3, N = 6, h = 8;
+      const Bb = B * beam;
+      const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+      const tex = (s) => katex.renderToString(s, { throwOnError: false });
+      // Prose with $...$ spans set as math, like the article's Markdown.
+      const md = (s) => s.split(/\$(.+?)\$/).map((p, i) => (i % 2 ? tex(p) : p)).join('');
+      const SYM = { d_model: 'd_{\\text{model}}', d_ff: 'd_{ff}', 'B·beam': 'B \\cdot \\text{beam}' };
+      const num = (x) => (x >= 10000 ? String(x).replace(/(\d)(?=(\d{3})+$)/g, '$1{,}') : String(x));
+      const symT = (sy) => tex('(' + sy.map((x) => SYM[x] ?? x).join(', ') + ')');
+      const numT = (nu) => tex('= (' + nu.map(num).join(', ') + ')');
+
+      let mode = 'train';
+      let sel = 'e_mha';
+
+      // Batch and length per side: decoder is (B, m) in training, (B·beam, t) at inference step t.
+      const src = { sy: ['B', 'n'], nu: [B, n] };
+      const dec = (inf) => (inf ? { sy: ['B·beam', 't'], nu: [Bb, t] } : { sy: ['B', 'm'], nu: [B, m] });
+      const withD = (s, d) => ({ sy: [...s.sy, d[0]], nu: [...s.nu, d[1]] });
+      const row = (k, s) => [k, s.sy, s.nu];
+      // Attention score shape (batch, h, query length, key length).
+      const score = (q, k) => ({ sy: [q.sy[0], 'h', q.sy[1], k.sy[1]], nu: [q.nu[0], h, q.nu[1], k.nu[1]] });
+
+      const ffn = (side) => ({
+        t: 'Position-wise Feed-Forward',
+        d: '$\\mathrm{FFN}(x) = \\max(0, xW_1 + b_1)W_2 + b_2$. 위치마다 따로, 같은 가중치로 적용하는 2층 MLP다. 가중치는 layer마다 다르다. 내부는 Level 4에서 다룬다.',
+        rows: [row('입력/출력', withD(side, ['d_model', dm])), row('은닉', withD(side, ['d_ff', dff]))],
+      });
+      const an = (side) => ({
+        t: 'Add & Norm',
+        d: 'sub-layer 출력에 dropout $(P_{drop} = 0.1)$을 적용한 뒤 입력 $x$에 더하고 정규화한다. 출력은 $\\mathrm{LayerNorm}(x + \\mathrm{Dropout}(\\mathrm{Sublayer}(x)))$다.',
+        rows: [row('$x$, 출력', withD(side, ['d_model', dm]))],
+        conv: 'LayerNorm의 gain, bias와 $\\epsilon$ 값은 논문에 없다.',
+      });
+
+      const INFO = {
+        e_mha: () => ({
+          t: 'Multi-Head Self-Attention',
+          d: 'Q, K, V가 모두 이전 encoder layer의 출력(첫 layer는 embedding + PE)에서 온다. mask가 없어 각 위치가 모든 위치를 본다. 내부는 Level 4에서 다룬다.',
+          rows: [
+            row('Q = K = V 입력', withD(src, ['d_model', dm])),
+            row('score', score(src, src)),
+            row('출력', withD(src, ['d_model', dm])),
+          ],
+          conv: 'padding 위치를 key에서 가리는 mask는 구현 관례다.',
+        }),
+        e_an: () => an(src),
+        e_ffn: () => ffn(src),
+        d_mmha: (inf) => ({
+          t: 'Masked Multi-Head Attention',
+          d: 'Q, K, V가 모두 이전 decoder layer의 출력(첫 layer는 embedding + PE)에서 온다. 위치 $i$는 자신을 포함해 $i$까지만 본다. 금지된 연결은 softmax 입력을 $-\\infty$로 바꿔 막는다.',
+          rows: [
+            row('Q = K = V 입력', withD(dec(inf), ['d_model', dm])),
+            row('score', score(dec(inf), dec(inf))),
+          ],
+          conv: inf
+            ? 'KV-cache(논문에 없는 구현 최적화)를 쓰면 query는 새 token 1개라 score가 $(B \\cdot \\text{beam}, h, 1, t)$이고, 가릴 미래 key가 없어 causal mask도 필요 없다.'
+            : '',
+        }),
+        d_xattn: (inf) => {
+          const z = inf ? { sy: ['B·beam', 'n'], nu: [Bb, n] } : src;
+          return {
+            t: 'Encoder-Decoder Attention',
+            d: 'Q는 바로 아래 Add & Norm의 출력이고, K와 V는 encoder 출력 $z$다. 흔히 cross-attention이라 부른다. causal mask가 없어 decoder의 모든 위치가 source의 모든 위치를 본다.',
+            rows: [
+              row('Q 입력', withD(dec(inf), ['d_model', dm])),
+              row('K = V = $z$', withD(z, ['d_model', dm])),
+              row('score', score(dec(inf), z)),
+            ],
+            conv: 'source padding mask는 구현 관례다.' + (inf ? ' $z$를 beam size만큼 복제하는 것도 구현 관례다.' : ''),
+          };
+        },
+        d_an: (inf) => an(dec(inf)),
+        d_ffn: (inf) => ffn(dec(inf)),
+        mem: (inf) => ({
+          t: 'Encoder output $z$',
+          d: '마지막 encoder layer의 출력. 모든 decoder layer의 encoder-decoder attention에 key와 value로 들어간다.',
+          rows: [row('$z$', withD(src, ['d_model', dm]))].concat(
+            inf ? [['beam 복제 후', ['B·beam', 'n', 'd_model'], [Bb, n, dm]]] : []
+          ),
+        }),
+      };
+
+      // An HTML label whose first line's top sits at (x, y).
+      const fo = (x, y, html, cls = '', w = 260) =>
+        `<foreignObject class="lab ${cls}" x="${x}" y="${y}" width="${w}" height="28"><div xmlns="http://www.w3.org/1999/xhtml">${html}</div></foreignObject>`;
+      // A one-line node; the label is HTML so it can hold math.
+      const node = (id, x, y, w, hh, label) =>
+        `<g class="node${sel === id ? ' sel' : ''}" data-id="${id}" tabindex="0" role="button" aria-label="${esc(label.replace(/\$/g, ''))}">` +
+        `<rect x="${x}" y="${y}" width="${w}" height="${hh}" rx="8"/>` + fo(x, y + hh / 2 - 12, md(label), 'c', w) + `</g>`;
+      const line = (pts, cls = '', arrow = true) =>
+        `<path class="edge ${cls}" d="M${pts.map((p) => p.join(' ')).join(' L')}"${arrow ? ' marker-end="url(#ah)"' : ''}/>`;
+      // Labels stacked downward from (x, y), 28px apart; [html, cls] pairs.
+      const stack = (x, y, rows) => rows.map(([html, c], i) => fo(x, y + 28 * i, html, c)).join('');
+      const shape = (x, y, s, title) =>
+        stack(x, y, (title ? [[title, '']] : []).concat([[symT(s.sy), ''], [numT(s.nu), 'n']]));
+
+      // Sub-layer k (from the bottom): box top at S(k), 40 tall; dropout arrow; Add & Norm 36 tall at S(k) - 60.
+      const S = (k) => 462 - 126 * k;
+      // One column of sub-layers. x: left edge; rx: residual rail; ids: sub-layer ids.
+      function column(x, w, rx, p, ids, labels) {
+        const cx = x + w / 2, edge = rx < x ? x : x + w;
+        let b = line([[cx, 544], [cx, 504]]);
+        ids.forEach((id, k) => {
+          const s = S(k), a = s - 60;
+          b += node(id, x, s, w, 40, labels[k]);
+          b += line([[cx, s], [cx, s - 22]]) + fo(cx + 10, s - 24, 'dropout', '', 80);
+          b += node(`${p}_an${k}`, x, a, w, 36, 'Add &amp; Norm');
+          if (k < ids.length - 1) b += line([[cx, a], [cx, S(k + 1) + 42]]);
+          // Residual: taken off the input arrow below the sub-layer, added at Add & Norm.
+          const y0 = s + 53;
+          b += line([[cx, y0], [rx, y0], [rx, a + 18], [edge + (rx < x ? -3 : 3), a + 18]], 'res');
+        });
+        return b;
+      }
+
+      function draw() {
+        const inf = mode === 'infer';
+        const D = withD(dec(inf), ['d_model', dm]);
+        let b = `<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="ah" d="M0 0L10 5L0 10z"/></marker></defs>`;
+        // Encoder x 30-280, residual rail on the left; decoder x 510-780, rail on the right.
+        b += column(30, 250, 12, 'e', ['e_mha', 'e_ffn'], ['Multi-Head Self-Attention', 'Feed Forward']);
+        b += line([[155, S(1) - 60], [155, 190]]);
+        b += fo(30, 120, md('Encoder layer $(\\times N)$'), 'n', 250);
+        b += shape(167, 176, withD(src, ['d_model', dm]), '입력/출력');
+        b += column(510, 270, 800, 'd', ['d_mmha', 'd_xattn', 'd_ffn'], ['Masked Multi-Head Attention', 'Encoder-Decoder Attention', 'Feed Forward']);
+        b += line([[645, S(2) - 60], [645, 100]]);
+        b += fo(510, 4, md('Decoder layer $(\\times N)$'), 'n', 250);
+        b += shape(657, 44, D, '입력/출력');
+        // z enters the cross-attention as K and V; Q comes up from below.
+        b += node('mem', 310, S(1), 90, 40, '$z$');
+        b += line([[400, S(1) + 20], [507, S(1) + 20]], 'mem') + fo(430, S(1) - 10, md('$K, V$'), '', 60);
+        b += fo(625, S(1) + 40, md('$Q$'), '', 20);
+        b += shape(300, S(1) + 50, inf ? { sy: ['B·beam', 'n', 'd_model'], nu: [Bb, n, dm] } : withD(src, ['d_model', dm]));
+        document.getElementById('dia').innerHTML = b;
+
+        const [, k] = sel.match(/^(.*?)\d*$/);
+        const it = INFO[k](inf);
+        document.getElementById('panel').innerHTML =
+          `<h3>${md(it.t)}</h3><p>${md(it.d)}</p>` +
+          `<div class="rows">${it.rows
+            .map(([kk, s, v]) => `<div><span class="k">${md(kk)}</span><br>${symT(s)}<br>${numT(v)}</div>`)
+            .join('')}</div>` +
+          (it.conv ? `<p class="conv">${md(it.conv)}</p>` : '');
+        document.querySelectorAll('.mode button').forEach((x) => x.setAttribute('aria-pressed', x.dataset.mode === mode));
+      }
+
+      document.getElementById('ex').innerHTML = md(
+        '예시: base 모델, $B=2$, $n=10$, $m=7$, $h=8$, $d_{ff}=2048$, beam size 4, 추론 step $t=3$'
+      );
+      document.getElementById('dia').addEventListener('click', (e) => {
+        const g = e.target.closest('.node');
+        if (g) (sel = g.dataset.id), draw();
+      });
+      document.getElementById('dia').addEventListener('keydown', (e) => {
+        const g = e.target.closest('.node');
+        if (g && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          sel = g.dataset.id;
+          draw();
+          document.querySelector(`[data-id="${sel}"]`).focus();
+        }
+      });
+      document.querySelectorAll('.mode button').forEach((x) =>
+        x.addEventListener('click', () => ((mode = x.dataset.mode), draw()))
+      );
+      draw();
+    </script>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 ---
 title: 반복되는 코드, 접을까 말까? 2편
-date: 2026-08-09
+published: 2026-08-09
 topics:
   - Dev
 description: 유지보수 관점을 포함시켜 비용을 모델링합니다.

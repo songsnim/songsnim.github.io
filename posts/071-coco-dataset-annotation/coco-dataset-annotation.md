@@ -1,6 +1,6 @@
 ---
 title: "COCO dataset annotation 둘러보기"
-date: 2023-11-03
+published: 2023-11-03
 topics:
   - "ML"
 description: "COCO dataset annotation JSON의 구조를 직접 뜯어본다."

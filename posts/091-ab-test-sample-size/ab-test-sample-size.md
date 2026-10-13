@@ -1,6 +1,6 @@
 ---
 title: "A/B테스트에서 유의미한 표본 크기를 정하는 공식"
-date: 2025-10-15
+published: 2025-10-15
 topics:
   - "ML"
   - "Math"

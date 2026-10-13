@@ -1,6 +1,6 @@
 ---
 title: "[ML] Neural Net Optimizer 파헤치기"
-date: 2025-10-10
+published: 2025-10-10
 topics:
   - ML
   - Math

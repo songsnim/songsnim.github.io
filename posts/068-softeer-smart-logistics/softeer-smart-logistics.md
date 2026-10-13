@@ -1,6 +1,6 @@
 ---
 title: "[Softeer] 스마트물류"
-date: 2023-07-06
+published: 2023-07-06
 topics:
   - "코딩테스트"
 description: "Softeer '스마트물류' 문제 풀이."

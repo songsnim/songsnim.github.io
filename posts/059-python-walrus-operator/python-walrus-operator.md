@@ -1,6 +1,6 @@
 ---
 title: "Python walrus operator\""
-date: 2023-06-29
+published: 2023-06-29
 topics:
   - "Dev"
 description: "Python 3.8에 추가된 walrus operator(:=)의 문법과 쓸모."

@@ -1,6 +1,6 @@
 ---
 title: worktree로 병렬 작업하면 진짜 빨라질까?
-date: 2026-09-08
+published: 2026-09-08
 topics:
   - Dev
   - Agent
