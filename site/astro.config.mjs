@@ -65,7 +65,7 @@ export default defineConfig({
   site: 'https://songsnim.github.io',
   // /stats is the author's own dashboard behind a token — nothing for a crawler
   // to index, and listing it would only advertise where it is.
-  integrations: [mdx(), sitemap({ filter: (page) => !page.endsWith('/stats/') })],
+  integrations: [mdx(), sitemap({ filter: (page) => !page.endsWith('/stats/') && !page.includes('/r/') })],
   // The topic index used to live at /tags. Anything already pointing there keeps working.
   redirects: { '/tags': '/topics' },
   markdown: {

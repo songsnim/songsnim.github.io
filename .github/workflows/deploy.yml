@@ -43,6 +43,8 @@ jobs:
         run: npm run validate
 
       - run: npm run build
+        env:
+          RESUME_SLUG: ${{ secrets.RESUME_SLUG }}
 
       - uses: actions/configure-pages@v5
 

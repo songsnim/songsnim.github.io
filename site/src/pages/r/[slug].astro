@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+
+/**
+ * Unlisted page: it exists only at /r/<RESUME_SLUG>/. The slug comes from the
+ * build environment (a GitHub Actions secret), not from the repository, because
+ * the repository is public. Nothing else on the site links here or mentions the
+ * slug; a browser that has opened this page remembers its path and adds the nav
+ * link itself (see Base.astro).
+ */
+export function getStaticPaths() {
+  const slug = import.meta.env.RESUME_SLUG ?? process.env.RESUME_SLUG ?? 'dev';
+  return [{ params: { slug } }];
+}
+---
+
+<Base title="Resume" description="이력과 포트폴리오.">
+  <Fragment slot="head">
+    <meta name="robots" content="noindex,nofollow" />
+  </Fragment>
+
+  <h1 class="lede">Resume</h1>
+  <p class="sub">Portfolio는 여기에 추가한다.</p>
+
+  <script is:inline>
+    try {
+      localStorage.setItem('resumePath', location.pathname);
+    } catch {}
+  </script>
+</Base>
