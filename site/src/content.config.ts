@@ -75,4 +75,21 @@ const posts = defineCollection({
   }),
 });
 
-export const collections = { posts };
+// One folder per case study under resume/, same filing convention as posts.
+const cases = defineCollection({
+  loader: glob({
+    base: '../resume/cases',
+    pattern: '**/*.md',
+    generateId: ({ entry }) => entry.replace(/\/[^/]+\.md$/, '').replace(/^\d+-/, ''),
+  }),
+  schema: z.object({
+    title: z.string().min(1),
+    role: z.string().min(1),
+    period: z.string().min(1),
+    summary: z.string().min(1),
+    stack: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { posts, cases };

@@ -1,0 +1,5 @@
+# One file per application: `npm run pdf -- <name>` builds resume-<name>.pdf and
+# portfolio-<name>.pdf from it. Order here is the order on the page.
+summary: ML engineer who ships vision and LLM systems from evaluation to production.
+bullets: [a-latency, a-eval, a-agent]
+cases: [dummy-case]

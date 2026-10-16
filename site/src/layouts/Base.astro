@@ -80,6 +80,9 @@ const year = new Date().getFullYear();
 
     <script is:inline>
       try {
+        // Any page under /r/<slug>/ unlocks the nav link, which points at the landing page.
+        if (location.pathname.startsWith('/r/'))
+          localStorage.setItem('resumePath', location.pathname.split('/').slice(0, 3).join('/') + '/');
         const p = localStorage.getItem('resumePath');
         const a = document.getElementById('resume');
         if (p && a) {

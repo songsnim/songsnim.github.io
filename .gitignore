@@ -11,3 +11,6 @@ CLAUDE.md
 # Obsidian's Space plugin leaves one of these in every folder it has opened.
 .space/
 *.sync-conflict-*
+
+# Resume/portfolio PDFs are built locally (npm run pdf) and never committed.
+resume/out/

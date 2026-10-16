@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "new": "node scripts/new-post.mjs",
+    "pdf": "node scripts/pdf.mjs",
     "validate": "node scripts/validate-posts.mjs",
     "build": "astro build",
     "postbuild": "! grep -rn 'http://localhost' dist --include=*.html",
@@ -21,5 +22,9 @@
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "js-yaml": "^5.5.0"
   }
 }

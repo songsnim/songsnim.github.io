@@ -1,0 +1,42 @@
+# Facts that do not change between applications. Everything a company might want
+# emphasised differently lives in `experience[].bullets`; variants/*.yaml picks
+# and orders those by id. All values below are dummy except education/publication.
+profile:
+  name: Youngjae Song
+  title: AI Engineer
+  contacts:
+    - { text: you@example.com, href: "mailto:you@example.com" }
+    - { text: github.com/songsnim, href: "https://github.com/songsnim" }
+    - { text: Seoul, KR }
+
+experience:
+  - company: Company A
+    role: Machine Learning Engineer
+    period: 2023.09 – Present
+    bullets:
+      - id: a-latency
+        tags: [applied]
+        text: Cut p95 inference latency of a vision model by 42% (180 ms → 104 ms) via quantization and batching.
+      - id: a-eval
+        tags: [research, applied]
+        text: Built an offline evaluation suite covering 12 failure modes; adopted as the release gate by 3 teams.
+      - id: a-agent
+        tags: [agent]
+        text: Shipped an LLM agent that automates triage of 1.2k weekly tickets at 91% routing accuracy.
+
+education:
+  - school: Sungkyunkwan University
+    degree: M.S. in Artificial Intelligence
+    period: 2021.08 – 2023.08
+    note: GPA 4.21 / 4.5
+  - school: Sungkyunkwan University
+    degree: B.S. in Mechanical Engineering
+    period: 2015.03 – 2021.08
+
+skills:
+  - { group: Languages, items: [Python, C++, SQL] }
+  - { group: ML, items: [PyTorch, scikit-learn, XGBoost] }
+  - { group: Tools, items: [Docker, Git, Linux] }
+
+publications:
+  - text: "Img2Tab: Automatic Class Relevant Concept Discovery from StyleGAN Features for Explainable Image Classification. arXiv, 2023."

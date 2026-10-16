@@ -1,0 +1,98 @@
+---
+import { resume } from '../lib/resume';
+
+interface Props {
+  summary: string;
+  experience: any[];
+}
+const { summary, experience } = Astro.props;
+const { profile, education, skills, publications } = resume;
+---
+
+<div class="sheetwrap">
+  <p class="sheetwarn" hidden>A4 1페이지를 넘었어요. bullet을 줄이세요.</p>
+  <article class="sheet" id="sheet">
+    <header class="sheet__head">
+      <h1>{profile.name}</h1>
+      <p class="sheet__role">{profile.title}</p>
+      <p class="sheet__contacts">
+        {
+          profile.contacts.map((c: any) =>
+            c.href ? <a href={c.href}>{c.text}</a> : <span>{c.text}</span>
+          )
+        }
+      </p>
+    </header>
+
+    <p class="sheet__summary">{summary}</p>
+
+    <section>
+      <h2>Experience</h2>
+      {
+        experience.map((e) => (
+          <div class="sheet__item">
+            <div class="sheet__row">
+              <strong>{e.company}</strong>
+              <span>{e.period}</span>
+            </div>
+            <div class="sheet__sub">{e.role}</div>
+            <ul>
+              {e.bullets.map((b: any) => (
+                <li>{b.text}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </section>
+
+    <section>
+      <h2>Education</h2>
+      {
+        education.map((e: any) => (
+          <div class="sheet__item">
+            <div class="sheet__row">
+              <strong>{e.school}</strong>
+              <span>{e.period}</span>
+            </div>
+            <div class="sheet__sub">
+              {e.degree}
+              {e.note && ` · ${e.note}`}
+            </div>
+          </div>
+        ))
+      }
+    </section>
+
+    <section>
+      <h2>Skills</h2>
+      {
+        skills.map((s: any) => (
+          <p class="sheet__skill">
+            <strong>{s.group}</strong> {s.items.join(', ')}
+          </p>
+        ))
+      }
+    </section>
+
+    <section>
+      <h2>Publications</h2>
+      <ul>
+        {publications.map((p: any) => <li>{p.text}</li>)}
+      </ul>
+    </section>
+  </article>
+</div>
+
+<script is:inline>
+  // The sheet is exactly one A4 page tall and clips; scripts/pdf.mjs reads the
+  // `is-over` class back out of the rendered DOM and refuses to write a PDF that
+  // lost a line.
+  (() => {
+    const s = document.getElementById('sheet');
+    if (s.scrollHeight > s.clientHeight + 1) {
+      s.classList.add('is-over');
+      document.querySelector('.sheetwarn').hidden = false;
+    }
+  })();
+</script>
