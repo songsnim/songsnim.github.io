@@ -31,7 +31,7 @@ $$
 - $QK^\top$: $(n \times d)(d \times n)$이므로 $2 \cdot n \cdot d \cdot n = 2n^2d$
 - score $\times V$: $(n \times n)(n \times d)$이므로 $2 \cdot n \cdot n \cdot d = 2n^2d$
 
-FLOPs 축의 기법은 모두 $n^2$를 다른 항으로 바꾼다. 어떤 쌍을 계산할지를 위치로 고르면 sliding window, 내용으로 고르면 sparse attention, 쌍 자체를 만들지 않으면 linear attention이다,
+FLOPs 축의 기법은 모두 attention의 $n^2$ 항을 줄인다. 어떤 쌍을 계산할지를 위치로 고르면 sliding window($n^2 \to nw$), 내용으로 고르면 sparse attention(main attention은 $nk$이지만 선택에 쓰는 indexer가 $n^2$ 항을 작은 상수로 남긴다), 쌍 자체를 만들지 않으면 linear attention($n^2 \to nC$)이다.
 
 ---
 # 2. Sliding window attention
@@ -47,7 +47,7 @@ $$
 비용에서 $n^2$가 $nw$로 바뀌므로 비용이 $n$에 대해 선형으로 감소한다. 근데 이러면 global dependency를 손 쉽게 학습할 수 있다는 Transformer의 장점이 퇴색된다는 우려가 생길 수 있지만, 이는 full attention과 적절히 섞으면 해결된다.
 
 ## 2-2. Receptive field와 local/global 혼합
-한 layer는 $w$ 거리까지만 보지만, layer를 쌓으면 정보가 window를 넘어 전달된다. CNN과 같은 원리로, $L$개 layer를 거친 token의 receptive field는 $Lw$다.[^longformer] 다만 먼 token 사이의 path-length가 $O(1)$에서 $O(n/w)$로 늘어나므로, Transformer가 없앤 long range dependency 문제가 다시 생긴다.
+한 layer는 $w$ 거리까지만 보지만, layer를 쌓으면 정보가 window를 넘어 전달된다. CNN과 같은 원리로, $L$개 layer를 거친 token의 receptive field는 대략 $Lw$이고, 자기 자신을 window에 포함하면 정확히는 layer마다 $w-1$칸씩 넓어져 $L(w-1)+1$이다.[^longformer] 다만 먼 token 사이의 path-length가 $O(1)$에서 $O(n/w)$로 늘어나므로, Transformer가 없앤 long range dependency 문제가 다시 생긴다.
 
 이 문제를 해결하기 위해 최근 모델은 sliding window layer($r$개)와 full attention layer(1개)를 교대로 쌓는다. 평균 비용은 local layer $r$개의 $4nwd$와 full attention layer 1개의 $4n^2d$를 평균한 값이다. 이차항은 남지만 계수가 $\frac{1}{r+1}$로 줄고, global layer가 먼 거리를 한 hop에 연결한다.
 
@@ -110,7 +110,7 @@ $$
 Softmax는 이 loss 안에서만 쓰고, 선택에는 $I$의 순위만 쓴다. $p$는 main model이 이미 만드는 값이므로 별도 label이 필요 없다. 
 
 #### 왜 굳이 KL Divengence를 쓰는가?
-> CrossEntropy는 안 되는가? 먼저 $CE(p,q)=D_{KL}(p||q)+H(p)$인데, 이 의미는 $p$의 분포를 완벽히 근사하더라도 $CE(p,q)$의 값이 $H(p)$라는 하한을 갖는다는 의미다. 이 말은, 얼마나 잘 맞추는 것과 무관하게, $p$ 분포의 **모양**에 따라 loss가 정해진다는 말이다. 하지만 $D_{KL}$은 $p$를 잘 근사하면 $p$ 분포의 모양과 관계 없이 loss가 0으로 수렴한다. 우리는 top-$k$개를 맞추는게 목적이다. $p$의 모양에는 관심이 없다. 따라서 top-$k$개를 골라야하는 Indexer는 KL divergence가 적합하다.
+> CrossEntropy는 안 되는가? $CE(p,q)=D_{KL}(p||q)+H(p)$이고 $H(p)$는 $q$와 무관한 상수이므로, $q$에 대한 gradient와 최적해는 CE와 KL이 같다. 학습 결과는 달라지지 않고, 달라지는 것은 loss 값뿐이다. CE는 $q$가 $p$를 완벽히 근사해도 $H(p)$가 남아 값만으로는 얼마나 가까운지 알 수 없지만, $D_{KL}$은 일치하면 0이 된다. 그래서 어느 쪽을 쓰든 학습은 같고, 진짜 선택은 KL의 방향이다.
 > 
 > 그럼 더 들어가서, reverse KL은 적합하지 않은가? 결론은 forward KL을 써야한다. forward KL은 $p$ 값이 큰데 $q$가 작을 때 벌점이 커진다. 왜냐하면 $CE(p,q)-H(p)$이기 때문이다. Top-$k$를 찾아야하는 문제에서는, $p$가 큰 곳을 잘 잡아야 한다. 이 때 forward KL은 $p$가 큰 곳을 잘 잡고, Reverse KL은 $p$가 작은 곳을 잘 잡아낸다. 그리고 잘 잡아내지 못 하는 곳은 어차피 main attention이 계산을 안 하게 될 곳이므로 상관없다.
 
@@ -132,7 +132,7 @@ Softmax는 이 loss 안에서만 쓰고, 선택에는 $I$의 순위만 쓴다. $
 # 4. Linear attention
 Linear attention[^linear]은  $n \times n$ score 행렬을 만들지 않는다. 이 장은 head 하나를 기준으로 하고, $q, k, v$의 차원은 모두 $d_h$이며, causal mask로 생기는 $\frac{1}{2}$은 비용식에서 무시한다.
 
-## 4-1. exp만 아니면 Q와 K를 분리할 수 있다.
+## 4-1. Q와 K를 분리하려면 exp를 바꿔야 한다
 Softmax attention의 출력은 value의 가중 평균이다.
 
 $$
@@ -147,7 +147,7 @@ $$
 \sum_{s \le t} v_s \left(k_s^\top q_t\right) = \Big(\sum_{s \le t} v_s k_s^\top\Big) q_t
 $$
 
-괄호 안은 $q_t$에 의존하지 않으므로 $n \times n$ 점수를 만들 필요가 없다. $\exp(q^\top k)$는 이렇게 분리되지 않는다. 일반적으로 $\text{sim}(q, k) = \phi(q)^\top \phi(k)$ 꼴이면 같은 이동이 가능하고, 원논문은 이 $\phi$를 feature map이라 부른다. 음이 아니려면 $\phi$의 출력이 음이 아니면 충분하다. 행렬로 쓰면
+괄호 안은 $q_t$에 의존하지 않으므로 $n \times n$ 점수를 만들 필요가 없다. $\exp(q^\top k)$는 유한 차원의 $\phi$로는 이렇게 분리되지 않는다. $q$와 $k$가 곱해진 뒤에 $\exp$를 씌우므로 교차 항이 모든 차수로 생기고, Taylor 전개의 모든 차수를 $\phi$로 모으면 쓸 수 있지만 출력 차원이 무한이라 상태 크기와 비용도 무한이 된다. 일반적으로 $\text{sim}(q, k) = \phi(q)^\top \phi(k)$ 꼴이면 같은 이동이 가능하고, 원논문은 이 $\phi$를 feature map이라 부른다. 음이 아니려면 $\phi$의 출력이 음이 아니면 충분하다. 행렬로 쓰면
 
 $$
 \left(\phi(Q)\phi(K)^\top\right)V = \phi(Q)\left(\phi(K)^\top V\right)
@@ -157,9 +157,9 @@ $$
 
 $Q$와 $K^T$를 먼저 곱하는 것과, $K^T$와 $V$를 먼저 곱하는 것의 차이를 직관적으로 이해해보자. 가장 먼저 관찰의 렌즈를 토큰에서 임베딩으로 옮겨간다고 생각해야한다. 기존 attention은 지금 토큰이 다른 토큰을 얼마나 attend하는지 가중치를 토큰 별로 내기 위해 시퀀스와 시퀀스의 유사도를 측정한다. 완전히 토큰 중심으로 돌아가기 때문에 이해하기가 편리하다. 그럼 임베딩 중심으로 바라보면 어떨까?
 
-먼저, 팔레트의 물감을 생각하자. $V$를 팔레트에 어떤 종류의 물감을 담을지 결정한다. $K$는 그 물감을 얼마나 담을지 결정한다. 그럼 $Q$의 역할은 뭘까? 각 물감을 얼마나 조합해서 섞을지를 결정한다. Decode를 한번 할 때  $Q$에 따라서 어느 비율로 물감을 **꺼내서** 칠할지 정하고, 다시 $K$에 의해 다음 토큰에서 $V$에 얼마나 또 물감을 추가할지 정한다. 결론을 내보면, "토큰 간의 관계성을 직접 학습하겠다"가 아니라, "토큰 간의 관계성을 꺼내 쓸 수 있는 상태 행렬을 학습하겠다."로 문제가 바뀌게 된다. 후자는 마치 RNN의 hidden state가 갖는 역할과 매우 유사하다.
+먼저, 팔레트의 물감을 생각하자. $V$를 팔레트에 어떤 종류의 물감을 담을지 결정한다. $K$는 그 물감을 얼마나 담을지 결정한다. 그럼 $Q$의 역할은 뭘까? 각 물감을 얼마나 조합해서 섞을지를 결정한다. Decode의 한 step에서는 먼저 새 token의 $K$가 정한 비율로 $V$의 물감을 팔레트에 더하고, 그다음 $Q$가 정한 비율로 팔레트에서 물감을 **꺼내서** 칠한다. 다음 token에서도 같은 일이 반복된다. 결론을 내보면, "토큰 간의 관계성을 직접 학습하겠다"가 아니라, "토큰 간의 관계성을 꺼내 쓸 수 있는 상태 행렬에 쌓아 두겠다."로 문제가 바뀌게 된다. 후자는 마치 RNN의 hidden state가 갖는 역할과 매우 유사하다.
 
-근데 팔레트의 칸이 토큰 수보다 적으면 기존 팔레트 칸에 색을 덮어써야하고, 이는 순수한 표현력이 조금 손해가 생기는 crosstalk 문제를 야기한다.
+근데 팔레트의 칸이 토큰 수보다 적으면 한 칸에 여러 token의 물감이 섞여 쌓이고, 섞인 색에서 원래 색을 되돌릴 수 없어 순수한 표현력에 손해가 생긴다. 이것이 crosstalk 문제다.
 
 <iframe src="http://localhost:4321/posts/reducing-llm-FLOPs/matmul-order.html" style="width:100%;aspect-ratio:16/9;border:0" loading="lazy" title="행렬을 곱하는 순서"></iframe>
 
@@ -170,7 +170,7 @@ $$
 \frac{\text{linear}}{\text{full}} = \frac{C}{n}
 $$
 
-이므로 $n > C$이면 linear가 싸다. $C = d_h$이면 $n$에 선형이다. 보통 $n>>C$ 이기 때문에 FLOPs를 상당히 절감할 수 있다.
+이므로 $n > C$이면 linear 쪽의 연산량이 적다. $C = d_h$이면 $n$에 선형이고, 보통 $n \gg C$이기 때문에 FLOPs를 상당히 절감할 수 있다. 다만 FLOPs 감소가 곧 실행 시간 감소는 아니다. 재귀 갱신은 token 순서대로 이어져 GPU에서 병렬화하기 어렵다.
 
 <iframe src="http://localhost:4321/posts/reducing-llm-FLOPs/linear-vs-full.html" style="width:100%;aspect-ratio:16/11;border:0" loading="lazy" title="full attention과 linear attention의 계산 비교"></iframe>
 
@@ -197,7 +197,6 @@ $S_0 = 0$, $z_0 = 0$에서 시작하고, 상태는 $S_t$와 $z_t$가 전부이�
 
 ---
 # 5. 정리
-네 기법이 한 격자($n = 32$)에서 어떻게 계산하는지 같은 속도로 돌려 본다. 칸은 (query, key) 쌍이고, 빗금은 건너뛰는 쌍이다. 그림의 sparse는 indexer를 실제로 학습시켜 쓰고, linear는 쌍 대신 작은 표 $S$ 하나에 쌓는다.
 
 <iframe src="http://localhost:4321/posts/reducing-llm-FLOPs/attention-grid.html" style="width:100%;aspect-ratio:16/22;border:0" loading="lazy" title="네 attention 기법의 계산 비교"></iframe>
 
@@ -213,7 +212,7 @@ $S_0 = 0$, $z_0 = 0$에서 시작하고, 상태는 $S_t$와 $z_t$가 전부이�
 
 </div>
 
-Sliding window를 쓰는 최근 모델은 full attention layer를 일부 남긴다. 이 모델들에서 $n^2$ 항은 사라지지 않고, full attention layer의 비율 $\frac{1}{r+1}$만큼 줄어든다. Sparse attention에서는 indexer의 $n^2$ 항이 남는다. Linear attention은 $n^2$ 항을 없애지만 대가로 state 크기가 고정되고, 원논문은 이 한계를 다루지 않는다.
+Sliding window를 쓰는 최근 모델은 full attention layer를 일부 남긴다. 이 모델들에서 $n^2$ 항은 사라지지 않고, full attention layer의 비율인 $\frac{1}{r+1}$배로 줄어든다. Sparse attention에서는 indexer의 $n^2$ 항이 남는다. Linear attention은 $n^2$ 항을 없애는 대신 state 크기가 고정되어, $n > C$이면 token 정보가 섞인다. 원논문은 이 한계를 다루지 않는다.
 
 [^longformer]: "Longformer: The Long-Document Transformer" (Beltagy et al., 2020)
 [^gemma3]: "Gemma 3 Technical Report" (Gemma Team, 2025)
