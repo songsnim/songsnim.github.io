@@ -215,8 +215,8 @@ if(typeof module!=='undefined')module.exports=buildModel;
       let raf = 0, t0 = 0;
       const RATE = maxFull / 7000;
       const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      function tick(now) {
-        F = (now - t0) * RATE; all();
+      function tick() {
+        F = Math.max(0, performance.now() - t0) * RATE; all();
         if (F < maxFull) raf = requestAnimationFrame(tick); else { F = maxFull; all(); go.textContent = '다시'; }
       }
       const go = document.getElementById('go');
