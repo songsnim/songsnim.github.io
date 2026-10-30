@@ -201,16 +201,14 @@ $S_0 = 0$, $z_0 = 0$에서 시작하고, 상태는 $S_t$와 $z_t$가 전부이�
 <iframe src="http://localhost:4321/posts/reducing-llm-FLOPs/attention-grid.html" style="width:100%;aspect-ratio:16/22;border:0" loading="lazy" title="네 attention 기법의 계산 비교"></iframe>
 
 
-<div class="wide">
 
-| 기법 | 쌍을 고르는 기준 | attention FLOPs | KV cache | 대가 |
-|:---|:---|:---|:---|:---|
-| Full attention | 전부 | $4n^2d$ | $O(n)$ | |
-| Sliding window | 위치 (최근 $w$개) | $4nwd$ | $O(w)$ | 먼 거리는 여러 hop |
-| Sparse | 내용 (top-$k$) | $4nkd$ + indexer 비용 | $O(n)$ | 선택 비용, cache 그대로 |
-| Linear | 쌍을 만들지 않음 | $4nCd$ | $O(1)$ (고정 크기 state) | $n > C$이면 token 정보가 섞임 |
+| 기법             | 쌍을 고르는 기준    | attention FLOPs     | KV cache             | 대가                     |
+| :------------- | :----------- | :------------------ | :------------------- | :--------------------- |
+| Full attention | 전부           | $4n^2d$             | $O(n)$               |                        |
+| Sliding window | 위치 (최근 $w$개) | $4nwd$              | $O(w)$               | 먼 거리는 여러 hop           |
+| Sparse         | 내용 (top-$k$) | $4nkd$ + indexer 비용 | $O(n)$               | 선택 비용, cache 그대로       |
+| Linear         | 쌍을 만들지 않음    | $4nCd$              | $O(1)$ (고정 크기 state) | $n > C$이면 token 정보가 섞임 |
 
-</div>
 
 Sliding window를 쓰는 최근 모델은 full attention layer를 일부 남긴다. 이 모델들에서 $n^2$ 항은 사라지지 않고, full attention layer의 비율인 $\frac{1}{r+1}$배로 줄어든다. Sparse attention에서는 indexer의 $n^2$ 항이 남는다. Linear attention은 $n^2$ 항을 없애는 대신 state 크기가 고정되어, $n > C$이면 token 정보가 섞인다. 원논문은 이 한계를 다루지 않는다.
 
