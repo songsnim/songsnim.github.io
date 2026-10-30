@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/figure.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 0 !important;
+        background: transparent !important;
+       
+      }
+      body { font-family: var(--body); color: var(--ink); }
+      .bar { display: flex; align-items: center; gap: var(--space-base); margin-bottom: var(--space-md); }
+      .bar p { margin: 0; color: var(--muted); font-size: 0.8rem; }
+      button {
+        font: inherit; font-size: 0.85rem; color: var(--ink); background: none;
+        border: 1px solid var(--rule); border-radius: var(--r-sm); padding: 4px 16px; cursor: pointer;
+      }
+      button:hover { color: var(--accent); border-color: var(--accent); }
+      .panels { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(5, auto); column-gap: var(--space-base); }
+      .panel { display: grid; grid-row: span 5; grid-template-rows: subgrid; }
+      .panels.two { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; row-gap: var(--space-md); }
+      .panels.two .panel { display: block; grid-row: auto; }
+      .panels.two .sub { min-height: 3.2em; }
+      h3 { margin: 0; font-family: var(--display); font-size: 0.9rem; }
+      .sub { margin: 2px 0 var(--space-sm); color: var(--muted); font-size: 0.75rem; line-height: 1.4;  }
+      canvas { display: block; width: 100%; }
+      .cnt { display: flex; justify-content: space-between; margin-top: var(--space-sm); font-family: var(--mono); font-size: 0.8rem; color: var(--ink-soft); }
+      .meter { height: 4px; margin-top: 4px; background: var(--rule); }
+      .meter i { display: block; width: 0; height: 100%; background: var(--accent); }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <button id="go" type="button">계산</button>
+      <p>네 기법을 같은 속도(초당 FLOPs)로 돌린다. 먼저 끝나는 쪽이 계산량이 적다.</p>
+    </div>
+    <div class="panels" id="panels"></div>
+    <script type="module">
+      import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.mjs';
+      const theme = new URLSearchParams(location.search).get('theme');
+      if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function buildModel(cfg){
+  const {n=32,d=8,w=6,k=4,HI=1,dI=2,DM=16,steps=300}=cfg||{};
+  const R=rng(11);
+  const gauss=(r=R)=>{let a=0;while(!a)a=r();return Math.sqrt(-2*Math.log(a))*Math.cos(2*Math.PI*r())};
+  const mat=(r,c,s)=>Array.from({length:r},()=>Array.from({length:c},()=>gauss()*s));
+  const dot=(a,b,len)=>{let s=0;for(let x=0;x<len;x++)s+=a[x]*b[x];return s};
+  const unit=()=>{const u=Array.from({length:DM},()=>gauss()),r=Math.hypot(...u);return u.map(x=>x/r)};
+  /* 같은 hidden state h에서 main Q,K,V와 indexer가 모두 나온다. 몇몇 token(HUBS)은 많은 query가 찾는 내용을 가진다 */
+  const H0=mat(n,DM,1),cDir=unit(),uDir=unit(),HUBS=[3,11,20,27];
+  for(let i=0;i<n;i++)for(let b=0;b<DM;b++)H0[i][b]+=cDir[b];
+  HUBS.forEach(h=>{for(let b=0;b<DM;b++)H0[h][b]+=2.2*uDir[b]});
+  const WQ=mat(d,DM,1/Math.sqrt(DM)),WK=mat(d,DM,1/Math.sqrt(DM)),WV=mat(d,DM,1/Math.sqrt(DM));
+  WQ.forEach((row,a)=>{const qc=dot(row,cDir,DM);for(let b=0;b<DM;b++)WK[a][b]+=6*qc*uDir[b]});
+  const proj=W=>H0.map(h=>W.map(row=>dot(row,h,DM)));
+  const Q=proj(WQ),K=proj(WK),V=proj(WV);
+  const sc=Q.map(q=>K.map(kk=>dot(q,kk,d)/Math.sqrt(d)));
+  const softmax=x=>{const m=Math.max(...x);let z=0;const e=x.map(y=>{y=Math.exp(y-m);z+=y;return y});return e.map(y=>y/z)};
+  /* main attention의 정답 분포 p (causal, 모든 앞 token) */
+  const P=sc.map((row,i)=>softmax(row.slice(0,i+1)));
+  /* indexer: I[t][s] = Σ_j w_j ReLU(q_j·k_s). 파라미터 W^QI, W^w, W^KI */
+  const OQ=0,OW=HI*dI*DM,OK=OW+HI*DM,NP=OK+dI*DM,Pm=new Float64Array(NP),m1=new Float64Array(NP),m2=new Float64Array(NP);
+  const r2=rng(29);for(let p=0;p<NP;p++)Pm[p]=gauss(r2)/Math.sqrt(DM);
+  const fwd=()=>{const qI=[],wI=[],kI=[];
+    for(let t=0;t<n;t++){const h=H0[t];qI[t]=[];wI[t]=[];
+      for(let j=0;j<HI;j++){const q=new Float64Array(dI);for(let a=0;a<dI;a++){let s=0;for(let b=0;b<DM;b++)s+=Pm[OQ+(j*dI+a)*DM+b]*h[b];q[a]=s}qI[t][j]=q;
+        let s=0;for(let b=0;b<DM;b++)s+=Pm[OW+j*DM+b]*h[b];wI[t][j]=s}
+      const kk=new Float64Array(dI);for(let a=0;a<dI;a++){let s=0;for(let b=0;b<DM;b++)s+=Pm[OK+a*DM+b]*h[b];kk[a]=s}kI[t]=kk}
+    const I=[];for(let t=0;t<n;t++){I[t]=[];for(let s=0;s<=t;s++){let x=0;for(let j=0;j<HI;j++)x+=wI[t][j]*Math.max(0,dot(qI[t][j],kI[s],dI));I[t][s]=x+1e-9*(n-s)}}
+    return{qI,wI,kI,I}};
+  /* stage 1 (dense warm-up): 모든 s ≤ t 위에서 KL(p ‖ Softmax(I))를 줄인다. Adam, lr 0.05 */
+  for(let step=1;step<=steps;step++){const F=fwd(),G=new Float64Array(NP);
+    const dq=F.qI.map(r=>r.map(()=>new Float64Array(dI))),dw=F.wI.map(r=>new Float64Array(HI)),dk=F.kI.map(()=>new Float64Array(dI));
+    for(let t=0;t<n;t++){const q=softmax(F.I[t]);
+      for(let s=0;s<=t;s++){const g=q[s]-P[t][s];
+        for(let j=0;j<HI;j++){const z=dot(F.qI[t][j],F.kI[s],dI);if(z<=0)continue;dw[t][j]+=g*z;const dz=g*F.wI[t][j];
+          for(let a=0;a<dI;a++){dq[t][j][a]+=dz*F.kI[s][a];dk[s][a]+=dz*F.qI[t][j][a]}}}}
+    for(let t=0;t<n;t++){const h=H0[t];
+      for(let j=0;j<HI;j++){for(let b=0;b<DM;b++)G[OW+j*DM+b]+=dw[t][j]*h[b];
+        for(let a=0;a<dI;a++){const x=dq[t][j][a];for(let b=0;b<DM;b++)G[OQ+(j*dI+a)*DM+b]+=x*h[b]}}
+      for(let a=0;a<dI;a++){const x=dk[t][a];for(let b=0;b<DM;b++)G[OK+a*DM+b]+=x*h[b]}}
+    const c1=1-.9**step,c2=1-.999**step;
+    for(let p=0;p<NP;p++){const g=G[p]/n;m1[p]=.9*m1[p]+.1*g;m2[p]=.999*m2[p]+.001*g*g;Pm[p]-=.05*(m1[p]/c1)/(Math.sqrt(m2[p]/c2)+1e-8)}}
+  const I=fwd().I;
+  /* 칸 선택. 가중치는 고른 칸 안의 softmax */
+  const sel={full:[],swa:[],sparse:[]},wt={full:[],swa:[],sparse:[]};
+  let hit=0,tot=0;
+  for(let i=0;i<n;i++){
+    const all=Array.from({length:i+1},(_,j)=>j);
+    const pick={full:all,swa:all.slice(Math.max(0,i-w+1))};
+    const rk=[...all].sort((a,b)=>I[i][b]-I[i][a]);pick.sparse=rk.slice(0,k).sort((a,b)=>a-b);
+    if(i+1>k){const tr=[...all].sort((a,b)=>sc[i][b]-sc[i][a]).slice(0,k);hit+=pick.sparse.filter(j=>tr.includes(j)).length;tot+=k}
+    for(const m of ['full','swa','sparse']){sel[m][i]=pick[m];const s=softmax(pick[m].map(j=>sc[i][j]));const mx=Math.max(...s);wt[m][i]=new Map(pick[m].map((j,t)=>[j,s[t]/mx]))}
+  }
+  /* linear: S_t = Σ_{s≤t} φ(k_s)ᵀ v_s (d×d). 색 세기용으로만 쓴다 */
+  const elu1=x=>x>0?x+1:Math.exp(x),phiK=K.map(r=>r.map(elu1));
+  const Sacc=[Array.from({length:d*d},()=>0)];
+  for(let t=0;t<n;t++){const p=Sacc[t].slice();for(let a=0;a<d;a++)for(let b=0;b<d;b++)p[a*d+b]+=phiK[t][a]*V[t][b];Sacc.push(p)}
+  const Smax=Math.max(...Sacc[n].map(Math.abs));
+  /* 단계 목록. 각 단계는 [종류, i, j, FLOPs] */
+  const cI=2*HI*dI+HI,pairs=m=>{const L=[];for(let i=0;i<n;i++)for(const j of sel[m][i])L.push(['m',i,j,4*d]);return L};
+  const S={full:pairs('full'),swa:pairs('swa'),
+    sparse:[...(()=>{const L=[];for(let i=0;i<n;i++)for(let j=0;j<=i;j++)L.push(['x',i,j,cI]);return L})(),...pairs('sparse')],
+    linear:[...Array.from({length:n},(_,t)=>['s',0,t,2*d*d]),...Array.from({length:n},(_,i)=>['o',i,0,2*d*d])]};
+  const cum={};for(const m in S){let a=0;cum[m]=[0,...S[m].map(s=>a+=s[3])]}
+  return{n,d,w,k,sel,wt,S,cum,Sacc,Smax,recall:hit/tot,total:Object.fromEntries(Object.keys(S).map(m=>[m,cum[m][S[m].length]]))};
+}
+if(typeof module!=='undefined')module.exports=buildModel;
+
+      const M = buildModel();
+      const { n } = M;
+      const INFO = {
+        full: ['Full attention', '모든 (query, key) 쌍을 계산한다.'],
+        swa: ['Sliding window', '가까운 key $w=6$개만 계산한다.'],
+        sparse: ['Sparse (top-$k$)', '작은 indexer가 모든 쌍에 점수를 매기고(점), 상위 $k=4$개만 계산한다.'],
+        linear: ['Linear', '쌍을 만들지 않는다. 작은 표 $S$에 key와 value를 쌓고, query가 읽는다.'],
+      };
+      const tex = (s) => s.replace(/\$([^$]+)\$/g, (_, t) => katex.renderToString(t, { throwOnError: false }));
+      const P = {};
+      const root = document.getElementById('panels');
+      for (const m of Object.keys(INFO)) {
+        const el = document.createElement('div'); el.className = 'panel';
+        el.innerHTML = `<h3>${tex(INFO[m][0])}</h3><p class="sub">${tex(INFO[m][1])}</p><canvas></canvas>
+          <div class="cnt"><span>FLOPs</span><span class="num">0</span></div><div class="meter"><i></i></div>`;
+        root.append(el);
+        P[m] = { cv: el.querySelector('canvas'), num: el.querySelector('.num'), bar: el.querySelector('i') };
+        P[m].cx = P[m].cv.getContext('2d');
+      }
+      /* plan[m][i][j]: 이 기법이 계산하는 칸 */
+      const plan = {};
+      for (const m of ['full', 'swa', 'sparse']) plan[m] = M.sel[m].map((r) => new Set(r));
+      const cum = M.cum, maxFull = M.total.full;
+      const fin = (m, F) => {
+        const c = cum[m]; let lo = 0, hi = c.length - 1;
+        while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (c[mid] <= F) lo = mid; else hi = mid - 1; }
+        return lo;
+      };
+      const css = () => { const s = getComputedStyle(document.documentElement), g = (k) => s.getPropertyValue(k).trim();
+        return { ink: g('--ink'), muted: g('--muted'), faint: g('--faint'), rule: g('--rule'), accent: g('--accent') }; };
+
+      let F = 0;
+      let GL = { csx: 8, csy: 8 };
+      function sizes() {
+        /* 본문 폭 정도로 좁으면 2×2로 놓는다. 한 줄이든 두 줄이든 스크롤 없이 모두 보여야 한다 */
+        const two = innerWidth < 900, rows = two ? 2 : 1; root.classList.toggle('two', two);
+        const cvs = Object.values(P).map((p) => p.cv), w = cvs[0].parentElement.clientWidth;
+        const over = document.body.scrollHeight - rows * Math.max(...cvs.map((c) => c.offsetHeight)), avail = (innerHeight - over - 4) / rows;
+        GL = { csx: Math.max(3, Math.floor(w / n)), csy: Math.max(3, Math.floor(avail / n)) };
+      }
+      function draw(m) {
+        const { cv, cx } = P[m], T = css(), w = cv.parentElement.clientWidth;
+        /* 칸은 가로로 넓은 직사각형이다. 너비는 패널 폭에, 높이는 iframe 높이에 맞춘다 (스크롤 없이 한눈에) */
+        const { csx, csy } = GL, sw = csx * n, sh = csy * n, dpr = devicePixelRatio || 1;
+        const cw = csx > 5 ? csx - 1 : csx, ch = csy > 5 ? csy - 1 : csy;
+        if (cv.width !== sw * dpr || cv.height !== sh * dpr) { cv.width = sw * dpr; cv.height = sh * dpr; cv.style.width = sw + 'px'; cv.style.height = sh + 'px'; }
+        cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, sw, sh);
+        const done = fin(m, F), steps = M.S[m];
+        /* causal mask */
+        cx.globalAlpha = 0.3; cx.fillStyle = T.rule;
+        for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) cx.fillRect(j * csx, i * csy, cw, ch);
+        cx.globalAlpha = 1;
+        /* 건너뛰는 칸은 빗금, 계산할 칸은 윤곽 */
+        cx.strokeStyle = T.faint; cx.globalAlpha = 0.7; cx.beginPath();
+        const out = new Path2D();
+        for (let i = 0; i < n; i++) for (let j = 0; j <= i; j++) {
+          const x = j * csx, y = i * csy;
+          if (m === 'linear' || !plan[m][i].has(j)) { cx.moveTo(x + 1, y + ch - 1); cx.lineTo(x + cw - 1, y + 1); }
+          else out.rect(x + 0.5, y + 0.5, cw - 1, ch - 1);
+        }
+        cx.stroke(); cx.globalAlpha = 1; cx.strokeStyle = T.rule; cx.stroke(out);
+        /* 끝낸 단계 */
+        let tS = 0, oRows = 0;
+        for (let s = 0; s < done; s++) {
+          const [kind, i, j] = steps[s], x = j * csx, y = i * csy;
+          if (kind === 'm') { cx.globalAlpha = 0.2 + 0.8 * M.wt[m][i].get(j); cx.fillStyle = T.accent; cx.fillRect(x, y, cw, ch); cx.globalAlpha = 1; }
+          else if (kind === 'x') {
+            cx.fillStyle = T.muted; cx.beginPath(); cx.arc(x + cw / 2, y + ch / 2, Math.max(1, Math.min(cw, ch) / 6), 0, 7); cx.fill();
+          } else if (kind === 's') tS++; else oRows++;
+        }
+        if (m === 'linear') {
+          /* key를 흡수한 열, 출력이 나온 행을 옅게 칠한다 */
+          cx.globalAlpha = 0.1; cx.fillStyle = T.accent;
+          if (tS) cx.fillRect(0, 0, tS * csx, sh);
+          if (oRows) cx.fillRect(0, 0, sw, oRows * csy);
+          cx.globalAlpha = 1;
+          /* 작은 표 S: 위쪽 빈 삼각형 안 */
+          const d = M.d, bw = Math.floor((sw * 0.3) / d), bh = Math.floor((sh * 0.3) / d), bx = sw - d * bw - 2, by = 2, S = M.Sacc[tS];
+          for (let a = 0; a < d; a++) for (let b = 0; b < d; b++) {
+            cx.globalAlpha = 0.06 + 0.94 * Math.abs(S[a * d + b]) / M.Smax; cx.fillStyle = T.accent;
+            cx.fillRect(bx + b * bw, by + a * bh, bw - 1, bh - 1);
+          }
+          cx.globalAlpha = 1; cx.strokeStyle = T.ink; cx.lineWidth = 1.5; cx.strokeRect(bx - 1, by - 1, d * bw + 1, d * bh + 1); cx.lineWidth = 1;
+          cx.fillStyle = T.ink; cx.font = `500 ${Math.max(10, Math.min(bw, bh))}px monospace`;
+          cx.textBaseline = 'top'; cx.fillText('S', bx - bw - 4, by);
+        }
+        const f = Math.min(F, M.total[m]);
+        P[m].num.textContent = Math.round(f).toLocaleString('en-US');
+        P[m].bar.style.width = (100 * f / maxFull).toFixed(1) + '%';
+      }
+      const all = () => { sizes(); Object.keys(INFO).forEach(draw); };
+      let raf = 0, t0 = 0;
+      const RATE = maxFull / 7000;
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function tick(now) {
+        F = (now - t0) * RATE; all();
+        if (F < maxFull) raf = requestAnimationFrame(tick); else { F = maxFull; all(); go.textContent = '다시'; }
+      }
+      const go = document.getElementById('go');
+      go.addEventListener('click', () => {
+        cancelAnimationFrame(raf);
+        if (reduce) { F = maxFull; all(); go.textContent = '다시'; return; }
+        F = 0; t0 = performance.now(); go.textContent = '다시'; raf = requestAnimationFrame(tick);
+      });
+      new ResizeObserver(all).observe(root);
+      addEventListener('resize', all);
+      matchMedia('(prefers-color-scheme: dark)').addEventListener('change', all);
+      all();
+    </script>
+  </body>
+</html>

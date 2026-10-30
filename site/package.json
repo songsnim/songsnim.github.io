@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "astro dev",
     "new": "node scripts/new-post.mjs",
-    "pdf": "node scripts/pdf.mjs",
     "validate": "node scripts/validate-posts.mjs",
     "build": "astro build",
     "postbuild": "! grep -rn 'http://localhost' dist --include=*.html",

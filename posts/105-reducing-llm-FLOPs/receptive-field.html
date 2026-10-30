@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/figure.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css" />
+    <style>
+      html, body { margin: 0; min-height: 0 !important; background: transparent !important; }
+      body { font-family: var(--body); color: var(--ink); font-size: 0.85rem; }
+      .bar { display: flex; align-items: center; gap: var(--space-base); margin-bottom: var(--space-md); flex-wrap: wrap; }
+      .bar p, .note { margin: 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5; }
+      button { font: inherit; font-size: 0.85rem; color: var(--ink); background: none; border: 1px solid var(--rule); border-radius: var(--r-sm); padding: 4px 14px; cursor: pointer; }
+      button:hover { color: var(--accent); border-color: var(--accent); }
+      button[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); }
+      input[type='range'] { accent-color: var(--accent); }
+      .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+      svg { display: block; width: 100%; }
+      .panels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--space-base); }
+      h3 { margin: 0 0 2px; font-family: var(--display); font-size: 0.9rem; }
+      .cnt { margin: var(--space-sm) 0 0; font-family: var(--mono); font-size: 0.8rem; color: var(--ink-soft); }
+      .cnt b { color: var(--accent); }
+    </style>
+  </head>
+  <body>
+    <div class="panels" id="panels"></div>
+    <script type="module">
+      import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.mjs';
+      const theme = new URLSearchParams(location.search).get('theme');
+      if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+      const tk = () => { const s = getComputedStyle(document.documentElement), g = (k) => s.getPropertyValue(k).trim();
+        return { ink: g('--ink'), soft: g('--ink-soft'), muted: g('--muted'), faint: g('--faint'), rule: g('--rule'), accent: g('--accent') }; };
+      const n = 20, L = 4, w = 3;
+      /* 두 구성: window만 4개, window 3개 + full 1개 (맨 위) */
+      const CFG = [
+        { title: 'Sliding window만 쌓기', layers: [false, false, false, false] },
+        { title: 'Window 3개 + full 1개', layers: [false, false, false, true] },
+      ];
+      const root = document.getElementById('panels');
+      const els = CFG.map((c) => {
+        const el = document.createElement('div');
+        el.innerHTML = `<h3>${c.title}</h3><div class="svg"></div><p class="cnt"></p>`;
+        root.append(el); return el;
+      });
+      function render() {
+        const T = tk(), pw = root.clientWidth / 2 - 8;
+        const over = document.body.scrollHeight - Math.max(...els.map((e) => e.querySelector('.svg').getBoundingClientRect().height));
+        const H = Math.max(220, innerHeight - over - 6), W = Math.max(160, pw);
+        CFG.forEach((c, ci) => {
+          const padL = 34, padR = 8, padT = 14, padB = 22, dx = (W - padL - padR) / (n - 1), dy = (H - padT - padB) / L;
+          const X = (t) => padL + t * dx, Y = (l) => padT + (L - l) * dy, glob = (l) => c.layers[l - 1];
+          const reach = Array.from({ length: L + 1 }, () => new Set()); reach[L].add(n - 1);
+          for (let l = L; l >= 1; l--) for (const t of reach[l]) { const lo = glob(l) ? 0 : Math.max(0, t - w + 1); for (let s = lo; s <= t; s++) reach[l - 1].add(s); }
+          let g = '';
+          for (let l = 1; l <= L; l++) g += `<rect x="0" y="${Y(l) - dy / 2 + 3}" width="${W}" height="${dy - 6}" fill="${glob(l) ? T.accent : T.rule}" fill-opacity="${glob(l) ? 0.14 : 0.3}"/>`;
+          for (let l = L; l >= 1; l--) for (const t of reach[l]) { const lo = glob(l) ? 0 : Math.max(0, t - w + 1);
+            for (let s = lo; s <= t; s++) g += `<line x1="${X(t)}" y1="${Y(l)}" x2="${X(s)}" y2="${Y(l - 1)}" stroke="${glob(l) ? T.ink : T.accent}" stroke-opacity="${glob(l) ? 0.45 : 0.9}" stroke-width="${glob(l) ? 1 : 1.6}"/>`; }
+          for (let l = 1; l <= L; l++) g += `<text x="6" y="${Y(l) + 4}" fill="${glob(l) ? T.accent : T.muted}" font-size="12" font-weight="700">${glob(l) ? 'full' : w}</text>`;
+          for (let l = 0; l <= L; l++) for (let t = 0; t < n; t++) { const on = reach[l].has(t);
+            g += `<circle cx="${X(t)}" cy="${Y(l)}" r="${on ? 4.5 : 3}" fill="${on ? T.accent : T.rule}" stroke="${on ? 'none' : T.faint}" stroke-opacity="0.6"/>`; }
+          for (let t = 0; t < n; t++) { const on = reach[0].has(t);
+            g += `<text x="${X(t)}" y="${Y(0) + 17}" text-anchor="middle" fill="${on ? T.ink : T.faint}" font-size="${dx < 14 ? 8 : 10}">${t + 1}</text>`; }
+          const el = els[ci];
+          el.querySelector('.svg').innerHTML = `<svg viewBox="0 0 ${W} ${H}" height="${H}">${g}</svg>`;
+          el.querySelector('.cnt').innerHTML = `마지막 token이 닿는 token <b>${reach[0].size}</b> / ${n}`;
+        });
+      }
+      new ResizeObserver(render).observe(root);
+      addEventListener('resize', render); render();
+    </script>
+  </body>
+</html>

@@ -12,5 +12,3 @@ CLAUDE.md
 .space/
 *.sync-conflict-*
 
-# Resume/portfolio PDFs are built locally (npm run pdf) and never committed.
-resume/out/

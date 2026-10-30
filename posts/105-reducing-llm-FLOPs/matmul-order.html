@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/figure.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css" />
+    <style>
+      html, body { margin: 0; min-height: 0 !important; background: transparent !important; }
+      body { font-family: var(--body); color: var(--ink); font-size: 0.85rem; }
+      .bar { display: flex; align-items: center; gap: var(--space-base); margin-bottom: var(--space-md); flex-wrap: wrap; }
+      .bar p, .note { margin: 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5; }
+      button { font: inherit; font-size: 0.85rem; color: var(--ink); background: none; border: 1px solid var(--rule); border-radius: var(--r-sm); padding: 4px 14px; cursor: pointer; }
+      button:hover { color: var(--accent); border-color: var(--accent); }
+      button[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); }
+      input[type='range'] { accent-color: var(--accent); }
+      .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+      .panels { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-lg); }
+      h3 { margin: 0 0 var(--space-md); font-family: var(--display); font-size: 1rem; font-weight: 400; white-space: nowrap; }
+      .chain { display: flex; align-items: flex-end; gap: 10px; }
+      .item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+      .item .lab { font-size: 0.8rem; color: var(--ink-soft); white-space: nowrap; text-align: center; line-height: 1.3; }
+      .m { box-sizing: border-box; border: 1.5px solid var(--faint); background: var(--rule); }
+      .m.res { background: var(--accent); border-color: var(--accent); }
+      .op { padding-bottom: 28px; color: var(--muted); font-size: 1.1rem; }
+      .cnt { margin-top: var(--space-md); font-family: var(--mono); color: var(--ink-soft); font-size: 0.9rem; }
+      .cnt b { color: var(--accent); font-size: 1.1rem; }
+      .ctl { display: flex; align-items: center; gap: var(--space-md); }
+      .ctl output { font-family: var(--mono); min-width: 3ch; }
+    </style>
+  </head>
+  <body>
+    <div class="bar">
+      <label class="ctl">token 수 <input id="n" type="range" min="4" max="32" value="12" /><output id="no"></output></label>
+      <p>두 순서의 결과는 같다. 중간에 만드는 행렬만 다르다.</p>
+    </div>
+    <div class="panels">
+      <section><h3 id="h1"></h3><div class="chain" id="c1"></div><div class="cnt" id="t1"></div></section>
+      <section><h3 id="h2"></h3><div class="chain" id="c2"></div><div class="cnt" id="t2"></div></section>
+    </div>
+    <script type="module">
+      import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.mjs';
+      const theme = new URLSearchParams(location.search).get('theme');
+      if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+      const tk = () => { const s = getComputedStyle(document.documentElement), g = (k) => s.getPropertyValue(k).trim();
+        return { ink: g('--ink'), soft: g('--ink-soft'), muted: g('--muted'), faint: g('--faint'), rule: g('--rule'), accent: g('--accent') }; };
+      const tex = (s) => s.replace(/\$([^$]+)\$/g, (_, t) => katex.renderToString(t, { throwOnError: false }));
+      const $ = (s, r = document) => r.querySelector(s);
+      const fmt = (x) => Math.round(x).toLocaleString('en-US');
+      const d = 4;
+      $('#h1').innerHTML = tex('$(\\phi(Q)\\,\\phi(K)^\\top)\\,V$: $Q$와 $K^\\top$를 먼저');
+      $('#h2').innerHTML = tex('$\\phi(Q)\\,(\\phi(K)^\\top V)$: $K^\\top$와 $V$를 먼저');
+      const it = (w, h, lab, res) => `<div class="item"><div class="m${res ? ' res' : ''}" style="width:${w}px;height:${h}px"></div><span class="lab">${lab}</span></div>`;
+      function render() {
+        const n = +$('#n').value; $('#no').textContent = n;
+        const gaps = 6 * 22 + 24 + 16, units = 3 * n + 3 * d;
+        const u = Math.max(3, Math.min(Math.floor((innerWidth - gaps) / units), Math.floor((innerHeight - 190) / n), 24));
+        const op = (s) => `<span class="op">${s}</span>`;
+        $('#c1').innerHTML = it(d * u, n * u, tex(`$Q$`) + `<br>${n}×${d}`) + op('×') + it(n * u, d * u, tex(`$K^\\top$`) + `<br>${d}×${n}`) + op('=') + it(n * u, n * u, tex(`${n}×${n}`), true);
+        $('#c2').innerHTML = it(n * u, d * u, tex(`$K^\\top$`) + `<br>${d}×${n}`) + op('×') + it(d * u, n * u, tex(`$V$`) + `<br>${n}×${d}`) + op('=') + it(d * u, d * u, tex(`${d}×${d}`), true);
+        $('#t1').innerHTML = `중간 행렬의 칸 수 <b>${fmt(n * n)}</b>`;
+        $('#t2').innerHTML = `중간 행렬의 칸 수 <b>${fmt(d * d)}</b> (n과 무관)`;
+      }
+      $('#n').addEventListener('input', render); addEventListener('resize', render); render();
+    </script>
+  </body>
+</html>

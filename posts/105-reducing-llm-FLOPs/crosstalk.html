@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/figure.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css" />
+    <style>
+      html, body { margin: 0; min-height: 0 !important; background: transparent !important; }
+      body { font-family: var(--body); color: var(--ink); font-size: 0.85rem; }
+      .bar { display: flex; align-items: center; gap: var(--space-base); margin-bottom: var(--space-md); flex-wrap: wrap; }
+      .bar p, .note { margin: 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5; }
+      button { font: inherit; font-size: 0.85rem; color: var(--ink); background: none; border: 1px solid var(--rule); border-radius: var(--r-sm); padding: 4px 14px; cursor: pointer; }
+      button:hover { color: var(--accent); border-color: var(--accent); }
+      button[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); }
+      input[type='range'] { accent-color: var(--accent); }
+      .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+      .panels { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-xl); }
+      h3 { margin: 0 0 4px; font-family: var(--display); font-size: 0.9rem; font-weight: 400; }
+      .sub { margin: 0 0 var(--space-sm); color: var(--muted); font-size: 0.78rem; }
+      canvas { display: block; touch-action: none; }
+      .read { margin-top: var(--space-sm); font-family: var(--mono); color: var(--ink-soft); }
+      .read b { color: var(--accent); }
+      .ctl { display: flex; align-items: center; gap: var(--space-md); }
+      .ctl output { font-family: var(--mono); min-width: 2ch; }
+    </style>
+  </head>
+  <body>
+    <div class="panels">
+      <section>
+        <h3>key 두 개: key 2를 끌어 각도를 바꾼다</h3>
+        <p class="sub" id="s1"></p>
+        <canvas id="c1"></canvas><div class="read" id="r1"></div>
+      </section>
+      <section>
+        <h3>key $t$개를 $C = 4$차원에 넣는다</h3>
+        <p class="sub" id="s2"></p>
+        <div class="bar"><label class="ctl">token 수 $t$ <input id="t" type="range" min="2" max="9" value="4" /><output id="to"></output></label></div>
+        <canvas id="c2"></canvas><div class="read" id="r2"></div>
+      </section>
+    </div>
+    <script type="module">
+      import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.mjs';
+      const theme = new URLSearchParams(location.search).get('theme');
+      if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+      const tk = () => { const s = getComputedStyle(document.documentElement), g = (k) => s.getPropertyValue(k).trim();
+        return { ink: g('--ink'), soft: g('--ink-soft'), muted: g('--muted'), faint: g('--faint'), rule: g('--rule'), accent: g('--accent') }; };
+      const tex = (s) => s.replace(/\$([^$]+)\$/g, (_, t) => katex.renderToString(t, { throwOnError: false }));
+      const $ = (s, r = document) => r.querySelector(s);
+      const fmt = (x) => Math.round(x).toLocaleString('en-US');
+      document.querySelectorAll('h3').forEach((e) => (e.innerHTML = tex(e.innerHTML)));
+      $('#s1').innerHTML = tex('길이가 1인 두 key 사이의 각도가 $90^\\circ$이면 섞이지 않고, 각도가 작을수록 $v_2$가 많이 섞인다.');
+      $('#s2').innerHTML = tex('칸 $(i, j)$의 값은 $k_i^\\top k_j$다. 회색은 자기 자신이고, 대각선 밖이 0이 아니면 그만큼 섞인다.');
+      document.querySelector('.bar label').innerHTML = tex('token 수 $t$') + ' <input id="t" type="range" min="2" max="9" value="4" /><output id="to"></output>';
+      let ang = Math.PI / 4;
+      const setup = (cv, w, h) => { const dpr = devicePixelRatio || 1; cv.width = w * dpr; cv.height = h * dpr; cv.style.width = w + 'px'; cv.style.height = h + 'px'; const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); return c; };
+      /* 오른쪽: 처음 C개는 직교 기저, 그 뒤는 고정된 무작위 방향 */
+      const C = 4, rnd = (() => { let s = 5; return () => ((s = (s * 16807) % 2147483647) / 2147483647); })();
+      const KEYS = []; for (let i = 0; i < 9; i++) { if (i < C) KEYS.push(Array.from({ length: C }, (_, a) => (a === i ? 1 : 0))); else { const v = Array.from({ length: C }, () => rnd() - 0.5); const r = Math.hypot(...v); KEYS.push(v.map((x) => x / r)); } }
+      function draw1() {
+        const T = tk(), W = Math.min(innerWidth / 2 - 40, 340), Hh = Math.min(innerHeight - 170, 340), cx = setup($('#c1'), W, Hh);
+        const o = { x: 40, y: Hh * 0.45 }, R = Math.min(W - 90, Hh * 0.4);
+        cx.clearRect(0, 0, W, Hh);
+        const font = `500 13px ${getComputedStyle(document.body).fontFamily}`;
+        const arrow = (a, col, lab) => { const x = o.x + R * Math.cos(a), y = o.y - R * Math.sin(a);
+          cx.strokeStyle = col; cx.fillStyle = col; cx.lineWidth = 3; cx.beginPath(); cx.moveTo(o.x, o.y); cx.lineTo(x, y); cx.stroke();
+          cx.beginPath(); cx.arc(x, y, 6, 0, 7); cx.fill(); cx.font = font; cx.fillText(lab, Math.min(x + 9, W - 48), y - 10); };
+        /* 두 key 사이 각도 호 */
+        cx.strokeStyle = T.faint; cx.lineWidth = 1.5; cx.beginPath(); cx.arc(o.x, o.y, R * 0.35, -ang, 0); cx.stroke();
+        arrow(0, T.ink, 'key 1'); arrow(ang, T.accent, 'key 2');
+        const c = Math.cos(ang);
+        /* key 1로 꺼냈을 때 나오는 값의 구성: value 1은 그대로, value 2는 cos만큼 */
+        const by = Hh * 0.45 + R * 0.5 + 34, bw = W - 80, bh = 22;
+        cx.fillStyle = T.muted; cx.font = font; cx.fillText('key 1로 꺼낸 값', 0, by - 10);
+        cx.fillStyle = T.ink; cx.globalAlpha = 0.85; cx.fillRect(0, by, bw * 0.6, bh); cx.globalAlpha = 1;
+        cx.fillStyle = T.accent; const w2 = Math.abs(c) * bw * 0.6; cx.globalAlpha = 0.85; cx.fillRect(bw * 0.6 + 4, by, w2, bh); cx.globalAlpha = 1;
+        cx.fillStyle = T.soft; cx.fillText('value 1', 4, by + bh + 16); if (w2 > 4) cx.fillText('value 2', bw * 0.6 + 4, by + bh + 16);
+        $('#r1').innerHTML = tex(`각도 $${Math.round((ang * 180) / Math.PI)}^\\circ$, 섞이는 양 $v_2$의 $\\mathbf{${Math.abs(c).toFixed(2)}}$배`);
+        draw1.o = o;
+      }
+      function draw2() {
+        const T = tk(), t = +$('#t').value; $('#to').textContent = t;
+        const W = Math.min(innerWidth / 2 - 40, innerHeight - 190, 340), cs = Math.floor(W / 9), cx = setup($('#c2'), cs * 9, cs * 9);
+        cx.clearRect(0, 0, cs * 9, cs * 9); let leak = 0;
+        for (let i = 0; i < t; i++) for (let j = 0; j < t; j++) { const g = KEYS[i].reduce((s, x, a) => s + x * KEYS[j][a], 0);
+          cx.globalAlpha = i === j ? 0.25 : Math.min(1, 0.08 + 0.92 * Math.abs(g)); cx.fillStyle = i === j ? T.ink : T.accent; cx.fillRect(j * cs, i * cs, cs - 2, cs - 2); if (i !== j && Math.abs(g) > 1e-9) leak++; }
+        cx.globalAlpha = 1;
+        $('#r2').innerHTML = tex(t <= C ? `$t \\le C$: 섞임 칸 <b>0</b>개` : `$t > C$: 섞임 칸 <b>${leak}</b>개`);
+      }
+      const move = (e) => { const o = draw1.o, r = $('#c1').getBoundingClientRect(), x = e.clientX - r.left - o.x, y = o.y - (e.clientY - r.top); ang = Math.atan2(y, x); draw1(); };
+      let drag = false; $('#c1').addEventListener('pointerdown', (e) => { drag = true; $('#c1').setPointerCapture(e.pointerId); move(e); });
+      $('#c1').addEventListener('pointermove', (e) => drag && move(e)); $('#c1').addEventListener('pointerup', () => (drag = false));
+      $('#t').addEventListener('input', draw2); addEventListener('resize', () => { draw1(); draw2(); });
+      draw1(); draw2();
+    </script>
+  </body>
+</html>

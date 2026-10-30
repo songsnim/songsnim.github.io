@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/figure.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.min.css" />
+    <style>
+      html, body { margin: 0; min-height: 0 !important; background: transparent !important; }
+      body { font-family: var(--body); color: var(--ink); font-size: 0.85rem; }
+      .bar { display: flex; align-items: center; gap: var(--space-base); margin-bottom: var(--space-md); flex-wrap: wrap; }
+      .bar p, .note { margin: 0; color: var(--muted); font-size: 0.8rem; line-height: 1.5; }
+      button { font: inherit; font-size: 0.85rem; color: var(--ink); background: none; border: 1px solid var(--rule); border-radius: var(--r-sm); padding: 4px 14px; cursor: pointer; }
+      button:hover { color: var(--accent); border-color: var(--accent); }
+      button[aria-pressed='true'] { border-color: var(--accent); color: var(--accent); }
+      input[type='range'] { accent-color: var(--accent); }
+      .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+      .grid { display: grid; grid-template-columns: 13.5rem 7rem 5.5rem minmax(0, 1fr); align-items: center; row-gap: 6px; column-gap: var(--space-sm); }
+      .grid .c { color: var(--ink-soft); font-size: 0.92rem; line-height: 1.35; }
+      .grid .hd { color: var(--muted); font-size: 0.85rem; }
+      .cells { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 2px; }
+      .cells i { display: block; height: var(--ch); background: var(--rule); position: relative; }
+      .cells i.sel { outline: 2px solid var(--accent); outline-offset: 1px; }
+      .vec { display: flex; gap: 2px; }
+      .vec i { display: block; width: 24px; height: 24px; }
+      .wbar { position: relative; height: 18px; }
+      .wbar i { position: absolute; top: 2px; height: 14px; }
+      .wbar::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--faint); }
+      .sep { grid-column: 1 / -1; height: 1px; background: var(--rule); margin: 4px 0; }
+      .sum .cells i { height: calc(var(--ch) + 8px); }
+      @media (max-width: 900px) {
+        .grid { grid-template-columns: 8.5rem 4.2rem 3.6rem minmax(0, 1fr); column-gap: 6px; }
+        .grid .c { font-size: 0.74rem; }
+        .grid .hd { font-size: 0.7rem; }
+        .vec i { width: 16px; height: 16px; }
+        .bar p { font-size: 0.72rem; }
+      }
+      .tick { color: var(--muted); font-size: 10px; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div class="bar"><button id="re" type="button">다른 query</button>
+      <p id="cap"></p></div>
+    <div class="grid" id="g"></div>
+    <script type="module">
+      import katex from 'https://cdn.jsdelivr.net/npm/katex@0.16.47/dist/katex.mjs';
+      const theme = new URLSearchParams(location.search).get('theme');
+      if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+      const tk = () => { const s = getComputedStyle(document.documentElement), g = (k) => s.getPropertyValue(k).trim();
+        return { ink: g('--ink'), soft: g('--ink-soft'), muted: g('--muted'), faint: g('--faint'), rule: g('--rule'), accent: g('--accent') }; };
+      const tex = (s) => s.replace(/\$([^$]+)\$/g, (_, t) => katex.renderToString(t, { throwOnError: false }));
+      const $ = (s, r = document) => r.querySelector(s);
+      const fmt = (x) => Math.round(x).toLocaleString('en-US');
+      $('#cap').innerHTML = tex('query token $t$ 하나가 앞선 token $s$ 열여섯 개에 점수를 매긴다. 양의 값은 초록, 음의 값은 회색이다. 마지막 head의 가중치는 음수라서 점수를 깎는다.');
+      const n = 16, HI = 3, dI = 2, K = 4;
+      let seed = 3; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647), g = () => { let a = 0; while (!a) a = rnd(); return Math.sqrt(-2 * Math.log(a)) * Math.cos(2 * Math.PI * rnd()); };
+      const keys = Array.from({ length: n }, () => Array.from({ length: dI }, g));
+      const cell = (v, m, T) => `background:${v >= 0 ? T.accent : T.muted};opacity:${(0.12 + 0.88 * Math.min(1, Math.abs(v) / m)).toFixed(2)}`;
+      function render() {
+        const T = tk(); const ch = Math.max(16, Math.min(32, Math.floor((innerHeight - 215) / (HI + dI + 3)) - 4));
+        document.documentElement.style.setProperty('--n', n); document.documentElement.style.setProperty('--ch', ch + 'px');
+        const q = Array.from({ length: HI }, () => Array.from({ length: dI }, g)), w = Array.from({ length: HI }, (_, j) => (j === HI - 1 ? -1 : 1) * (0.5 + Math.abs(g())));
+        const val = q.map((qj, j) => keys.map((k) => w[j] * Math.max(0, qj[0] * k[0] + qj[1] * k[1])));
+        const I = keys.map((_, s) => val.reduce((a, r) => a + r[s], 0));
+        const top = [...I.keys()].sort((a, b) => I[b] - I[a]).slice(0, K);
+        const km = Math.max(...keys.flat().map(Math.abs)), vm = Math.max(...val.flat().map(Math.abs)), im = Math.max(...I.map(Math.abs)), wm = Math.max(...w.map(Math.abs)), qm = Math.max(...q.flat().map(Math.abs));
+        let h = `<span></span><span class="hd">query</span><span class="hd">가중치</span><span class="hd">앞선 token 1 … ${n}</span>`;
+        h += `<span class="c">index key (모든 head가 공유)</span><span></span><span></span><div>${keys[0].map((_, a) => `<div class="cells">${keys.map((k) => `<i style="${cell(k[a], km, T)}"></i>`).join('')}</div>`).join('')}</div>`;
+        h += '<div class="sep"></div>';
+        for (let j = 0; j < HI; j++) {
+          h += `<span class="c">head ${j + 1}: 가중치 × ReLU(query·key)</span><div class="vec">${q[j].map((x) => `<i style="${cell(x, qm, T)}"></i>`).join('')}</div>`
+            + `<div class="wbar"><i style="${w[j] >= 0 ? 'left:50%' : 'right:50%'};width:${(50 * Math.abs(w[j])) / wm}%;background:${w[j] >= 0 ? T.accent : T.muted}"></i></div>`
+            + `<div class="cells">${val[j].map((v) => (v === 0 ? '<i></i>' : `<i style="${cell(v, vm, T)}"></i>`)).join('')}</div>`;
+        }
+        h += '<div class="sep"></div>';
+        h += `<span class="c"><b>합 = index score</b></span><span></span><span></span><div class="sum"><div class="cells">${I.map((v, s) => `<i class="${top.includes(s) ? 'sel' : ''}" style="${cell(v, im, T)}"></i>`).join('')}</div></div>`;
+        h += `<span class="c">상위 ${K}개 선택</span><span></span><span></span><div class="cells">${I.map((_, s) => `<i style="background:${top.includes(s) ? T.accent : 'transparent'};height:6px"></i>`).join('')}</div>`;
+        $('#g').innerHTML = h;
+      }
+      $('#re').addEventListener('click', () => { seed = (seed * 7 + 13) % 2147483646 + 1; render(); });
+      addEventListener('resize', render); render();
+    </script>
+  </body>
+</html>

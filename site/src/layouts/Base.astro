@@ -59,7 +59,6 @@ const year = new Date().getFullYear();
           <a href="/">Home</a>
           <a href="/posts">Blog</a>
           <a href="/topics">Topics</a>
-          <a id="resume" href="/" hidden>Resume</a>
           <a href="https://github.com/songsnim">GitHub</a>
           <button class="themetoggle" id="theme" type="button" aria-label="테마 전환">◐</button>
         </nav>
@@ -77,20 +76,6 @@ const year = new Date().getFullYear();
         <span class="footband__year">© {year} Songsnim</span>
       </div>
     </footer>
-
-    <script is:inline>
-      try {
-        // Any page under /r/<slug>/ unlocks the nav link, which points at the landing page.
-        if (location.pathname.startsWith('/r/'))
-          localStorage.setItem('resumePath', location.pathname.split('/').slice(0, 3).join('/') + '/');
-        const p = localStorage.getItem('resumePath');
-        const a = document.getElementById('resume');
-        if (p && a) {
-          a.href = p;
-          a.hidden = false;
-        }
-      } catch {}
-    </script>
 
     <script is:inline>
       document.getElementById('theme')?.addEventListener('click', () => {
