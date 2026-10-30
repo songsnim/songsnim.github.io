@@ -27,7 +27,15 @@
       .cnt b { color: var(--accent); font-size: 1.1rem; }
       .ctl { display: flex; align-items: center; gap: var(--space-md); }
       .ctl output { font-family: var(--mono); min-width: 3ch; }
-    </style>
+          /* nudge: 눌러 볼 수 있는 컨트롤임을 은근히 알린다 */
+      button { color: var(--accent); font-weight: 600; background: color-mix(in srgb, var(--accent) 10%, transparent); border-color: color-mix(in srgb, var(--accent) 55%, var(--rule)); }
+      button:hover { background: color-mix(in srgb, var(--accent) 20%, transparent); }
+      button.nudge, input[type='range'].nudge { animation: nudge 2.2s ease-out 1.2s 3; }
+      input[type='range'].nudge { border-radius: 999px; }
+      @keyframes nudge { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); } 70%, 100% { box-shadow: 0 0 0 9px transparent; } }
+      .hint { color: var(--accent); font-size: 0.75rem; white-space: nowrap; }
+      @media (prefers-reduced-motion: reduce) { button.nudge, input[type='range'].nudge { animation: none; } }
+</style>
   </head>
   <body>
     <div class="bar">
@@ -62,6 +70,15 @@
         $('#t2').innerHTML = `중간 행렬의 칸 수 <b>${fmt(d * d)}</b> (n과 무관)`;
       }
       $('#n').addEventListener('input', render); addEventListener('resize', render); render();
+          /* nudge: 첫 조작 전까지 컨트롤에 옅은 맥박과 안내 문구를 보인다 */
+      (() => {
+        document.querySelectorAll('button, input[type=range]').forEach((el) => {
+          el.classList.add('nudge');
+          let hint = null;
+          if (el.type === 'range') { hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = '← 움직여 보세요'; el.parentElement.append(hint); }
+          el.addEventListener(el.type === 'range' ? 'input' : 'click', () => { el.classList.remove('nudge'); hint?.remove(); }, { once: true });
+        });
+      })();
     </script>
   </body>
 </html>
