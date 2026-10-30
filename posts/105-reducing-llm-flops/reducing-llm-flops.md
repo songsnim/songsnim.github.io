@@ -38,7 +38,7 @@ FLOPs 축의 기법은 모두 attention의 $n^2$ 항을 줄인다. 어떤 쌍을
 ## 2-1. 방법
 Query token $q_t$가 직전 $w$개 key $k_{t-w+1}, \dots, k_t$에만 attend한다.
 
-<iframe src="http://localhost:4321/posts/reducing-llm-FLOPs/window-vs-full.html" style="width:100%;aspect-ratio:16/11;border:0" loading="lazy" title="full attention과 sliding window attention의 계산 비교"></iframe>
+<iframe src="http://localhost:4321/posts/reducing-llm-flops/window-vs-full.html" style="width:100%;aspect-ratio:16/11;border:0" loading="lazy" title="full attention과 sliding window attention의 계산 비교"></iframe>
 
 $$
 \text{cost} = 4nwd \quad (w \ll n)
@@ -53,7 +53,7 @@ $$
 
 아래 그림은 window 3인 layer 4개만 쌓은 경우(왼쪽)와 window layer 3개 위에 full attention layer 1개를 쌓은 경우(오른쪽)에서 마지막 token이 닿는 범위를 비교한다. 왼쪽은 20개 중 9개에만 닿고, 오른쪽은 맨 위 layer에서 모든 token에 한 hop에 닿는다.
 
-<iframe src="http://localhost:4321/posts/reducing-llm-FLOPs/receptive-field.html" style="width:100%;aspect-ratio:16/10;border:0" loading="lazy" title="window만 쌓은 경우와 full attention layer를 섞은 경우의 receptive field 비교"></iframe>
+<iframe src="http://localhost:4321/posts/reducing-llm-flops/receptive-field.html" style="width:100%;aspect-ratio:16/10;border:0" loading="lazy" title="window만 쌓은 경우와 full attention layer를 섞은 경우의 receptive field 비교"></iframe>
 
 ---
 # 3. Sparse attention
@@ -68,7 +68,7 @@ $$
 
 해결책은 attention score를 값싸게 추정하는 것이다. 어떻게 추정할 것인가? 바로 attention score의 분포를 근사 학습하는 작은 indexer를 도입하는 것이다.
 
-<iframe src="http://localhost:4321/posts/reducing-llm-FLOPs/sparse-vs-full.html" style="width:100%;aspect-ratio:16/11;border:0" loading="lazy" title="full attention과 sparse attention의 계산 비교"></iframe>
+<iframe src="http://localhost:4321/posts/reducing-llm-flops/sparse-vs-full.html" style="width:100%;aspect-ratio:16/11;border:0" loading="lazy" title="full attention과 sparse attention의 계산 비교"></iframe>
 
 ## 3-2. DeepSeek Sparse Attention
 DeepSeek V3.2의 DSA는 lightning indexer로 근사 score를 만든다.[^dsa] Indexer는 main attention과 같은 hidden state $h$를 입력으로 받는 작은 attention 형태의 score 계산기다. 학습되는 weight는 linear projection 세 개다. 기호는 다음과 같다.
@@ -94,7 +94,7 @@ $w_{t,j}$의 역할은 수식에서 추론할 수 있다. $w_{t,j} < 0$이면 �
 
 아래 그림은 query 하나가 앞선 token 16개에 점수를 매기고 상위 4개를 고르는 과정이다. 마지막 head의 가중치가 음수여서 그 head가 큰 token의 점수는 깎인다.
 
-<iframe src="http://localhost:4321/posts/reducing-llm-FLOPs/indexer-score.html" style="width:100%;aspect-ratio:16/10;border:0" loading="lazy" title="lightning indexer의 점수 계산"></iframe>
+<iframe src="http://localhost:4321/posts/reducing-llm-flops/indexer-score.html" style="width:100%;aspect-ratio:16/10;border:0" loading="lazy" title="lightning indexer의 점수 계산"></iframe>
 
 각 query에서 $I_{t,s}$가 큰 상위 $k = 2048$개 token의 집합 $S_t$를 고르고, main attention은 $S_t$에만 계산한다. 
 
@@ -161,7 +161,7 @@ $Q$와 $K^T$를 먼저 곱하는 것과, $K^T$와 $V$를 먼저 곱하는 것의
 
 근데 팔레트의 칸이 토큰 수보다 적으면 한 칸에 여러 token의 물감이 섞여 쌓이고, 섞인 색에서 원래 색을 되돌릴 수 없어 순수한 표현력에 손해가 생긴다. 이것이 crosstalk 문제다.
 
-<iframe src="http://localhost:4321/posts/reducing-llm-FLOPs/matmul-order.html" style="width:100%;aspect-ratio:16/9;border:0" loading="lazy" title="행렬을 곱하는 순서"></iframe>
+<iframe src="http://localhost:4321/posts/reducing-llm-flops/matmul-order.html" style="width:100%;aspect-ratio:16/9;border:0" loading="lazy" title="행렬을 곱하는 순서"></iframe>
 
 ## 4-2. 비용은 C/n이다
 Softmax attention의 head당 FLOPs는 $4n^2 d_h$이고, 결합법칙을 쓴 쪽은 $4nCd_h$다. 비율은
@@ -172,7 +172,7 @@ $$
 
 이므로 $n > C$이면 linear 쪽의 연산량이 적다. $C = d_h$이면 $n$에 선형이고, 보통 $n \gg C$이기 때문에 FLOPs를 상당히 절감할 수 있다. 다만 FLOPs 감소가 곧 실행 시간 감소는 아니다. 재귀 갱신은 token 순서대로 이어져 GPU에서 병렬화하기 어렵다.
 
-<iframe src="http://localhost:4321/posts/reducing-llm-FLOPs/linear-vs-full.html" style="width:100%;aspect-ratio:16/11;border:0" loading="lazy" title="full attention과 linear attention의 계산 비교"></iframe>
+<iframe src="http://localhost:4321/posts/reducing-llm-flops/linear-vs-full.html" style="width:100%;aspect-ratio:16/11;border:0" loading="lazy" title="full attention과 linear attention의 계산 비교"></iframe>
 
 ## 4-3. Causal이면 고정 크기 state를 갱신하는 RNN이다
 Causal linear attention의 출력은 $\text{sim}(q, k) = \phi(q)^\top \phi(k)$를 넣은 가중 평균이다.
@@ -198,7 +198,7 @@ $S_0 = 0$, $z_0 = 0$에서 시작하고, 상태는 $S_t$와 $z_t$가 전부이�
 ---
 # 5. 정리
 
-<iframe src="http://localhost:4321/posts/reducing-llm-FLOPs/attention-grid.html" style="width:100%;aspect-ratio:16/22;border:0" loading="lazy" title="네 attention 기법의 계산 비교"></iframe>
+<iframe src="http://localhost:4321/posts/reducing-llm-flops/attention-grid.html" style="width:100%;aspect-ratio:16/22;border:0" loading="lazy" title="네 attention 기법의 계산 비교"></iframe>
 
 
 
