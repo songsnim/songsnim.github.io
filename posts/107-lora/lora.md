@@ -1,9 +1,9 @@
 ---
 title: "[ML] LoRA: 닭 잡는 칼로 닭 잡기"
-topics: 
+topics:
   - ML
 description: 1% 학습 파라미터 수로 full fine tuning 수준 성능 내기
-draft: true
+draft: false
 ---
 # 1. Background
 ## 1-1. Full fine-tuning의 문제점: 소 잡는 칼로 닭 잡기
