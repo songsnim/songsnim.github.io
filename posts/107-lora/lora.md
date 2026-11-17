@@ -101,7 +101,7 @@ $BA$가 $d \times k$이므로 합쳐도 구조가 같다. 이후에는 $Wx$ 하�
 
 ---
 # 4. 결론
-LoRA는 $\Delta W$를 저랭크 행렬 2개로 쪼개서 $W_0$에 더 하는 방식으로 fine tuning을 수행한다. 게다가 $r=1$인 경우에도 거의 full fine tuning에 준하는 성능을 내는 것을 보인다. 따라서, 특정 task에 사전학습 모델을 사용하기 위해 full fine tuning을 하는 건 닭 잡는 데 소 잡는 칼 꺼내는 격이다. LoRA는 Full fine tuning 대비 1% 미만 수준의 학습 파라미터로 대등한 수준의 성능을 낼 수 있으므로 성능 손해 없이 학습 속도와 메모리를 효율적으로 사용해 fine tuning할 수 있다. 
+LoRA는 $\Delta W$를 저랭크 행렬 2개로 쪼개서 $W_0$에 더 하는 방식으로 fine tuning을 수행한다. 게다가 $r=1$인 경우에도 거의 full fine tuning에 준하는 성능을 낸다. 따라서, 특정 task에 사전학습 모델을 사용하기 위해 full fine tuning을 하는 건 닭 잡는 데 소 잡는 칼 꺼내는 격이다. LoRA는 Full fine tuning 대비 1% 미만 수준의 학습 파라미터로 대등한 수준의 성능을 낼 수 있으므로 성능 손해 없이 학습 속도와 메모리를 효율적으로 사용해 fine tuning할 수 있다. 
 
 
 [^lora]: "LoRA: Low-Rank Adaptation of Large Language Models" (Hu et al., ICLR 2022)
